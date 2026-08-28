@@ -4,7 +4,7 @@
 # This is the configuration file for your submission.
 # Please edit the fields below to match your project.
 
-project-name: Chipalooza Analog Project
+project-name: Chipalooza LVDS PLL Project
 
 # Must be a unique name and must match TOP in the Makefile, the file names in
 # layout/, schematic/xschem/ and testbenches/xschem/, and the top cell inside
@@ -12,12 +12,12 @@ project-name: Chipalooza Analog Project
 top-cell: "sg13cmos5l_chipalooza_analog_project"
 
 team-members:
-- Firstname Lastname
-- Firstname Lastname
+- Enno Schnackenberg
+- Rahul Bhagwat
 
 # small (500um x 200um), tiny (200um x 200um) or large (500um x 415um).
 # Must match the floorplan template this layout was started from.
-slot-size: tiny
+slot-size: large
 
 # Number of analog pins actually used, 0-3. This example wires all three
 # (analog_0, analog_1, analog_2), see final/vh/sg13cmos5l_chipalooza_analog_project.vh.
