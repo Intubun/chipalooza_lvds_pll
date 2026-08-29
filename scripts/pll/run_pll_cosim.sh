@@ -12,13 +12,17 @@ FREF_HZ=${FREF_HZ:-100e6}
 SIM_TIME_S=${SIM_TIME_S:-4e-6}
 MAX_STEP_S=${MAX_STEP_S:-5e-12}
 VDD=${VDD:-1.2}
+CORNER=${CORNER:-tt}
+TEMP_C=${TEMP_C:-27}
 TOOLS_BIN=${TOOLS_BIN:-/foss/tools/bin}
 REAL_VERILATOR=${REAL_VERILATOR:-$TOOLS_BIN/verilator}
 
-python3 - "$DIV_INTEGER" "$DIV_FRACTIONAL" "$TEST_DIV" "$FREF_HZ" "$SIM_TIME_S" <<'PY'
+python3 - "$DIV_INTEGER" "$DIV_FRACTIONAL" "$TEST_DIV" "$FREF_HZ" "$SIM_TIME_S" "$CORNER" "$TEMP_C" <<'PY'
 import sys
 integer, fractional, test_div = map(int, sys.argv[1:4])
 fref, sim_time = map(float, sys.argv[4:6])
+corner = sys.argv[6]
+temp = float(sys.argv[7])
 if not 4 <= integer <= 80:
     raise SystemExit("DIV_INTEGER must be 4-80")
 if not 0 <= fractional <= 65535:
@@ -29,6 +33,10 @@ if not 25e6 <= fref <= 250e6:
     raise SystemExit("FREF_HZ must be 25e6-250e6")
 if sim_time < 2e-6:
     raise SystemExit("SIM_TIME_S must be at least 2e-6")
+if corner not in ("tt", "ss", "ff", "sf", "fs"):
+    raise SystemExit("CORNER must be tt, ss, ff, sf, or fs")
+if not -40 <= temp <= 125:
+    raise SystemExit("TEMP_C must be -40 to 125")
 PY
 
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/pll-cosim.XXXXXX")
@@ -115,13 +123,23 @@ export SPICE_USERINIT_DIR=$PDKPATH/libs.tech/ngspice
   mv pll_digital.so pll_digital_cosim.so
 )
 
+expected_inputs='ref_clk vco_clk reset_n enable div_integer test_div_select div_fractional'
+expected_outputs='feedback_clk up down pll_clk test_clk'
+actual_inputs=$(sed -n 's/^VL_DATA([^,]*,\([^,]*\),.*/\1/p' "$WORK/pll_digital_obj_dir/inputs.h" | paste -sd' ' -)
+actual_outputs=$(sed -n 's/^VL_DATA([^,]*,\([^,]*\),.*/\1/p' "$WORK/pll_digital_obj_dir/outputs.h" | paste -sd' ' -)
+if [[ $actual_inputs != "$expected_inputs" || $actual_outputs != "$expected_outputs" ]]; then
+  printf 'd_cosim port order changed; update pll_digital_cosim.sym before simulation.\n' >&2
+  printf 'inputs:  %s\noutputs: %s\n' "$actual_inputs" "$actual_outputs" >&2
+  exit 1
+fi
+
 (
   cd "$PLL_DIR"
   env -u DISPLAY xschem -n -q -x -o "$WORK" -N pll_cosim.spice ../../testbenches/xschem/pll_cosim.tb.sch \
     >"$WORK/xschem.log" 2>&1 || [[ $? -eq 10 ]]
 )
 
-export DIV_INTEGER DIV_FRACTIONAL TEST_DIV FREF_HZ SIM_TIME_S MAX_STEP_S VDD
+export DIV_INTEGER DIV_FRACTIONAL TEST_DIV FREF_HZ SIM_TIME_S MAX_STEP_S VDD CORNER TEMP_C
 python3 - "$WORK/pll_cosim.spice" <<'PY'
 import os
 import re
@@ -136,6 +154,8 @@ fref = float(os.environ["FREF_HZ"])
 sim_time = float(os.environ["SIM_TIME_S"])
 max_step = float(os.environ["MAX_STEP_S"])
 vdd = float(os.environ["VDD"])
+corner = os.environ["CORNER"]
+temp = float(os.environ["TEMP_C"])
 period = 1.0 / fref
 settled_start = sim_time - 1.0e-6
 
@@ -147,6 +167,9 @@ text = re.sub(
 text = re.sub(r"VDD_SRC VDD 0 \S+", f"VDD_SRC VDD 0 {vdd}", text)
 text = re.sub(r"VENABLE ENABLE 0 \S+", f"VENABLE ENABLE 0 {vdd}", text)
 text = text.replace("PULSE(0 1.2 2n", f"PULSE(0 {vdd} 2n")
+text = text.replace("mos_tt", f"mos_{corner}")
+text = text.replace(".options temp=27", f".options temp={temp}")
+text = text.replace("v(x_pll.x_analog.x_vco.net1)=1.2", f"v(x_pll.x_analog.x_vco.net1)={vdd}")
 for prefix, width, value in (
     ("DIV_INT", 7, integer),
     ("DIV_FRAC", 16, fractional),
@@ -218,9 +241,12 @@ measured = 1.0 / mean_period
 if abs(measured / target - 1.0) > 0.01:
     raise SystemExit(f"co-simulation frequency error exceeds 1%: target={target} measured={measured}")
 print(json.dumps({
+    "corner": os.environ["CORNER"],
     "divide": integer + fractional / 65536.0,
     "reference_hz": fref,
     "target_output_hz": target,
+    "temp_c": float(os.environ["TEMP_C"]),
+    "vdd_v": float(os.environ["VDD"]),
     "measured_output_hz": measured,
     "rms_period_jitter_s": rms_jitter,
     "peak_to_peak_period_jitter_s": max(periods) - min(periods),
