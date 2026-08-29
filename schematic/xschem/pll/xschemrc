@@ -1,6 +1,0 @@
-# Reuse the project/PDK configuration and expose this hierarchy when Xschem
-# is launched directly from schematic/xschem/pll.
-source [file normalize [file join [file dirname [info script]] .. xschemrc]]
-append_xschem_library_path_unique [file dirname [info script]]
-append_xschem_library_path_unique [file join [file dirname [info script]] testbenches xschem]
-set ::netlist_dir [file normalize [file join [file dirname [info script]] simulations]]

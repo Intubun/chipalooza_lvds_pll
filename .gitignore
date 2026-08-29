@@ -14,8 +14,6 @@ runs/
 backups/
 sim_build/
 /schematic/xschem/simulations
-/schematic/xschem/pll/simulations
-/schematic/xschem/pll/testbenches/xschem/simulations
 /testbenches/xschem/simulations
 /macros/inverter/verification/cace/_runs
 /macros/inverter/verification/cace/_docs
@@ -25,5 +23,11 @@ sim_build/
 /macros/inverter/testbenches/xschem/simulations
 /macros/counter/schematic/xschem/simulations
 /macros/counter/testbenches/xschem/simulations
+/macros/pll_analog/schematic/xschem/simulations
+/macros/pll_analog/testbenches/xschem/simulations
+/macros/pll_digital/schematic/xschem/simulations
+/macros/pll_digital/testbenches/xschem/simulations
+/macros/pll_digital/flow/final
+/macros/pll_digital/flow/librelane/runs
 /macros/counter/flow/final
 /macros/counter/fpga/*/build/

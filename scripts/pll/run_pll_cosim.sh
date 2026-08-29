@@ -3,8 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
-PLL_DIR="$PROJECT_ROOT/schematic/xschem/pll"
-RTL_DIR="$PLL_DIR/rtl"
+PLL_DIR="$PROJECT_ROOT/macros/pll_analog/schematic/xschem"
+RTL_DIR="$PROJECT_ROOT/macros/pll_digital/rtl"
 DIV_INTEGER=${DIV_INTEGER:-20}
 DIV_FRACTIONAL=${DIV_FRACTIONAL:-0}
 TEST_DIV=${TEST_DIV:-1}
@@ -117,7 +117,7 @@ export SPICE_USERINIT_DIR=$PDKPATH/libs.tech/ngspice
 
 (
   cd "$PLL_DIR"
-  env -u DISPLAY xschem -n -q -x -o "$WORK" -N pll_cosim.spice testbenches/xschem/pll_cosim.tb.sch \
+  env -u DISPLAY xschem -n -q -x -o "$WORK" -N pll_cosim.spice ../../testbenches/xschem/pll_cosim.tb.sch \
     >"$WORK/xschem.log" 2>&1 || [[ $? -eq 10 ]]
 )
 

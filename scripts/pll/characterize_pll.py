@@ -43,7 +43,7 @@ def main() -> None:
         raise SystemExit("divide must be in the supported 4-80 range")
 
     project_root = Path(__file__).resolve().parents[2]
-    pll_dir = project_root / "schematic" / "xschem" / "pll"
+    pll_dir = project_root / "macros" / "pll_analog" / "schematic" / "xschem"
     output_frequency = args.fref * args.divide / 2.0
     if not 500e6 <= output_frequency <= 1e9:
         raise SystemExit("fref * divide / 2 must produce a 500 MHz-1 GHz PLL output")
@@ -65,7 +65,7 @@ def main() -> None:
                 temp_dir,
                 "-N",
                 "pll.spice",
-                "testbenches/xschem/pll.tb.sch",
+                "../../testbenches/xschem/pll.tb.sch",
             ],
             cwd=pll_dir,
             env=env,
