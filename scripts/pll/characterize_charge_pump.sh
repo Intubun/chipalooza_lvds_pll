@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
-PLL_DIR="$PROJECT_ROOT/schematic/xschem/pll"
+PLL_DIR="$PROJECT_ROOT/macros/pll_analog/schematic/xschem"
 WORK=$(mktemp -d /tmp/pll-cp-pvt.XXXXXX)
 JOBS=${JOBS:-4}
 KEEP_WORK=${KEEP_WORK:-0}

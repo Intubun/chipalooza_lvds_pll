@@ -3,9 +3,9 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
-PLL_DIR="$PROJECT_ROOT/schematic/xschem/pll"
+PLL_DIR="$PROJECT_ROOT/macros/pll_digital"
 RTL_DIR="$PLL_DIR/rtl"
-TB_DIR="$PLL_DIR/testbenches/rtl"
+TB_DIR="$PLL_DIR/testbenches/verilog"
 TOOLS_BIN=${TOOLS_BIN:-/foss/tools/bin}
 IVERILOG=${IVERILOG:-$TOOLS_BIN/iverilog}
 VVP=${VVP:-$TOOLS_BIN/vvp}

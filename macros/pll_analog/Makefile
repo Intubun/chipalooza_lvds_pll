@@ -4,7 +4,7 @@
 MAKEFILE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 # Variables
-TOP = sg13cmos5l_chipalooza_analog_project
+TOP = pll_analog
 
 .DEFAULT_GOAL := help
 
@@ -46,7 +46,6 @@ _GDS_EXT = $(if $(wildcard $(LAY_DIR)/$(CELL).gds),gds,klay.gds)
 OPEN_ARGS ?=
 
 # Folder structure
-MACROS_DIR      := macros
 XSCHEM_SCH_DIR  := schematic/xschem
 XSCHEM_TB_DIR   := testbenches/xschem
 LAY_DIR         := layout
@@ -115,54 +114,34 @@ sim-view-xschem: ## Plot Xschem simulation results (usage: make sim-view-xschem 
 	SHOW_PLOTS=1 python3 $(SIM_PLOT_DIR)/$(SCRIPT).py
 .PHONY: sim-view-xschem
 
+characterize-charge-pump: ## Run the complete charge-pump PVT sweep
+	../../scripts/pll/characterize_charge_pump.sh
+.PHONY: characterize-charge-pump
 
-sim-all: ## Simulate the macro
-	$(MAKE) sim-xschem TB=$(TOP)_tb_tran
+characterize-ring: ## Run the complete buffered-VCO PVT sweep
+	../../scripts/pll/characterize_ring.sh
+.PHONY: characterize-ring
+
+sim-cosim: ## Run the configurable RTL/transistor PLL co-simulation
+	../../scripts/pll/run_pll_cosim.sh
+.PHONY: sim-cosim
+
+sim-all: ## Run focused analog smoke tests and configurable PLL co-simulation
+	CORNERS=tt VDDS=1.20 TEMPS=27 VCTRLS=0.70 ../../scripts/pll/characterize_charge_pump.sh >/dev/null
+	CORNERS=tt VDDS=1.20 TEMPS=27 VCTRLS=0.80 ../../scripts/pll/characterize_ring.sh >/dev/null
+	$(MAKE) sim-cosim
 .PHONY: sim-all
 # ================================================================================================
 
 
-# Build Targets
-build-counter: ## Lint, build, verify and simulate the counter macro
-	@$(MAKE) -C $(MACROS_DIR)/counter all
-.PHONY: build-counter
-
-build-inverter: ## Verify, build and simulate the inverter macro
-	@$(MAKE) -C $(MACROS_DIR)/inverter all
-.PHONY: build-inverter
-
-build-pll-analog: ## Verify, build and simulate the analog PLL macro
-	@$(MAKE) -C $(MACROS_DIR)/pll_analog all
-.PHONY: build-pll-analog
-
-build-pll-digital: ## Lint, harden, verify and simulate the digital PLL macro
-	@$(MAKE) -C $(MACROS_DIR)/pll_digital all
-.PHONY: build-pll-digital
-
-build-pll: build-pll-digital build-pll-analog ## Build both physical PLL macros
-.PHONY: build-pll
-
-build-macros: ## Verify, build and simulate all macros (counter and inverter)
-	$(MAKE) build-counter
-	$(MAKE) build-inverter
-#	ToDo: further macros
-.PHONY: build-macros
-
-build-top: ## Build TOP cell (check PR boundary, Verilog, LEF, LIB, copy GDS, and render images)
-	$(MAKE) check-boundary
+# Build Target
+build-top: ## Build TOP cell (Verilog, LEF, LIB, copy GDS, and render image)
 	$(MAKE) lef
 	$(MAKE) lib
 	$(MAKE) verilog
 	$(MAKE) copy-gds
 	$(MAKE) render-gds
 .PHONY: build-top
-# ================================================================================================
-
-
-# PR Boundary Check Target
-check-boundary: ## Check that the TOP cell layout carries the PR boundary box on layer 189 that the chip flow needs
-	python3 $(SCRIPTS_DIR)/check_boundary.py $(LAY_DIR)/$(TOP).gds $(TOP)
-.PHONY: check-boundary
 # ================================================================================================
 
 
@@ -391,7 +370,7 @@ klayout-verify: ## Verify CELL cell with KLayout (usage: make klayout-verify [CE
 #	$(MAKE) klayout-pex CELL=$(CELL)
 .PHONY: klayout-verify
 
-klayout-verify-all: ## Verify the top-level cell with KLayout (DRC, LVS)
+klayout-verify-all: ## Verify all main subcells with KLayout (DRC, LVS)
 	$(MAKE) klayout-verify CELL=$(TOP)
 .PHONY: klayout-verify-all
 
@@ -401,15 +380,14 @@ magic-verify: ## Verify CELL cell with Magic (usage: make magic-verify [CELL=<ce
 	$(MAKE) magic-pex CELL=$(CELL)
 .PHONY: magic-verify
 
-magic-verify-all: ## Verify the top-level cell with Magic (DRC, LVS, PEX)
+magic-verify-all: ## Verify all main subcells with Magic (DRC, LVS, PEX)
 	$(MAKE) magic-verify CELL=$(TOP)
 .PHONY: magic-verify-all
 # ================================================================================================
 
 
 # Verify, Build and Simulate All Target
-all: ## Verify, build and simulate the macros and the TOP cell
-	$(MAKE) build-macros
+all: ## Verify, build and simulate the TOP cell
 	$(MAKE) klayout-verify-all
 	$(MAKE) magic-verify-all
 	$(MAKE) build-top
@@ -418,8 +396,8 @@ all: ## Verify, build and simulate the macros and the TOP cell
 # ================================================================================================
 
 
-# Clean Targets
-clean: ## Delete all generated files and folders of the TOP cell (final, netlists, render, DRC/LVS reports, simulation outputs)
+# Clean Target
+clean: ## Delete all generated files and folders
 	rm -rf $(GDS_DIR) $(LEF_DIR) $(LIB_DIR) $(VH_DIR)
 	rm -rf $(NET_SCH_DIR) $(NET_LAY_DIR) $(NET_PEX_DIR)
 	rm -rf $(RENDER_IMG_DIR)
@@ -428,34 +406,4 @@ clean: ## Delete all generated files and folders of the TOP cell (final, netlist
 	rm -rf $(SIM_PLOT_DIR)/data $(SIM_PLOT_DIR)/figures $(SIM_PLOT_DIR)/__pycache__
 	rm -rf $(SCRIPTS_DIR)/__pycache__
 .PHONY: clean
-
-clean-counter: ## Delete all generated files and folders of the counter macro
-	@$(MAKE) -C $(MACROS_DIR)/counter clean
-.PHONY: clean-counter
-
-clean-inverter: ## Delete all generated files and folders of the inverter macro
-	@$(MAKE) -C $(MACROS_DIR)/inverter clean
-.PHONY: clean-inverter
-
-clean-pll-analog: ## Delete generated files from the analog PLL macro
-	@$(MAKE) -C $(MACROS_DIR)/pll_analog clean
-.PHONY: clean-pll-analog
-
-clean-pll-digital: ## Delete generated files from the digital PLL macro
-	@$(MAKE) -C $(MACROS_DIR)/pll_digital clean
-.PHONY: clean-pll-digital
-
-clean-pll: clean-pll-analog clean-pll-digital ## Delete generated files from both PLL macros
-.PHONY: clean-pll
-
-clean-macros: ## Delete all generated files and folders of all macros (counter and inverter)
-	$(MAKE) clean-counter
-	$(MAKE) clean-inverter
-#	ToDo: further macros
-.PHONY: clean-macros
-
-clean-all: ## Delete all generated files and folders of the macros and the TOP cell
-	$(MAKE) clean-macros
-	$(MAKE) clean
-.PHONY: clean-all
 # ================================================================================================
