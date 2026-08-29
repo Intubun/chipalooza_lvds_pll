@@ -1,0 +1,18 @@
+v {xschem version=3.4.8RC file_version=1.3}
+G {type=delay
+verilog_ignore=true
+vhdl_ignore=true
+format="@name [ @@A @@B ] @@Y @and_model"
+template="name=A1 and_model=pll_and"
+}
+L 4 -50 -30 0 -30 {}
+L 4 -50 30 0 30 {}
+L 4 -50 -30 -50 30 {}
+A 4 0 0 30 270 450 {}
+B 5 -72.5 -12.5 -67.5 -7.5 {name=A dir=in}
+L 4 -70 -10 -50 -10 {}
+B 5 -72.5 7.5 -67.5 12.5 {name=B dir=in}
+L 4 -70 10 -50 10 {}
+B 5 27.5 -2.5 32.5 2.5 {name=Y dir=out}
+L 4 30 0 50 0 {}
+T {@name} -45 -42 0 0 0.2 0.2 {}
