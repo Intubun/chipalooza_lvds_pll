@@ -14,6 +14,8 @@ runs/
 backups/
 sim_build/
 /schematic/xschem/simulations
+/schematic/xschem/pll/simulations
+/schematic/xschem/pll/testbenches/xschem/simulations
 /testbenches/xschem/simulations
 /macros/inverter/verification/cace/_runs
 /macros/inverter/verification/cace/_docs
