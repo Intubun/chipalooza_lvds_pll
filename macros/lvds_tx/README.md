@@ -39,8 +39,8 @@ The top level instantiates `lvds_tx` as `xlvds` in
 
 | macro pin | top level |
 |---|---|
-| `Out_p` / `Out_n` | `analog_1` / `analog_2` |
-| `Va` / `Vss` | `VAPWR` (3.3 V) / `VGND` |
+| `Out_p` / `Out_n` | `analog_pin[2]` / `analog_pin[3]`, two of the four dedicated pads |
+| `Va` / `Vss` | `vdd_3v3` / `vss_3v3` |
 | `Iref_pd`, `Iref_drv`, `Vref` | **provisional top-level ports**, because the pin frame in this repository is a copied HeiChips-style template with no bias pins. The real Chipalooza wrapper has `ibias[1:0]` and `vbias` — see the warning in the top-level README — so these three map straight onto them and need no on-chip bias block. |
 | `D_p` / `D_n` | driven by `lvds_pattern`, the standard-cell PRBS-7 generator |
 
