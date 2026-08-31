@@ -47,38 +47,38 @@ def main():
     # ------------------------------------------------------------------
     ngspice_file = data_dir / "sg13cmos5l_chipalooza_analog_project_tb_tran.txt"
 
-    time = ng.loadngspicecol(str(ngspice_file), "time")
-    uio_in_0 = ng.loadngspicecol(str(ngspice_file), "v(uio_in_0)")
-    analog_0 = ng.loadngspicecol(str(ngspice_file), "v(analog_0)")
-    analog_1 = ng.loadngspicecol(str(ngspice_file), "v(analog_1)")
-    analog_2 = ng.loadngspicecol(str(ngspice_file), "v(analog_2)")
-
-    # Display-friendly axis scale
-    time_ms = time * 1e3
+    time_ns = ng.loadngspicecol(str(ngspice_file), "time") * 1e9
+    d_p = ng.loadngspicecol(str(ngspice_file), "v(d_p)")
+    d_n = ng.loadngspicecol(str(ngspice_file), "v(d_n)")
+    vos = ng.loadngspicecol(str(ngspice_file), "v(vos)")
+    vod = ng.loadngspicecol(str(ngspice_file), "vod")
+    core_p = ng.loadngspicecol(str(ngspice_file), "v(x1.core_p)")
+    core_n = ng.loadngspicecol(str(ngspice_file), "v(x1.core_n)")
 
     # ------------------------------------------------------------------
-    # 2. Transient Plot (Voltages over Time)
+    # 2. Transient plot: the core pair, the pads, and the difference
     # ------------------------------------------------------------------
-    uio_in_0_color = '#0c5da5'
-    analog_0_color = '#ff6b35'
-    analog_1_color = '#2f855a'
-    analog_2_color = '#805ad5'
+    fig1, (ax0, ax1, ax2) = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+    fig1.suptitle("Chipalooza 2026 - pattern generator into the LVDS driver")
 
-    fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-    fig1.suptitle('Chipalooza 2026 Analog Project - Transient Response')
+    ax0.plot(time_ns, core_p, color="#0c5da5", linewidth=1.0, label=r"$core_\mathrm{p}$")
+    ax0.plot(time_ns, core_n, color="#c1440e", linewidth=1.0, label=r"$core_\mathrm{n}$")
+    ax0.set_ylabel(r"$V$ (V)")
+    ax0.grid(visible=True, which="major", linestyle="--", alpha=0.45)
+    ax0.legend(loc="best")
 
-    ax1.plot(time_ms, uio_in_0, color=uio_in_0_color, linewidth=2.4, label=r'$V_\mathrm{uio\_in\_0}$')
-    ax1.plot(time_ms, analog_2, color=analog_2_color, linewidth=2.0, linestyle='--', label=r'$V_\mathrm{analog\_2}$')
-    ax1.set_ylabel(r'$V$ (V)')
-    ax1.grid(visible=True, which='major', linestyle='--', alpha=0.45)
-    ax1.legend(loc='best')
+    ax1.plot(time_ns, d_p, color="#2f855a", linewidth=1.4, label=r"analog_pin[2] ($d_\mathrm{p}$)")
+    ax1.plot(time_ns, d_n, color="#805ad5", linewidth=1.4, label=r"analog_pin[3] ($d_\mathrm{n}$)")
+    ax1.plot(time_ns, vos, color="#ff6b35", linewidth=1.4, linestyle="--", label=r"$V_\mathrm{os}$")
+    ax1.set_ylabel(r"$V$ (V)")
+    ax1.grid(visible=True, which="major", linestyle="--", alpha=0.45)
+    ax1.legend(loc="best")
 
-    ax2.plot(time_ms, analog_1, color=analog_1_color, linewidth=2.0, label=r'$V_\mathrm{analog\_1}$')
-    ax2.plot(time_ms, analog_0, color=analog_0_color, linewidth=2.0, linestyle='--', label=r'$V_\mathrm{analog\_0}$')
-    ax2.set_xlabel(r'$t$ (ms)')
-    ax2.set_ylabel(r'$V$ (V)')
-    ax2.grid(visible=True, which='major', linestyle='--', alpha=0.45)
-    ax2.legend(loc='best')
+    ax2.plot(time_ns, vod * 1e3, color="#0c5da5", linewidth=1.4, label=r"$V_\mathrm{od}$")
+    ax2.set_xlabel(r"$t$ (ns)")
+    ax2.set_ylabel(r"$V_\mathrm{od}$ (mV)")
+    ax2.grid(visible=True, which="major", linestyle="--", alpha=0.45)
+    ax2.legend(loc="best")
 
     plt.tight_layout()
 
@@ -88,8 +88,8 @@ def main():
     fig1.savefig(str(figures_dir / "sg13cmos5l_chipalooza_analog_project_tb_tran.svg"), bbox_inches='tight')
     fig1.savefig(str(figures_dir / "sg13cmos5l_chipalooza_analog_project_tb_tran.pdf"), bbox_inches='tight')
     np.savetxt(str(figures_dir / "sg13cmos5l_chipalooza_analog_project_tb_tran.csv"),
-               np.column_stack((time_ms, uio_in_0, analog_0, analog_1, analog_2)), comments="",
-               header="time_ms,uio_in_0,analog_0,analog_1,analog_2", delimiter=",")
+               np.column_stack((time_ns, d_p, d_n, vos, vod, core_p, core_n)), comments="",
+               header="time_ns,d_p,d_n,vos,vod,core_p,core_n", delimiter=",")
 
     # ------------------------------------------------------------------
     # 4. Open the plot window (blocks until it is closed)

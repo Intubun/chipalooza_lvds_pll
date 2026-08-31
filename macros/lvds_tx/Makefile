@@ -4,7 +4,7 @@
 MAKEFILE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 # Variables
-TOP = sg13cmos5l_chipalooza_analog_project
+TOP = lvds_tx
 
 .DEFAULT_GOAL := help
 
@@ -46,7 +46,6 @@ _GDS_EXT = $(if $(wildcard $(LAY_DIR)/$(CELL).gds),gds,klay.gds)
 OPEN_ARGS ?=
 
 # Folder structure
-MACROS_DIR      := macros
 XSCHEM_SCH_DIR  := schematic/xschem
 XSCHEM_TB_DIR   := testbenches/xschem
 LAY_DIR         := layout
@@ -76,7 +75,7 @@ help: ## Show this help message
 	@echo 'THRESHOLD/MINRES/MINDELAY are full-RC (EXT_MODE=3) extresist settings for magic-pex (defaults 10000 mOhm / 1000 mOhm / 1 ps).'
 	@echo 'DRC_LEVEL defaults to macro. Sets the KLayout DRC level for klayout-drc (precheck|macro|regular).'
 	@echo 'EV_PRECISION defaults to 5 significant digits for xschem ev function.'
-	@echo 'TB selects the Xschem testbench for sim-xschem (default: <CELL>_tb_tran).'
+	@echo 'TB selects the Xschem testbench for sim-xschem (default: Driver.tb).'
 	@echo 'SCRIPT selects the plotting script for sim-view-xschem (default: plot_<CELL>).'
 	@echo 'OPEN_ARGS passes extra options to sak-open.py for the open target (e.g. --all).'
 .PHONY: help
@@ -93,7 +92,7 @@ open: ## Open the design files of this folder in the sak-open.py file browser (n
 # Simulation Targets
 # Testbench for the Xschem simulation targets (default: <CELL>_tb_tran)
 # Override with: make <target> TB=<testbenchname>
-TB ?= $(CELL)_tb_tran
+TB ?= Driver.tb
 # Plotting script for sim-view-xschem (default: plot_<CELL>)
 # Override with: make <target> SCRIPT=<scriptname>
 SCRIPT ?= plot_$(CELL)
@@ -102,9 +101,10 @@ sim-xschem: ## Run TB simulation with Xschem in batch mode (usage: make sim-xsch
 	mkdir -p $(XSCHEM_TB_DIR)/simulations
 	mkdir -p $(SIM_PLOT_DIR)/data
 	rm -f $(XSCHEM_TB_DIR)/simulations/$(TB).spice
-#	`xschem netlist` returns a non-zero status on some schematics while writing a
-#	perfectly good netlist, so the status is not trusted here; the generated netlist
-#	itself is checked instead.  Same guard as the macro Makefiles.
+#	`xschem netlist` returns a non-zero status on tb_dc even though the netlist it
+#	writes is complete and simulates correctly - it does the same on the unmodified
+#	source schematic, so it is not something this import introduced. The status is
+#	therefore not trusted here; the generated netlist itself is checked instead.
 	-cd $(XSCHEM_TB_DIR) && xschem -r -x -q --rcfile xschemrc --command ' \
 		xschem set netlist_type spice; \
 		set netlist_dir $(abspath $(XSCHEM_TB_DIR)/simulations); \
@@ -125,57 +125,42 @@ sim-view-xschem: ## Plot Xschem simulation results (usage: make sim-view-xschem 
 	SHOW_PLOTS=1 python3 $(SIM_PLOT_DIR)/$(SCRIPT).py
 .PHONY: sim-view-xschem
 
+sim-driver: ## Transient compliance bench of the output driver (clauses 4.1.4/4.1.5)
+	$(MAKE) sim-xschem TB=Driver.tb
+.PHONY: sim-driver
 
-sim-all: ## Simulate the macro
-	$(MAKE) sim-xschem TB=$(TOP)_tb_tran
+sim-dc: ## Static compliance bench of the output driver (clauses 4.1.1/4.1.2/4.1.3)
+	$(MAKE) sim-xschem TB=tb_dc
+.PHONY: sim-dc
+
+sim-predriver: ## Pre-driver + driver transient bench
+	$(MAKE) sim-xschem TB=predriver.tb
+.PHONY: sim-predriver
+
+sim-link-word: ## Mixed-signal link bench, single word pattern (needs serdes/serdes_dig.so)
+	$(MAKE) sim-xschem TB=tb_word
+.PHONY: sim-link-word
+
+sim-link-prbs: ## Mixed-signal link bench, PRBS pattern (needs serdes/serdes_dig.so)
+	$(MAKE) sim-xschem TB=tb_prbs
+.PHONY: sim-link-prbs
+
+sim-all: ## Run the analog benches that need no co-simulation
+	$(MAKE) sim-dc
+	$(MAKE) sim-driver
+	$(MAKE) sim-predriver
 .PHONY: sim-all
 # ================================================================================================
 
 
-# Build Targets
-build-inverter: ## Verify, build and simulate the inverter macro
-	@$(MAKE) -C $(MACROS_DIR)/inverter all
-.PHONY: build-inverter
-
-build-pll-analog: ## Verify, build and simulate the analog PLL macro
-	@$(MAKE) -C $(MACROS_DIR)/pll_analog all
-.PHONY: build-pll-analog
-
-build-pll-digital: ## Lint, harden, verify and simulate the digital PLL macro
-	@$(MAKE) -C $(MACROS_DIR)/pll_digital all
-.PHONY: build-pll-digital
-
-build-pll: build-pll-digital build-pll-analog ## Build both physical PLL macros
-.PHONY: build-pll
-
-build-lvds-tx: ## Simulate the LVDS transmitter macro (schematic only, no layout yet)
-	@$(MAKE) -C $(MACROS_DIR)/lvds_tx sim-all
-.PHONY: build-lvds-tx
-
-build-lvds-pattern: ## Simulate and check the LVDS pattern generator macro (schematic only, no layout yet)
-	@$(MAKE) -C $(MACROS_DIR)/lvds_pattern sim-all
-.PHONY: build-lvds-pattern
-
-build-macros: ## Verify, build and simulate all macros
-	$(MAKE) build-inverter
-#	ToDo: further macros
-.PHONY: build-macros
-
-build-top: ## Build TOP cell (check PR boundary, Verilog, LEF, LIB, copy GDS, and render images)
-	$(MAKE) check-boundary
+# Build Target
+build-top: ## Build TOP cell (Verilog, LEF, LIB, copy GDS, and render image)
 	$(MAKE) lef
 	$(MAKE) lib
 	$(MAKE) verilog
 	$(MAKE) copy-gds
 	$(MAKE) render-gds
 .PHONY: build-top
-# ================================================================================================
-
-
-# PR Boundary Check Target
-check-boundary: ## Check that the TOP cell layout carries the PR boundary box on layer 189 that the chip flow needs
-	python3 $(SCRIPTS_DIR)/check_boundary.py $(LAY_DIR)/$(TOP).gds $(TOP)
-.PHONY: check-boundary
 # ================================================================================================
 
 
@@ -404,7 +389,7 @@ klayout-verify: ## Verify CELL cell with KLayout (usage: make klayout-verify [CE
 #	$(MAKE) klayout-pex CELL=$(CELL)
 .PHONY: klayout-verify
 
-klayout-verify-all: ## Verify the top-level cell with KLayout (DRC, LVS)
+klayout-verify-all: ## Verify all main subcells with KLayout (DRC, LVS)
 	$(MAKE) klayout-verify CELL=$(TOP)
 .PHONY: klayout-verify-all
 
@@ -414,15 +399,14 @@ magic-verify: ## Verify CELL cell with Magic (usage: make magic-verify [CELL=<ce
 	$(MAKE) magic-pex CELL=$(CELL)
 .PHONY: magic-verify
 
-magic-verify-all: ## Verify the top-level cell with Magic (DRC, LVS, PEX)
+magic-verify-all: ## Verify all main subcells with Magic (DRC, LVS, PEX)
 	$(MAKE) magic-verify CELL=$(TOP)
 .PHONY: magic-verify-all
 # ================================================================================================
 
 
 # Verify, Build and Simulate All Target
-all: ## Verify, build and simulate the macros and the TOP cell
-	$(MAKE) build-macros
+all: ## Verify, build and simulate the TOP cell
 	$(MAKE) klayout-verify-all
 	$(MAKE) magic-verify-all
 	$(MAKE) build-top
@@ -431,8 +415,8 @@ all: ## Verify, build and simulate the macros and the TOP cell
 # ================================================================================================
 
 
-# Clean Targets
-clean: ## Delete all generated files and folders of the TOP cell (final, netlists, render, DRC/LVS reports, simulation outputs)
+# Clean Target
+clean: ## Delete all generated files and folders
 	rm -rf $(GDS_DIR) $(LEF_DIR) $(LIB_DIR) $(VH_DIR)
 	rm -rf $(NET_SCH_DIR) $(NET_LAY_DIR) $(NET_PEX_DIR)
 	rm -rf $(RENDER_IMG_DIR)
@@ -441,37 +425,4 @@ clean: ## Delete all generated files and folders of the TOP cell (final, netlist
 	rm -rf $(SIM_PLOT_DIR)/data $(SIM_PLOT_DIR)/figures $(SIM_PLOT_DIR)/__pycache__
 	rm -rf $(SCRIPTS_DIR)/__pycache__
 .PHONY: clean
-
-clean-inverter: ## Delete all generated files and folders of the inverter macro
-	@$(MAKE) -C $(MACROS_DIR)/inverter clean
-.PHONY: clean-inverter
-
-clean-pll-analog: ## Delete generated files from the analog PLL macro
-	@$(MAKE) -C $(MACROS_DIR)/pll_analog clean
-.PHONY: clean-pll-analog
-
-clean-pll-digital: ## Delete generated files from the digital PLL macro
-	@$(MAKE) -C $(MACROS_DIR)/pll_digital clean
-.PHONY: clean-pll-digital
-
-clean-pll: clean-pll-analog clean-pll-digital ## Delete generated files from both PLL macros
-.PHONY: clean-pll
-
-clean-lvds-tx: ## Delete generated files from the LVDS transmitter macro
-	@$(MAKE) -C $(MACROS_DIR)/lvds_tx clean
-.PHONY: clean-lvds-tx
-
-clean-lvds-pattern: ## Delete generated files from the LVDS pattern generator macro
-	@$(MAKE) -C $(MACROS_DIR)/lvds_pattern clean
-.PHONY: clean-lvds-pattern
-
-clean-macros: ## Delete all generated files and folders of all macros
-	$(MAKE) clean-inverter
-#	ToDo: further macros
-.PHONY: clean-macros
-
-clean-all: ## Delete all generated files and folders of the macros and the TOP cell
-	$(MAKE) clean-macros
-	$(MAKE) clean
-.PHONY: clean-all
 # ================================================================================================

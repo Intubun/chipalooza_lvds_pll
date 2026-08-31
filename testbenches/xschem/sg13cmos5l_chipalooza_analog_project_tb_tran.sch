@@ -5,324 +5,252 @@ V {}
 S {}
 F {}
 E {}
-B 2 1680 -1420 2480 -1020 {flags=graph
-y1=-0.0047
-y2=1.9e-06
-ypos1=0
-ypos2=2
-divy=5
-subdivy=1
-unity=1
-x1=0
-x2=0.004
-divx=5
-subdivx=1
-xlabmag=1.0
-ylabmag=1.0
+T {Top-level transient bench.
 
+  analog_pin[0]  250 MHz reference on the dedicated pad
+  dig_in[4]      1 GHz, standing in for the PLL
+  dig_in[0]      clk_src = 1
+  dig_in[1]      en, low until 3 ns
+  dig_in[2]      reset, high until 2 ns
+  dig_in[3]      mode, PRBS-7 from 10 ns
+  ibias[1:0]     30 uA each, vbias 1.25 V
 
-dataset=-1
-unitx=1
-logx=0
-logy=0
-linewidth_mult=3
-color="4 21"
-node="i(VPWR)
-i(VAPWR)"}
-B 2 1680 -1000 2480 -600 {flags=graph
-y1=0.35
-y2=1.1
-ypos1=0
-ypos2=2
-divy=5
-subdivy=1
-unity=1
-x1=0
-x2=0.004
-divx=5
-subdivx=1
-xlabmag=1.0
-ylabmag=1.0
-node="analog_0
-analog_1"
-color="4 7"
-dataset=-1
-unitx=1
-logx=0
-logy=0
-linewidth_mult=3
-autoload=0}
-B 2 1680 -580 2480 -180 {flags=graph
-y1=0
-y2=1.6
-ypos1=0
-ypos2=2
-divy=5
-subdivy=1
-unity=1
-x1=0
-x2=0.004
-divx=5
-subdivx=1
-xlabmag=1.0
-ylabmag=1.0
-node="uio_in_0
-analog_2"
-color="4 7"
-dataset=-1
-unitx=1
-logx=0
-logy=0
-linewidth_mult=3
-autoload=0}
-T {Testbench for transient analysis - Chipalooza 2026 - Analog Project} 390 -1740 0 0 1 1 {}
-N 1420 -1160 1420 -1120 {lab=VPWR}
-N 1420 -1060 1420 -1020 {lab=GND}
-N 780 -440 780 -420 {lab=GND}
-N 1420 -680 1420 -660 {lab=analog_1}
-N 1520 -680 1520 -660 {lab=analog_1}
-N 1420 -600 1420 -580 {lab=GND}
-N 1520 -600 1520 -580 {lab=GND}
-N 1420 -840 1420 -820 {lab=analog_2}
-N 1520 -840 1520 -820 {lab=analog_2}
-N 1420 -760 1420 -740 {lab=GND}
-N 1520 -760 1520 -740 {lab=GND}
-N 1380 -680 1380 -540 {lab=analog_1}
-N 1340 -840 1340 -560 {lab=analog_2}
-N 1100 -1160 1100 -1140 {lab=VAPWR}
-N 1080 -480 1080 -420 {lab=GND}
-N 880 -1100 900 -1100 {lab=#net1}
-N 880 -1080 900 -1080 {lab=#net2}
-N 880 -1060 900 -1060 {lab=#net3}
-N 880 -1020 900 -1020 {lab=#net4}
-N 880 -1000 900 -1000 {lab=#net5}
-N 880 -980 900 -980 {lab=#net6}
-N 880 -960 900 -960 {lab=#net7}
-N 880 -940 900 -940 {lab=#net8}
-N 880 -920 900 -920 {lab=#net9}
-N 880 -900 900 -900 {lab=#net10}
-N 880 -840 900 -840 {lab=#net11}
-N 880 -820 900 -820 {lab=#net12}
-N 880 -800 900 -800 {lab=#net13}
-N 880 -780 900 -780 {lab=#net14}
-N 880 -760 900 -760 {lab=#net15}
-N 880 -740 900 -740 {lab=#net16}
-N 880 -720 900 -720 {lab=#net17}
-N 880 -660 900 -660 {lab=#net18}
-N 880 -640 900 -640 {lab=#net19}
-N 880 -620 900 -620 {lab=#net20}
-N 880 -600 900 -600 {lab=#net21}
-N 880 -580 900 -580 {lab=#net22}
-N 880 -560 900 -560 {lab=#net23}
-N 880 -540 900 -540 {lab=#net24}
-N 880 -520 900 -520 {lab=#net25}
-N 1340 -840 1420 -840 {lab=analog_2}
-N 1380 -680 1420 -680 {lab=analog_1}
-N 1340 -520 1340 -500 {lab=analog_0}
-N 1340 -440 1340 -420 {lab=GND}
-N 1420 -680 1520 -680 {lab=analog_1}
-N 1420 -840 1520 -840 {lab=analog_2}
-N 1520 -680 1580 -680 {lab=analog_1}
-N 1520 -840 1580 -840 {lab=analog_2}
-N 1520 -1160 1520 -1120 {lab=VAPWR}
-N 1520 -1060 1520 -1020 {lab=GND}
-N 1060 -1160 1060 -1140 {lab=VPWR}
-N 1260 -1020 1280 -1020 {lab=#net26}
-N 1260 -1000 1280 -1000 {lab=#net27}
-N 1260 -980 1280 -980 {lab=#net28}
-N 1260 -960 1280 -960 {lab=#net29}
-N 1260 -940 1280 -940 {lab=#net30}
-N 1260 -920 1280 -920 {lab=#net31}
-N 1260 -900 1280 -900 {lab=#net32}
-N 1260 -880 1280 -880 {lab=#net33}
-N 1260 -840 1280 -840 {lab=#net34}
-N 1260 -820 1280 -820 {lab=#net35}
-N 1260 -800 1280 -800 {lab=#net36}
-N 1260 -780 1280 -780 {lab=#net37}
-N 1260 -760 1280 -760 {lab=#net38}
-N 1260 -740 1280 -740 {lab=#net39}
-N 1260 -720 1280 -720 {lab=#net40}
-N 1260 -700 1280 -700 {lab=#net41}
-N 1260 -560 1340 -560 {lab=analog_2}
-N 1260 -540 1380 -540 {lab=analog_1}
-N 1260 -520 1340 -520 {lab=analog_0}
-N 880 -880 900 -880 {lab=#net42}
-N 780 -700 900 -700 {lab=uio_in_0}
-N 780 -700 780 -500 {lab=uio_in_0}
-C {devices/code_shown.sym} 20 -1450 0 0 {name=NGSPICE
-only_toplevel=true 
-value="
-.include ../../../netlist/pex/sg13cmos5l_chipalooza_analog_project_magic_pex_3.spice
-.param VPWR=1.5
-.csparam VPWR=VPWR
-.param VAPWR=1.5
-.csparam VAPWR=VAPWR
-.param Vcm=VAPWR/2
-.temp 27
-.param Cload=10p
-.param Rload=1k
-.options savecurrents klu method=gear reltol=1e-3 abstol=1e-12 gmin=1e-12
-.control
-
-save all
-
-* Operating Point Analysis
-op
-remzerovec
-write @schname\\\\.raw
-set appendwrite
-
-* Transient Analysis
-tran 1u 4m
-write @schname\\\\.raw
-
-* Plotting
-plot i(VPWR)
-plot i(VAPWR)
-plot analog_0 analog_1
-plot uio_in_0 analog_2
-
-* Measurements
-meas tran vin_peak MAX v(analog_0)
-meas tran vout_peak MAX v(analog_1)
-
-let Adm = vout_peak / vin_peak
-let Adm_dB = vdb(Adm)
-print Adm_dB
-
-meas tran vout_pp_max MAX v(analog_1)
-meas tran vout_pp_min MIN v(analog_1)
-let vout_pp = vout_pp_max - vout_pp_min
-print vout_pp
-
-* Write Data
-unset appendwrite
-set wr_vecnames
-set wr_singlescale
-wrdata ../plot_simulations/data/@schname\\\\.txt
-+ v(uio_in_0) v(analog_0) v(analog_1) v(analog_2)
-
-*quit
-.endc
-"}
-C {title-3.sym} 0 0 0 0 {name=l2 author="Simon Dorrer" rev=1.0 lock=true}
-C {devices/launcher.sym} 1740 -1470 0 0 {name=h1
-descr="Load waves" 
-tclcommand="xschem raw_read $netlist_dir/[file rootname [file tail [xschem get current_name]]].raw tran"
-}
-C {devices/launcher.sym} 1740 -1530 0 0 {name=h3
-descr="Annotate OP" 
-tclcommand="set show_hidden_texts 1; xschem annotate_op"
-}
-C {devices/vsource.sym} 1420 -1090 0 0 {name=VPWR value=\{VPWR\}}
-C {devices/gnd.sym} 1080 -420 0 0 {name=l3 lab=GND}
-C {devices/vsource.sym} 1340 -470 0 0 {name=vsine spice_ignore=False value="sin(\{Vcm\} 10m 1k)"
-}
-C {devices/lab_wire.sym} 780 -700 0 0 {name=l22 sig_type=std_logic lab=uio_in_0}
-C {devices/gnd.sym} 780 -420 0 0 {name=l26 lab=GND}
-C {devices/code_shown.sym} 2000 -1590 0 0 {name=MODEL only_toplevel=true
-format="tcleval( @value )"
+Load is 49.9 + 49.9 ohm across analog_pin[2] / analog_pin[3] with the
+Vos tap.  No pad or ESD model, so the Vos figure is not the compliance
+number - the driver was characterised with one.} -1700 -2100 0 0 0.45 0.45 {}
+N -1200 -1960 -1200 -1930 {lab=vdd_3v3}
+C {lab_pin.sym} -1200 -1960 1 0 {name=ls_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
+C {devices/vsource.sym} -1200 -1900 0 0 {name=Vvdd_3v3 value="3.3"}
+N -1200 -1870 -1200 -1840 {lab=GND}
+C {devices/gnd.sym} -1200 -1840 0 0 {name=lg_vdd_3v3 lab=GND}
+T {gated 3.3 V} -1140 -1905 0 0 0.3 0.3 {}
+N -1200 -1760 -1200 -1730 {lab=vdd_1v2}
+C {lab_pin.sym} -1200 -1760 1 0 {name=ls_vdd_1v2 sig_type=std_logic lab=vdd_1v2}
+C {devices/vsource.sym} -1200 -1700 0 0 {name=Vvdd_1v2 value="1.2"}
+N -1200 -1670 -1200 -1640 {lab=GND}
+C {devices/gnd.sym} -1200 -1640 0 0 {name=lg_vdd_1v2 lab=GND}
+T {gated 1.2 V} -1140 -1705 0 0 0.3 0.3 {}
+N -1200 -1560 -1200 -1530 {lab=vbias}
+C {lab_pin.sym} -1200 -1560 1 0 {name=ls_vbias sig_type=std_logic lab=vbias}
+C {devices/vsource.sym} -1200 -1500 0 0 {name=Vvbias value="1.25"}
+N -1200 -1470 -1200 -1440 {lab=GND}
+C {devices/gnd.sym} -1200 -1440 0 0 {name=lg_vbias lab=GND}
+T {shared voltage bias, the driver wants 1.25 V} -1140 -1505 0 0 0.3 0.3 {}
+N -1200 -1360 -1200 -1330 {lab=analog_pin[0]}
+C {lab_pin.sym} -1200 -1360 1 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
+C {devices/vsource.sym} -1200 -1300 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 1.9n 4n)"}
+N -1200 -1270 -1200 -1240 {lab=GND}
+C {devices/gnd.sym} -1200 -1240 0 0 {name=lg_analog_pin_0 lab=GND}
+T {ref_clk, 250 MHz} -1140 -1305 0 0 0.3 0.3 {}
+N -1200 -1160 -1200 -1130 {lab=dig_in[4]}
+C {lab_pin.sym} -1200 -1160 1 0 {name=ls_dig_in_4 sig_type=std_logic lab=dig_in[4]}
+C {devices/vsource.sym} -1200 -1100 0 0 {name=Vdig_in_4 value="PULSE(0 1.2 0 30p 30p 470p 1n)"}
+N -1200 -1070 -1200 -1040 {lab=GND}
+C {devices/gnd.sym} -1200 -1040 0 0 {name=lg_dig_in_4 lab=GND}
+T {PROVISIONAL pll_clk, 1 GHz} -1140 -1105 0 0 0.3 0.3 {}
+N -1200 -960 -1200 -930 {lab=dig_in[0]}
+C {lab_pin.sym} -1200 -960 1 0 {name=ls_dig_in_0 sig_type=std_logic lab=dig_in[0]}
+C {devices/vsource.sym} -1200 -900 0 0 {name=Vdig_in_0 value="1.2"}
+N -1200 -870 -1200 -840 {lab=GND}
+C {devices/gnd.sym} -1200 -840 0 0 {name=lg_dig_in_0 lab=GND}
+T {clk_src = 1, take the fast clock} -1140 -905 0 0 0.3 0.3 {}
+N -1200 -760 -1200 -730 {lab=enable}
+C {lab_pin.sym} -1200 -760 1 0 {name=ls_enable sig_type=std_logic lab=enable}
+C {devices/vsource.sym} -1200 -700 0 0 {name=Venable value="1.2"}
+N -1200 -670 -1200 -640 {lab=GND}
+C {devices/gnd.sym} -1200 -640 0 0 {name=lg_enable lab=GND}
+T {project enable} -1140 -705 0 0 0.3 0.3 {}
+N -1200 -560 -1200 -530 {lab=dig_in[1]}
+C {lab_pin.sym} -1200 -560 1 0 {name=ls_dig_in_1 sig_type=std_logic lab=dig_in[1]}
+C {devices/vsource.sym} -1200 -500 0 0 {name=Vdig_in_1 value="PWL(0 0 3n 0 3.1n 1.2)"}
+N -1200 -470 -1200 -440 {lab=GND}
+C {devices/gnd.sym} -1200 -440 0 0 {name=lg_dig_in_1 lab=GND}
+T {en, low until 3 ns} -1140 -505 0 0 0.3 0.3 {}
+N -1200 -360 -1200 -330 {lab=dig_in[2]}
+C {lab_pin.sym} -1200 -360 1 0 {name=ls_dig_in_2 sig_type=std_logic lab=dig_in[2]}
+C {devices/vsource.sym} -1200 -300 0 0 {name=Vdig_in_2 value="PWL(0 1.2 2n 1.2 2.1n 0)"}
+N -1200 -270 -1200 -240 {lab=GND}
+C {devices/gnd.sym} -1200 -240 0 0 {name=lg_dig_in_2 lab=GND}
+T {reset, high until 2 ns} -1140 -305 0 0 0.3 0.3 {}
+N -1200 -160 -1200 -130 {lab=dig_in[3]}
+C {lab_pin.sym} -1200 -160 1 0 {name=ls_dig_in_3 sig_type=std_logic lab=dig_in[3]}
+C {devices/vsource.sym} -1200 -100 0 0 {name=Vdig_in_3 value="PWL(0 0 10n 0 10.1n 1.2)"}
+N -1200 -70 -1200 -40 {lab=GND}
+C {devices/gnd.sym} -1200 -40 0 0 {name=lg_dig_in_3 lab=GND}
+T {mode -> PRBS-7 at 10 ns} -1140 -105 0 0 0.3 0.3 {}
+N -1200 40 -1200 70 {lab=ibias[0]}
+C {lab_pin.sym} -1200 40 1 0 {name=ls_ibias_0 sig_type=std_logic lab=ibias[0]}
+C {isource.sym} -1200 100 0 0 {name=Iibias_0 value=-30u}
+N -1200 130 -1200 160 {lab=GND}
+C {devices/gnd.sym} -1200 160 0 0 {name=lg_ibias_0 lab=GND}
+T {pre-driver reference, 30 uA} -1140 95 0 0 0.3 0.3 {}
+N -1200 240 -1200 270 {lab=ibias[1]}
+C {lab_pin.sym} -1200 240 1 0 {name=ls_ibias_1 sig_type=std_logic lab=ibias[1]}
+C {isource.sym} -1200 300 0 0 {name=Iibias_1 value=-30u}
+N -1200 330 -1200 360 {lab=GND}
+C {devices/gnd.sym} -1200 360 0 0 {name=lg_ibias_1 lab=GND}
+T {driver reference, 30 uA} -1140 295 0 0 0.3 0.3 {}
+N -280 -350 -220 -350 {lab=vdd_3v3}
+C {lab_pin.sym} -280 -350 0 0 {name=lx_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
+N -280 -330 -220 -330 {lab=vdd_1v2}
+C {lab_pin.sym} -280 -330 0 0 {name=lx_vdd_1v2 sig_type=std_logic lab=vdd_1v2}
+N -280 -310 -220 -310 {lab=GND}
+C {devices/gnd.sym} -280 -310 1 0 {name=lgg_vss_3v3 lab=GND}
+N -280 -290 -220 -290 {lab=GND}
+C {devices/gnd.sym} -280 -290 1 0 {name=lgg_vss_1v2 lab=GND}
+N -280 -270 -220 -270 {lab=GND}
+C {devices/gnd.sym} -280 -270 1 0 {name=lgg_vssio lab=GND}
+N -280 -250 -220 -250 {lab=enable}
+C {lab_pin.sym} -280 -250 0 0 {name=lx_enable sig_type=std_logic lab=enable}
+N -280 -230 -220 -230 {lab=clk}
+C {lab_pin.sym} -280 -230 0 0 {name=lx_clk sig_type=std_logic lab=clk}
+N -280 -210 -220 -210 {lab=dig_in[23]}
+C {lab_pin.sym} -280 -210 0 0 {name=lx_dig_in_23 sig_type=std_logic lab=dig_in[23]}
+N -280 -190 -220 -190 {lab=dig_in[22]}
+C {lab_pin.sym} -280 -190 0 0 {name=lx_dig_in_22 sig_type=std_logic lab=dig_in[22]}
+N -280 -170 -220 -170 {lab=dig_in[21]}
+C {lab_pin.sym} -280 -170 0 0 {name=lx_dig_in_21 sig_type=std_logic lab=dig_in[21]}
+N -280 -150 -220 -150 {lab=dig_in[20]}
+C {lab_pin.sym} -280 -150 0 0 {name=lx_dig_in_20 sig_type=std_logic lab=dig_in[20]}
+N -280 -130 -220 -130 {lab=dig_in[19]}
+C {lab_pin.sym} -280 -130 0 0 {name=lx_dig_in_19 sig_type=std_logic lab=dig_in[19]}
+N -280 -110 -220 -110 {lab=dig_in[18]}
+C {lab_pin.sym} -280 -110 0 0 {name=lx_dig_in_18 sig_type=std_logic lab=dig_in[18]}
+N -280 -90 -220 -90 {lab=dig_in[17]}
+C {lab_pin.sym} -280 -90 0 0 {name=lx_dig_in_17 sig_type=std_logic lab=dig_in[17]}
+N -280 -70 -220 -70 {lab=dig_in[16]}
+C {lab_pin.sym} -280 -70 0 0 {name=lx_dig_in_16 sig_type=std_logic lab=dig_in[16]}
+N -280 -50 -220 -50 {lab=dig_in[15]}
+C {lab_pin.sym} -280 -50 0 0 {name=lx_dig_in_15 sig_type=std_logic lab=dig_in[15]}
+N -280 -30 -220 -30 {lab=dig_in[14]}
+C {lab_pin.sym} -280 -30 0 0 {name=lx_dig_in_14 sig_type=std_logic lab=dig_in[14]}
+N -280 -10 -220 -10 {lab=dig_in[13]}
+C {lab_pin.sym} -280 -10 0 0 {name=lx_dig_in_13 sig_type=std_logic lab=dig_in[13]}
+N -280 10 -220 10 {lab=dig_in[12]}
+C {lab_pin.sym} -280 10 0 0 {name=lx_dig_in_12 sig_type=std_logic lab=dig_in[12]}
+N -280 30 -220 30 {lab=dig_in[11]}
+C {lab_pin.sym} -280 30 0 0 {name=lx_dig_in_11 sig_type=std_logic lab=dig_in[11]}
+N -280 50 -220 50 {lab=dig_in[10]}
+C {lab_pin.sym} -280 50 0 0 {name=lx_dig_in_10 sig_type=std_logic lab=dig_in[10]}
+N -280 70 -220 70 {lab=dig_in[9]}
+C {lab_pin.sym} -280 70 0 0 {name=lx_dig_in_9 sig_type=std_logic lab=dig_in[9]}
+N -280 90 -220 90 {lab=dig_in[8]}
+C {lab_pin.sym} -280 90 0 0 {name=lx_dig_in_8 sig_type=std_logic lab=dig_in[8]}
+N -280 110 -220 110 {lab=dig_in[7]}
+C {lab_pin.sym} -280 110 0 0 {name=lx_dig_in_7 sig_type=std_logic lab=dig_in[7]}
+N -280 130 -220 130 {lab=dig_in[6]}
+C {lab_pin.sym} -280 130 0 0 {name=lx_dig_in_6 sig_type=std_logic lab=dig_in[6]}
+N -280 150 -220 150 {lab=dig_in[5]}
+C {lab_pin.sym} -280 150 0 0 {name=lx_dig_in_5 sig_type=std_logic lab=dig_in[5]}
+N -280 170 -220 170 {lab=dig_in[4]}
+C {lab_pin.sym} -280 170 0 0 {name=lx_dig_in_4 sig_type=std_logic lab=dig_in[4]}
+N -280 190 -220 190 {lab=dig_in[3]}
+C {lab_pin.sym} -280 190 0 0 {name=lx_dig_in_3 sig_type=std_logic lab=dig_in[3]}
+N -280 210 -220 210 {lab=dig_in[2]}
+C {lab_pin.sym} -280 210 0 0 {name=lx_dig_in_2 sig_type=std_logic lab=dig_in[2]}
+N -280 230 -220 230 {lab=dig_in[1]}
+C {lab_pin.sym} -280 230 0 0 {name=lx_dig_in_1 sig_type=std_logic lab=dig_in[1]}
+N -280 250 -220 250 {lab=dig_in[0]}
+C {lab_pin.sym} -280 250 0 0 {name=lx_dig_in_0 sig_type=std_logic lab=dig_in[0]}
+N -280 270 -220 270 {lab=ibias[1]}
+C {lab_pin.sym} -280 270 0 0 {name=lx_ibias_1 sig_type=std_logic lab=ibias[1]}
+N -280 290 -220 290 {lab=ibias[0]}
+C {lab_pin.sym} -280 290 0 0 {name=lx_ibias_0 sig_type=std_logic lab=ibias[0]}
+N -280 310 -220 310 {lab=vbias}
+C {lab_pin.sym} -280 310 0 0 {name=lx_vbias sig_type=std_logic lab=vbias}
+N 220 -350 280 -350 {lab=dig_out[11]}
+C {lab_pin.sym} 280 -350 0 1 {name=lx_dig_out_11 sig_type=std_logic lab=dig_out[11]}
+N 220 -330 280 -330 {lab=dig_out[10]}
+C {lab_pin.sym} 280 -330 0 1 {name=lx_dig_out_10 sig_type=std_logic lab=dig_out[10]}
+N 220 -310 280 -310 {lab=dig_out[9]}
+C {lab_pin.sym} 280 -310 0 1 {name=lx_dig_out_9 sig_type=std_logic lab=dig_out[9]}
+N 220 -290 280 -290 {lab=dig_out[8]}
+C {lab_pin.sym} 280 -290 0 1 {name=lx_dig_out_8 sig_type=std_logic lab=dig_out[8]}
+N 220 -270 280 -270 {lab=dig_out[7]}
+C {lab_pin.sym} 280 -270 0 1 {name=lx_dig_out_7 sig_type=std_logic lab=dig_out[7]}
+N 220 -250 280 -250 {lab=dig_out[6]}
+C {lab_pin.sym} 280 -250 0 1 {name=lx_dig_out_6 sig_type=std_logic lab=dig_out[6]}
+N 220 -230 280 -230 {lab=dig_out[5]}
+C {lab_pin.sym} 280 -230 0 1 {name=lx_dig_out_5 sig_type=std_logic lab=dig_out[5]}
+N 220 -210 280 -210 {lab=dig_out[4]}
+C {lab_pin.sym} 280 -210 0 1 {name=lx_dig_out_4 sig_type=std_logic lab=dig_out[4]}
+N 220 -190 280 -190 {lab=dig_out[3]}
+C {lab_pin.sym} 280 -190 0 1 {name=lx_dig_out_3 sig_type=std_logic lab=dig_out[3]}
+N 220 -170 280 -170 {lab=dig_out[2]}
+C {lab_pin.sym} 280 -170 0 1 {name=lx_dig_out_2 sig_type=std_logic lab=dig_out[2]}
+N 220 -150 280 -150 {lab=dig_out[1]}
+C {lab_pin.sym} 280 -150 0 1 {name=lx_dig_out_1 sig_type=std_logic lab=dig_out[1]}
+N 220 -130 280 -130 {lab=dig_out[0]}
+C {lab_pin.sym} 280 -130 0 1 {name=lx_dig_out_0 sig_type=std_logic lab=dig_out[0]}
+N 220 -110 280 -110 {lab=analog_pin[3]}
+C {lab_pin.sym} 280 -110 0 1 {name=lx_analog_pin_3 sig_type=std_logic lab=analog_pin[3]}
+N 220 -90 280 -90 {lab=analog_pin[2]}
+C {lab_pin.sym} 280 -90 0 1 {name=lx_analog_pin_2 sig_type=std_logic lab=analog_pin[2]}
+N 220 -70 280 -70 {lab=analog_pin[1]}
+C {lab_pin.sym} 280 -70 0 1 {name=lx_analog_pin_1 sig_type=std_logic lab=analog_pin[1]}
+N 220 -50 280 -50 {lab=analog_pin[0]}
+C {lab_pin.sym} 280 -50 0 1 {name=lx_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
+N 220 -30 280 -30 {lab=analog_bus[3]}
+C {lab_pin.sym} 280 -30 0 1 {name=lx_analog_bus_3 sig_type=std_logic lab=analog_bus[3]}
+N 220 -10 280 -10 {lab=analog_bus[2]}
+C {lab_pin.sym} 280 -10 0 1 {name=lx_analog_bus_2 sig_type=std_logic lab=analog_bus[2]}
+N 220 10 280 10 {lab=analog_bus[1]}
+C {lab_pin.sym} 280 10 0 1 {name=lx_analog_bus_1 sig_type=std_logic lab=analog_bus[1]}
+N 220 30 280 30 {lab=analog_bus[0]}
+C {lab_pin.sym} 280 30 0 1 {name=lx_analog_bus_0 sig_type=std_logic lab=analog_bus[0]}
+C {sg13cmos5l_chipalooza_analog_project.sym} 0 0 0 0 {name=x1}
+N 700 -960 700 -930 {lab=analog_pin[3]}
+C {lab_pin.sym} 700 -960 1 0 {name=lpad_d_n sig_type=std_logic lab=analog_pin[3]}
+C {devices/vsource.sym} 700 -900 0 0 {name=Vd_n value=0}
+N 700 -870 700 -840 {lab=d_n}
+C {lab_pin.sym} 700 -840 3 0 {name=lmeas_d_n sig_type=std_logic lab=d_n}
+N 900 -960 900 -930 {lab=analog_pin[2]}
+C {lab_pin.sym} 900 -960 1 0 {name=lpad_d_p sig_type=std_logic lab=analog_pin[2]}
+C {devices/vsource.sym} 900 -900 0 0 {name=Vd_p value=0}
+N 900 -870 900 -840 {lab=d_p}
+C {lab_pin.sym} 900 -840 3 0 {name=lmeas_d_p sig_type=std_logic lab=d_p}
+N 800 -840 800 -810 {lab=d_n}
+C {lab_pin.sym} 800 -840 1 0 {name=lt1 sig_type=std_logic lab=d_n}
+C {res.sym} 800 -810 0 0 {name=Rtp value=49.9}
+N 800 -780 800 -750 {lab=vos}
+N 800 -780 880 -780 {lab=vos}
+C {lab_pin.sym} 880 -780 0 1 {name=lvos sig_type=std_logic lab=vos}
+C {res.sym} 800 -720 0 0 {name=Rtn value=49.9}
+N 800 -690 800 -660 {lab=d_p}
+C {lab_pin.sym} 800 -660 3 0 {name=lt2 sig_type=std_logic lab=d_p}
+C {devices/code_shown.sym} -2400 -2100 0 0 {name=NGSPICE
+only_toplevel=true
 value="
 .lib cornerMOSlv.lib mos_tt
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
 .lib cornerDIO.lib dio_tt
-"}
-C {devices/lab_pin.sym} 1580 -680 0 1 {name=l1 sig_type=std_logic lab=analog_1}
-C {capa.sym} 1420 -630 0 0 {name=C1
-m=1
-value=\{Cload\}
-footprint=1206
-device="ceramic capacitor"
-}
-C {res.sym} 1520 -630 0 0 {name=R1
-value=\{Rload\}
-footprint=1206
-device=resistor
-m=1
-spice_ignore=true}
-C {devices/gnd.sym} 1420 -580 0 0 {name=l9 lab=GND}
-C {devices/gnd.sym} 1520 -580 0 0 {name=l10 lab=GND}
-C {devices/lab_pin.sym} 1580 -840 0 1 {name=l11 sig_type=std_logic lab=analog_2}
-C {capa.sym} 1420 -790 0 0 {name=C2
-m=1
-value=\{Cload\}
-footprint=1206
-device="ceramic capacitor"
-}
-C {res.sym} 1520 -790 0 0 {name=R2
-value=\{Rload\}
-footprint=1206
-device=resistor
-m=1
-spice_ignore=true}
-C {devices/gnd.sym} 1420 -740 0 0 {name=l13 lab=GND}
-C {devices/gnd.sym} 1520 -740 0 0 {name=l14 lab=GND}
-C {devices/gnd.sym} 1420 -1020 0 0 {name=l19 lab=GND}
-C {noconn.sym} 1280 -1020 2 0 {name=l20}
-C {noconn.sym} 1280 -1000 2 0 {name=l21}
-C {noconn.sym} 1280 -980 2 0 {name=l23}
-C {noconn.sym} 1280 -960 2 0 {name=l24}
-C {noconn.sym} 1280 -940 2 0 {name=l25}
-C {noconn.sym} 1280 -920 2 0 {name=l27}
-C {noconn.sym} 1280 -900 2 0 {name=l28}
-C {noconn.sym} 1280 -880 2 0 {name=l29}
-C {noconn.sym} 1280 -840 2 0 {name=l30}
-C {noconn.sym} 1280 -820 2 0 {name=l31}
-C {noconn.sym} 1280 -800 2 0 {name=l32}
-C {noconn.sym} 1280 -780 2 0 {name=l33}
-C {noconn.sym} 1280 -760 2 0 {name=l34}
-C {noconn.sym} 1280 -740 2 0 {name=l35}
-C {noconn.sym} 1280 -720 2 0 {name=l36}
-C {noconn.sym} 1280 -700 2 0 {name=l37}
-C {noconn.sym} 880 -1100 2 1 {name=l38}
-C {noconn.sym} 880 -1080 2 1 {name=l39}
-C {noconn.sym} 880 -1060 2 1 {name=l40}
-C {noconn.sym} 880 -1020 2 1 {name=l41}
-C {noconn.sym} 880 -1000 2 1 {name=l42}
-C {noconn.sym} 880 -980 2 1 {name=l43}
-C {noconn.sym} 880 -960 2 1 {name=l44}
-C {noconn.sym} 880 -940 2 1 {name=l45}
-C {noconn.sym} 880 -920 2 1 {name=l46}
-C {noconn.sym} 880 -900 2 1 {name=l47}
-C {noconn.sym} 880 -840 2 1 {name=l48}
-C {noconn.sym} 880 -820 2 1 {name=l49}
-C {noconn.sym} 880 -800 2 1 {name=l50}
-C {noconn.sym} 880 -780 2 1 {name=l51}
-C {noconn.sym} 880 -760 2 1 {name=l52}
-C {noconn.sym} 880 -740 2 1 {name=l53}
-C {noconn.sym} 880 -720 2 1 {name=l54}
-C {noconn.sym} 880 -660 2 1 {name=l56}
-C {noconn.sym} 880 -640 2 1 {name=l57}
-C {noconn.sym} 880 -620 2 1 {name=l58}
-C {noconn.sym} 880 -600 2 1 {name=l59}
-C {noconn.sym} 880 -580 2 1 {name=l60}
-C {noconn.sym} 880 -560 2 1 {name=l61}
-C {noconn.sym} 880 -540 2 1 {name=l62}
-C {noconn.sym} 880 -520 2 1 {name=l63}
-C {devices/lab_wire.sym} 1340 -520 0 1 {name=l4 sig_type=std_logic lab=analog_0}
-C {devices/gnd.sym} 1340 -420 0 1 {name=l5 lab=GND}
-C {devices/lab_pin.sym} 1420 -1160 3 1 {name=l6 sig_type=std_logic lab=VPWR}
-C {devices/vsource.sym} 1520 -1090 0 0 {name=VAPWR value=\{VAPWR\}}
-C {devices/gnd.sym} 1520 -1020 0 0 {name=l7 lab=GND}
-C {devices/lab_pin.sym} 1520 -1160 3 1 {name=l8 sig_type=std_logic lab=VAPWR}
-C {devices/lab_pin.sym} 1060 -1160 3 1 {name=l12 sig_type=std_logic lab=VPWR}
-C {devices/lab_pin.sym} 1100 -1160 3 1 {name=l15 sig_type=std_logic lab=VAPWR}
-C {devices/vsource.sym} 780 -470 0 1 {name=vpulse spice_ignore=False value="pulse(0 \{VPWR\} 0 10n 10n 500u 1m)"
-}
-C {noconn.sym} 880 -880 2 1 {name=l16}
-C {sg13cmos5l_chipalooza_analog_project.sym} 2720 -1080 0 0 {name=x2
-spice_ignore=true}
-C {sg13cmos5l_chipalooza_analog_project_pex.sym} 2720 -360 0 0 {name=x3
-spice_ignore=true}
-C {sg13cmos5l_chipalooza_analog_project.sym} 1080 -800 0 0 {name=x1
-}
-C {devices/launcher.sym} 1740 -1590 0 0 {name=h2
-descr="Simulate" 
-tclcommand="xschem save; xschem netlist; file mkdir $netlist_dir; write_data [save_params] $netlist_dir/[file rootname [file tail [xschem get current_name]]].save; xschem simulate"
-}
-C {devices/code_shown.sym} 20 -1570 0 0 {name=SAVE only_toplevel=true
-format="tcleval( @value )"
-value="
-.include [file rootname [file tail [xschem get schname]]].save
+.include cap_mfringe.lib
+.include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
+.temp 27
+.options savecurrents klu method=gear reltol=1e-3 abstol=1e-12 gmin=1e-12
+.control
+save all
+op
+remzerovec
+write @schname\\\\.raw
+set appendwrite
+tran 5p 40n
+write @schname\\\\.raw
+
+let vod = v(d_p)-v(d_n)
+meas tran vod_max MAX vod from=20n to=40n
+meas tran vod_min MIN vod from=20n to=40n
+meas tran vos_avg AVG v(vos) from=20n to=40n
+meas tran vos_max MAX v(vos) from=20n to=40n
+meas tran vos_min MIN v(vos) from=20n to=40n
+let vos_pp = vos_max - vos_min
+print vod_max vod_min vos_avg vos_pp
+
+unset appendwrite
+set wr_vecnames
+set wr_singlescale
+wrdata ../plot_simulations/data/@schname\\\\.txt
++ v(d_p) v(d_n) v(vos) vod v(x1.core_p) v(x1.core_n)
+.endc
 "}
