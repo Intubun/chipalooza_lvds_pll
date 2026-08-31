@@ -5,173 +5,164 @@ V {}
 S {}
 F {}
 E {}
-P 4 1 1710 -1280 {}
-P 4 5 1720 -1280 2120 -1280 2120 -500 1720 -500 1720 -1280 {fill = false
-dash = 16}
-T {Chipalooza 2026 - Analog Project} 830 -1700 0 0 1 1 {}
-T {Decoupling} 1730 -1270 0 0 0.4 0.4 {}
-N 1200 -800 1200 -780 {lab=VAPWR}
-N 1200 -700 1200 -680 {lab=VGND}
-N 1200 -1080 1200 -1060 {lab=VAPWR}
-N 1200 -980 1200 -960 {lab=VGND}
-N 1080 -740 1140 -740 {lab=analog_0}
-N 1080 -1020 1140 -1020 {lab=ui_in[0]}
-N 1280 -1020 1340 -1020 {lab=analog_2}
-N 1280 -740 1340 -740 {lab=analog_1}
-N 1920 -800 1920 -760 {lab=VAPWR}
-N 1860 -720 1890 -720 {lab=VGND}
-N 1860 -720 1860 -620 {lab=VGND}
-N 1920 -620 1980 -620 {lab=VGND}
-N 1980 -720 1980 -620 {lab=VGND}
-N 1950 -720 1980 -720 {lab=VGND}
-N 1920 -620 1920 -580 {lab=VGND}
-N 1920 -720 1920 -620 {lab=VGND}
-N 1860 -620 1920 -620 {lab=VGND}
-N 500 -1320 540 -1320 {lab=clk}
-N 500 -1300 540 -1300 {lab=ena}
-N 500 -1340 540 -1340 {lab=rst_n}
-N 500 -1260 540 -1260 {lab=uio_in[7]}
-N 500 -1240 540 -1240 {lab=uio_in[6]}
-N 500 -1220 540 -1220 {lab=uio_in[5]}
-N 500 -1200 540 -1200 {lab=uio_in[4]}
-N 500 -1180 540 -1180 {lab=uio_in[3]}
-N 500 -1160 540 -1160 {lab=uio_in[2]}
-N 500 -1140 540 -1140 {lab=uio_in[1]}
-N 500 -1120 540 -1120 {lab=uio_in[0]}
-N 500 -1080 540 -1080 {lab=ui_in[7]}
-N 500 -1060 540 -1060 {lab=ui_in[6]}
-N 500 -1040 540 -1040 {lab=ui_in[5]}
-N 500 -1020 540 -1020 {lab=ui_in[4]}
-N 500 -1000 540 -1000 {lab=ui_in[3]}
-N 500 -980 540 -980 {lab=ui_in[2]}
-N 500 -960 540 -960 {lab=ui_in[1]}
-N 500 -940 540 -940 {lab=ui_in[0]}
-N 500 -900 540 -900 {lab=uio_oe[7]}
-N 500 -880 540 -880 {lab=uio_oe[6]}
-N 500 -860 540 -860 {lab=uio_oe[5]}
-N 500 -840 540 -840 {lab=uio_oe[4]}
-N 500 -820 540 -820 {lab=uio_oe[3]}
-N 500 -800 540 -800 {lab=uio_oe[2]}
-N 500 -780 540 -780 {lab=uio_oe[1]}
-N 500 -760 540 -760 {lab=uio_oe[0]}
-N 500 -720 540 -720 {lab=uio_out[7]}
-N 500 -700 540 -700 {lab=uio_out[6]}
-N 500 -680 540 -680 {lab=uio_out[5]}
-N 500 -660 540 -660 {lab=uio_out[4]}
-N 500 -640 540 -640 {lab=uio_out[3]}
-N 500 -620 540 -620 {lab=uio_out[2]}
-N 500 -600 540 -600 {lab=uio_out[1]}
-N 500 -580 540 -580 {lab=uio_out[0]}
-N 500 -540 540 -540 {lab=uo_out[7]}
-N 500 -520 540 -520 {lab=uo_out[6]}
-N 500 -500 540 -500 {lab=uo_out[5]}
-N 500 -480 540 -480 {lab=uo_out[4]}
-N 500 -460 540 -460 {lab=uo_out[3]}
-N 500 -440 540 -440 {lab=uo_out[2]}
-N 500 -420 540 -420 {lab=uo_out[1]}
-N 500 -400 540 -400 {lab=uo_out[0]}
-N 500 -1400 540 -1400 {lab=VAPWR}
-N 500 -1380 540 -1380 {lab=VGND}
-N 500 -1420 540 -1420 {lab=VPWR}
-N 500 -360 540 -360 {lab=analog_2}
-N 500 -340 540 -340 {lab=analog_1}
-N 500 -320 540 -320 {lab=analog_0}
-N 1920 -1180 1920 -1140 {lab=VPWR}
-N 1860 -1100 1890 -1100 {lab=VGND}
-N 1860 -1100 1860 -1000 {lab=VGND}
-N 1920 -1000 1980 -1000 {lab=VGND}
-N 1980 -1100 1980 -1000 {lab=VGND}
-N 1950 -1100 1980 -1100 {lab=VGND}
-N 1920 -1000 1920 -960 {lab=VGND}
-N 1920 -1100 1920 -1000 {lab=VGND}
-N 1860 -1000 1920 -1000 {lab=VGND}
-C {title-3.sym} 0 0 0 0 {name=l1 author="Simon Dorrer" rev=1.0 lock=true}
-C {inverter.sym} 1200 -740 0 0 {name=x3}
-C {inverter.sym} 1200 -1020 0 0 {name=x4}
-C {lab_pin.sym} 1920 -800 1 0 {name=p25 sig_type=std_logic lab=VAPWR}
-C {lab_pin.sym} 1920 -580 3 0 {name=p26 sig_type=std_logic lab=VGND}
-C {devices/ipin.sym} 500 -1340 2 1 {name=p30 lab=rst_n}
-C {devices/ipin.sym} 500 -1320 2 1 {name=p31 lab=clk}
-C {devices/ipin.sym} 500 -1300 2 1 {name=p32 lab=ena}
-C {devices/ipin.sym} 500 -1260 2 1 {name=p33 lab=uio_in[7]}
-C {conn_3x1.sym} 560 -1320 0 1 {name=c3 footprint=connector(3,1)}
-C {conn_8x1.sym} 560 -1240 0 1 {name=c4 footprint=connector(8,1)}
-C {devices/ipin.sym} 500 -1080 2 1 {name=p8 lab=ui_in[7]}
-C {conn_8x1.sym} 560 -1060 0 1 {name=c5 footprint=connector(8,1)}
-C {devices/opin.sym} 500 -900 2 0 {name=p18 lab=uio_oe[7]}
-C {devices/opin.sym} 500 -880 2 0 {name=p27 lab=uio_oe[6]}
-C {devices/opin.sym} 500 -860 2 0 {name=p28 lab=uio_oe[5]}
-C {devices/opin.sym} 500 -840 2 0 {name=p29 lab=uio_oe[4]}
-C {devices/opin.sym} 500 -820 2 0 {name=p41 lab=uio_oe[3]}
-C {devices/opin.sym} 500 -800 2 0 {name=p42 lab=uio_oe[2]}
-C {devices/opin.sym} 500 -780 2 0 {name=p43 lab=uio_oe[1]}
-C {devices/opin.sym} 500 -760 2 0 {name=p44 lab=uio_oe[0]}
-C {conn_8x1.sym} 560 -880 0 1 {name=c6 footprint=connector(8,1)}
-C {devices/opin.sym} 500 -720 2 0 {name=p45 lab=uio_out[7]}
-C {devices/opin.sym} 500 -700 2 0 {name=p46 lab=uio_out[6]}
-C {devices/opin.sym} 500 -680 2 0 {name=p47 lab=uio_out[5]}
-C {devices/opin.sym} 500 -660 2 0 {name=p48 lab=uio_out[4]}
-C {devices/opin.sym} 500 -640 2 0 {name=p49 lab=uio_out[3]}
-C {devices/opin.sym} 500 -620 2 0 {name=p50 lab=uio_out[2]}
-C {devices/opin.sym} 500 -600 2 0 {name=p51 lab=uio_out[1]}
-C {devices/opin.sym} 500 -580 2 0 {name=p52 lab=uio_out[0]}
-C {conn_8x1.sym} 560 -700 0 1 {name=c7 footprint=connector(8,1)}
-C {devices/opin.sym} 500 -540 2 0 {name=p53 lab=uo_out[7]}
-C {devices/opin.sym} 500 -520 2 0 {name=p54 lab=uo_out[6]}
-C {devices/opin.sym} 500 -500 2 0 {name=p55 lab=uo_out[5]}
-C {devices/opin.sym} 500 -480 2 0 {name=p56 lab=uo_out[4]}
-C {devices/opin.sym} 500 -460 2 0 {name=p57 lab=uo_out[3]}
-C {devices/opin.sym} 500 -440 2 0 {name=p58 lab=uo_out[2]}
-C {devices/opin.sym} 500 -420 2 0 {name=p59 lab=uo_out[1]}
-C {devices/opin.sym} 500 -400 2 0 {name=p60 lab=uo_out[0]}
-C {conn_8x1.sym} 560 -520 0 1 {name=c8 footprint=connector(8,1)}
-C {conn_3x1.sym} 560 -1400 0 1 {name=c9 footprint=connector(3,1)}
-C {devices/iopin.sym} 500 -1420 2 0 {name=p61 lab=VPWR}
-C {devices/iopin.sym} 500 -1380 2 0 {name=p62 lab=VGND}
-C {devices/iopin.sym} 500 -1400 2 0 {name=p63 lab=VAPWR}
-C {devices/ipin.sym} 500 -1060 2 1 {name=p9 lab=ui_in[6]}
-C {devices/ipin.sym} 500 -1040 2 1 {name=p12 lab=ui_in[5]}
-C {devices/ipin.sym} 500 -1020 2 1 {name=p13 lab=ui_in[4]}
-C {devices/ipin.sym} 500 -1000 2 1 {name=p14 lab=ui_in[3]}
-C {devices/ipin.sym} 500 -980 2 1 {name=p15 lab=ui_in[2]}
-C {devices/ipin.sym} 500 -960 2 1 {name=p16 lab=ui_in[1]}
-C {devices/ipin.sym} 500 -940 2 1 {name=p17 lab=ui_in[0]}
-C {devices/ipin.sym} 500 -1240 2 1 {name=p34 lab=uio_in[6]}
-C {devices/ipin.sym} 500 -1220 2 1 {name=p35 lab=uio_in[5]}
-C {devices/ipin.sym} 500 -1200 2 1 {name=p36 lab=uio_in[4]}
-C {devices/ipin.sym} 500 -1180 2 1 {name=p37 lab=uio_in[3]}
-C {devices/ipin.sym} 500 -1160 2 1 {name=p38 lab=uio_in[2]}
-C {devices/ipin.sym} 500 -1140 2 1 {name=p39 lab=uio_in[1]}
-C {devices/ipin.sym} 500 -1120 2 1 {name=p40 lab=uio_in[0]}
-C {conn_3x1.sym} 560 -340 0 1 {name=c10 footprint=connector(3,1)}
-C {devices/iopin.sym} 500 -360 2 0 {name=p64 lab=analog_2}
-C {devices/iopin.sym} 500 -340 2 0 {name=p65 lab=analog_1}
-C {devices/iopin.sym} 500 -320 2 0 {name=p66 lab=analog_0}
-C {lab_pin.sym} 1920 -1180 1 0 {name=p3 sig_type=std_logic lab=VPWR}
-C {lab_pin.sym} 1920 -960 3 0 {name=p4 sig_type=std_logic lab=VGND}
-C {sg13cmos5l_pr/sg13_lv_pmos.sym} 1920 -1120 1 0 {name=M1
-l=10.0u
-w=10.0u
-ng=1
-m=1
-mm_ok=1
-model=sg13_lv_pmos
-spiceprefix=X
-}
-C {sg13cmos5l_pr/sg13_lv_pmos.sym} 1920 -740 1 0 {name=M2
-l=10.0u
-w=10.0u
-ng=1
-m=1
-mm_ok=1
-model=sg13_lv_pmos
-spiceprefix=X
-}
-C {lab_pin.sym} 1200 -1080 1 0 {name=p1 sig_type=std_logic lab=VAPWR}
-C {lab_pin.sym} 1200 -800 1 0 {name=p5 sig_type=std_logic lab=VAPWR}
-C {lab_pin.sym} 1200 -960 3 0 {name=p11 sig_type=std_logic lab=VGND}
-C {lab_pin.sym} 1200 -680 3 0 {name=p19 sig_type=std_logic lab=VGND}
-C {lab_pin.sym} 1080 -1020 0 0 {name=p2 sig_type=std_logic lab=ui_in[0]}
-C {lab_pin.sym} 1340 -1020 0 1 {name=p6 sig_type=std_logic lab=analog_2}
-C {lab_pin.sym} 1080 -740 0 0 {name=p7 sig_type=std_logic lab=analog_0}
-C {lab_pin.sym} 1340 -740 0 1 {name=p10 sig_type=std_logic lab=analog_1}
+T {Chipalooza 2026 - LVDS transmitter with PRBS-7 generator} 700 -1500 0 0 1 1 {}
+T {Port list is verilog/rtl/user_project_wrapper_4a.v from
+RTimothyEdwards/sg13cmos5l_ocd_chipalooza.  Four dedicated analog
+pads means slot s1 or s16 - the only two that have four.
+
+  analog_pin[0]  ref_clk   PLL reference in
+  analog_pin[1]  pll_out   PLL clock out, RESERVED - nothing drives it
+                           until the PLL is placed
+  analog_pin[2]  d_p       LVDS out +
+  analog_pin[3]  d_n       LVDS out -
+
+All four are sg13cmos5l_IOPadAnalog in config.txt, so the core signal
+name is the pad name and there is one signal per pad.  Changing a pad
+type changes the core-facing signals - an InOut pad becomes five.} 60 -1420 0 0 0.4 0.4 {}
+T {dig_in map.  The housekeeping SPI routes every bit
+individually to a pin, a constant or the sequencer, so a
+configuration bit costs a register write and no pin.
+
+  dig_in[0]   clk_src   0 = ref_clk, 1 = pll_clk
+  dig_in[1]   en        gated with the project enable
+  dig_in[2]   reset     active high, seeds the PRBS
+  dig_in[3]   mode      0 = clock passthrough, 1 = PRBS-7
+  dig_in[4]   PROVISIONAL pll_clk, until the PLL is placed
+  dig_in[23:5] unused, read as zero, and zero works
+
+dig_out[11:0], analog_bus[3:0] and vssio are not connected
+yet.  clk, the shared external clock, is unused: the
+reference comes in on its own dedicated pad.} 60 -1000 0 0 0.4 0.4 {}
+T {Two supply domains with separate grounds.  The core pair
+core_p / core_n crosses from vss_1v2 to vss_3v3 - the two
+have to be tied together in the frame, check before tapeout.} 1450 -760 0 0 0.35 0.35 {}
+N 1030 -580 1070 -580 {lab=core_n}
+C {lab_pin.sym} 1070 -580 0 1 {name=l_xpat_d_n sig_type=std_logic lab=core_n}
+N 1030 -600 1070 -600 {lab=core_p}
+C {lab_pin.sym} 1070 -600 0 1 {name=l_xpat_d_p sig_type=std_logic lab=core_p}
+N 1030 -420 1070 -420 {lab=vdd_1v2}
+C {lab_pin.sym} 1070 -420 0 1 {name=l_xpat_vdd sig_type=std_logic lab=vdd_1v2}
+N 1030 -400 1070 -400 {lab=vss_1v2}
+C {lab_pin.sym} 1070 -400 0 1 {name=l_xpat_vss sig_type=std_logic lab=vss_1v2}
+N 730 -560 770 -560 {lab=dig_in[0]}
+C {lab_pin.sym} 730 -560 0 0 {name=l_xpat_clk_src sig_type=std_logic lab=dig_in[0]}
+N 730 -540 770 -540 {lab=en_gated}
+C {lab_pin.sym} 730 -540 0 0 {name=l_xpat_en sig_type=std_logic lab=en_gated}
+N 730 -500 770 -500 {lab=dig_in[3]}
+C {lab_pin.sym} 730 -500 0 0 {name=l_xpat_mode sig_type=std_logic lab=dig_in[3]}
+N 730 -580 770 -580 {lab=dig_in[4]}
+C {lab_pin.sym} 730 -580 0 0 {name=l_xpat_pll_clk sig_type=std_logic lab=dig_in[4]}
+N 730 -600 770 -600 {lab=ref_clk}
+C {lab_pin.sym} 730 -600 0 0 {name=l_xpat_ref_clk sig_type=std_logic lab=ref_clk}
+N 730 -520 770 -520 {lab=dig_in[2]}
+C {lab_pin.sym} 730 -520 0 0 {name=l_xpat_reset sig_type=std_logic lab=dig_in[2]}
+C {lvds_pattern.sym} 900 -500 0 0 {name=xpat}
+N 1510 -530 1550 -530 {lab=core_n}
+C {lab_pin.sym} 1510 -530 0 0 {name=l_xlvds_d_n sig_type=std_logic lab=core_n}
+N 1510 -550 1550 -550 {lab=core_p}
+C {lab_pin.sym} 1510 -550 0 0 {name=l_xlvds_d_p sig_type=std_logic lab=core_p}
+N 1510 -490 1550 -490 {lab=ibias[1]}
+C {lab_pin.sym} 1510 -490 0 0 {name=l_xlvds_iref_drv sig_type=std_logic lab=ibias[1]}
+N 1510 -510 1550 -510 {lab=ibias[0]}
+C {lab_pin.sym} 1510 -510 0 0 {name=l_xlvds_iref_pd sig_type=std_logic lab=ibias[0]}
+N 1850 -510 1890 -510 {lab=d_n}
+C {lab_pin.sym} 1890 -510 0 1 {name=l_xlvds_out_n sig_type=std_logic lab=d_n}
+N 1850 -530 1890 -530 {lab=d_p}
+C {lab_pin.sym} 1890 -530 0 1 {name=l_xlvds_out_p sig_type=std_logic lab=d_p}
+N 1850 -550 1890 -550 {lab=vdd_3v3}
+C {lab_pin.sym} 1890 -550 0 1 {name=l_xlvds_va sig_type=std_logic lab=vdd_3v3}
+N 1510 -470 1550 -470 {lab=vbias}
+C {lab_pin.sym} 1510 -470 0 0 {name=l_xlvds_vref sig_type=std_logic lab=vbias}
+N 1850 -490 1890 -490 {lab=vss_3v3}
+C {lab_pin.sym} 1890 -490 0 1 {name=l_xlvds_vss sig_type=std_logic lab=vss_3v3}
+C {lvds_tx.sym} 1700 -500 0 0 {name=xlvds}
+N 400 -320 440 -320 {lab=enable}
+C {lab_pin.sym} 400 -320 0 0 {name=l_xeng_a sig_type=std_logic lab=enable}
+N 400 -280 440 -280 {lab=dig_in[1]}
+C {lab_pin.sym} 400 -280 0 0 {name=l_xeng_b sig_type=std_logic lab=dig_in[1]}
+N 560 -300 600 -300 {lab=en_gated}
+C {lab_pin.sym} 600 -300 0 1 {name=l_xeng_x sig_type=std_logic lab=en_gated}
+C {sg13cmos5l_stdcells/sg13cmos5l_and2_1.sym} 500 -300 0 0 {name=xeng
+VDD=vdd_1v2 VSS=vss_1v2}
+N 2420 -800 2460 -800 {lab=vss_1v2}
+C {lab_pin.sym} 2460 -800 0 1 {name=l_Cd12_b sig_type=std_logic lab=vss_1v2}
+N 2420 -770 2460 -770 {lab=vss_1v2}
+C {lab_pin.sym} 2460 -770 0 1 {name=l_Cd12_d sig_type=std_logic lab=vss_1v2}
+N 2340 -800 2380 -800 {lab=vdd_1v2}
+C {lab_pin.sym} 2340 -800 0 0 {name=l_Cd12_g sig_type=std_logic lab=vdd_1v2}
+N 2420 -830 2460 -830 {lab=vss_1v2}
+C {lab_pin.sym} 2460 -830 0 1 {name=l_Cd12_s sig_type=std_logic lab=vss_1v2}
+C {sg13cmos5l_pr/sg13_lv_pmos.sym} 2400 -800 0 0 {name=Cd12
+l=10.0u w=10.0u ng=1 m=1 mm_ok=1 model=sg13_lv_pmos spiceprefix=X}
+N 2420 -500 2460 -500 {lab=vss_3v3}
+C {lab_pin.sym} 2460 -500 0 1 {name=l_Cd33_b sig_type=std_logic lab=vss_3v3}
+N 2420 -470 2460 -470 {lab=vss_3v3}
+C {lab_pin.sym} 2460 -470 0 1 {name=l_Cd33_d sig_type=std_logic lab=vss_3v3}
+N 2340 -500 2380 -500 {lab=vdd_3v3}
+C {lab_pin.sym} 2340 -500 0 0 {name=l_Cd33_g sig_type=std_logic lab=vdd_3v3}
+N 2420 -530 2460 -530 {lab=vss_3v3}
+C {lab_pin.sym} 2460 -530 0 1 {name=l_Cd33_s sig_type=std_logic lab=vss_3v3}
+C {sg13cmos5l_pr/sg13_hv_pmos.sym} 2400 -500 0 0 {name=Cd33
+l=10.0u w=10.0u ng=1 m=1 mm_ok=1 model=sg13_hv_pmos spiceprefix=X}
+N 0 -1300 40 -1300 {lab=ref_clk}
+C {devices/ipin.sym} 0 -1300 2 1 {name=p_ref_clk lab=ref_clk}
+C {lab_pin.sym} 40 -1300 0 1 {name=lp_ref_clk sig_type=std_logic lab=ref_clk}
+T {analog_pin[0] - PLL reference in} 90 -1308 0 0 0.25 0.25 {}
+N 0 -1260 40 -1260 {lab=pll_out}
+C {devices/opin.sym} 0 -1260 2 0 {name=p_pll_out lab=pll_out}
+C {lab_pin.sym} 40 -1260 0 1 {name=lp_pll_out sig_type=std_logic lab=pll_out}
+T {analog_pin[1] - PLL clock out, reserved} 90 -1268 0 0 0.25 0.25 {}
+N 0 -1220 40 -1220 {lab=d_p}
+C {devices/opin.sym} 0 -1220 2 0 {name=p_d_p lab=d_p}
+C {lab_pin.sym} 40 -1220 0 1 {name=lp_d_p sig_type=std_logic lab=d_p}
+T {analog_pin[2] - LVDS out +} 90 -1228 0 0 0.25 0.25 {}
+N 0 -1180 40 -1180 {lab=d_n}
+C {devices/opin.sym} 0 -1180 2 0 {name=p_d_n lab=d_n}
+C {lab_pin.sym} 40 -1180 0 1 {name=lp_d_n sig_type=std_logic lab=d_n}
+T {analog_pin[3] - LVDS out -} 90 -1188 0 0 0.25 0.25 {}
+N 0 -1140 40 -1140 {lab=enable}
+C {devices/ipin.sym} 0 -1140 2 1 {name=p_enable lab=enable}
+C {lab_pin.sym} 40 -1140 0 1 {name=lp_enable sig_type=std_logic lab=enable}
+T {project enable} 90 -1148 0 0 0.25 0.25 {}
+N 0 -1100 40 -1100 {lab=clk}
+C {devices/ipin.sym} 0 -1100 2 1 {name=p_clk lab=clk}
+C {lab_pin.sym} 40 -1100 0 1 {name=lp_clk sig_type=std_logic lab=clk}
+T {shared external clock} 90 -1108 0 0 0.25 0.25 {}
+N 0 -1060 40 -1060 {lab=dig_in[23:0]}
+C {devices/ipin.sym} 0 -1060 2 1 {name=p_dig_in23_0 lab=dig_in[23:0]}
+C {lab_pin.sym} 40 -1060 0 1 {name=lp_dig_in23_0 sig_type=std_logic lab=dig_in[23:0]}
+T {24 shared digital inputs} 90 -1068 0 0 0.25 0.25 {}
+N 0 -1020 40 -1020 {lab=dig_out[11:0]}
+C {devices/opin.sym} 0 -1020 2 0 {name=p_dig_out11_0 lab=dig_out[11:0]}
+C {lab_pin.sym} 40 -1020 0 1 {name=lp_dig_out11_0 sig_type=std_logic lab=dig_out[11:0]}
+T {12 shared digital outputs} 90 -1028 0 0 0.25 0.25 {}
+N 0 -980 40 -980 {lab=ibias[1:0]}
+C {devices/iopin.sym} 0 -980 2 0 {name=p_ibias1_0 lab=ibias[1:0]}
+C {lab_pin.sym} 40 -980 0 1 {name=lp_ibias1_0 sig_type=std_logic lab=ibias[1:0]}
+T {shared current biases} 90 -988 0 0 0.25 0.25 {}
+N 0 -940 40 -940 {lab=vbias}
+C {devices/iopin.sym} 0 -940 2 0 {name=p_vbias lab=vbias}
+C {lab_pin.sym} 40 -940 0 1 {name=lp_vbias sig_type=std_logic lab=vbias}
+T {shared voltage bias} 90 -948 0 0 0.25 0.25 {}
+N 0 -900 40 -900 {lab=analog_bus[3:0]}
+C {devices/iopin.sym} 0 -900 2 0 {name=p_analog_bus3_0 lab=analog_bus[3:0]}
+C {lab_pin.sym} 40 -900 0 1 {name=lp_analog_bus3_0 sig_type=std_logic lab=analog_bus[3:0]}
+T {shared analog buses} 90 -908 0 0 0.25 0.25 {}
+N 0 -860 40 -860 {lab=vdd_3v3}
+C {devices/iopin.sym} 0 -860 2 0 {name=p_vdd_3v3 lab=vdd_3v3}
+C {lab_pin.sym} 40 -860 0 1 {name=lp_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
+T {gated 3.3 V} 90 -868 0 0 0.25 0.25 {}
+N 0 -820 40 -820 {lab=vdd_1v2}
+C {devices/iopin.sym} 0 -820 2 0 {name=p_vdd_1v2 lab=vdd_1v2}
+C {lab_pin.sym} 40 -820 0 1 {name=lp_vdd_1v2 sig_type=std_logic lab=vdd_1v2}
+T {gated 1.2 V} 90 -828 0 0 0.25 0.25 {}
+N 0 -780 40 -780 {lab=vss_3v3}
+C {devices/iopin.sym} 0 -780 2 0 {name=p_vss_3v3 lab=vss_3v3}
+C {lab_pin.sym} 40 -780 0 1 {name=lp_vss_3v3 sig_type=std_logic lab=vss_3v3}
+N 0 -740 40 -740 {lab=vss_1v2}
+C {devices/iopin.sym} 0 -740 2 0 {name=p_vss_1v2 lab=vss_1v2}
+C {lab_pin.sym} 40 -740 0 1 {name=lp_vss_1v2 sig_type=std_logic lab=vss_1v2}
+N 0 -700 40 -700 {lab=vssio}
+C {devices/iopin.sym} 0 -700 2 0 {name=p_vssio lab=vssio}
+C {lab_pin.sym} 40 -700 0 1 {name=lp_vssio sig_type=std_logic lab=vssio}
+T {substrate ground} 90 -708 0 0 0.25 0.25 {}
