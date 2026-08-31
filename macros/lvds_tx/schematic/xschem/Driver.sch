@@ -265,18 +265,18 @@ mmax=4
 spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} 1280 -150 0 0 {name=Cop
-l=3.4u
-w=48u
- ng=8
+l=10.0u
+w=10.0u
+ ng=1
  m=1
   mm_ok=1
  model=sg13_hv_nmos
 spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} 1380 -150 0 0 {name=Con
-l=3.4u
-w=48u
- ng=8
+l=10.0u
+w=10.0u
+ ng=1
  m=1
   mm_ok=1
  model=sg13_hv_nmos
