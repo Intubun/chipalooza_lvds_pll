@@ -33,8 +33,7 @@ C {lab_pin.sym} -100 -60 0 0 {name=p_ref sig_type=std_logic lab=REF_CLK}
 C {lab_pin.sym} -100 -40 0 0 {name=p_iref sig_type=std_logic lab=IREF}
 C {lab_pin.sym} -100 -20 0 0 {name=p_enable sig_type=std_logic lab=ENABLE}
 C {lab_pin.sym} -100 0 0 0 {name=p_reset sig_type=std_logic lab=RESET_N}
-C {lab_pin.sym} -100 20 0 0 {name=p_div_int sig_type=std_logic lab=DIV_INT[6:0]}
-C {lab_pin.sym} -100 40 0 0 {name=p_div_frac sig_type=std_logic lab=DIV_FRAC[15:0]}
+C {lab_pin.sym} -100 20 0 0 {name=p_div_ratio sig_type=std_logic lab=DIV_RATIO[9:0]}
 C {lab_pin.sym} -100 60 0 0 {name=p_test_div sig_type=std_logic lab=TEST_DIV[1:0]}
 C {lab_pin.sym} 100 -20 0 1 {name=p_pll_clk sig_type=std_logic lab=PLL_CLK}
 C {lab_pin.sym} 100 20 0 1 {name=p_test_clk sig_type=std_logic lab=TEST_CLK}

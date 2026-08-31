@@ -22,24 +22,23 @@ sources=(
 )
 
 run_case() {
-  local name=$1 integer=$2 fractional=$3 ref_period_ns=$4
+  local name=$1 ratio=$2 ref_period_ns=$3
   local output="$WORK/$name"
   "$IVERILOG" -g2012 -s tb_pll_behavioral \
-    -Ptb_pll_behavioral.DIV_INTEGER="$integer" \
-    -Ptb_pll_behavioral.DIV_FRACTIONAL="$fractional" \
+    -Ptb_pll_behavioral.DIV_RATIO="$ratio" \
     -Ptb_pll_behavioral.REF_PERIOD_NS="$ref_period_ns" \
     -o "$output" "${sources[@]}"
   "$VVP" "$output"
 }
 
-run_case ref25_out500_int 40 0 40.0
-run_case ref25_out1g_int 80 0 40.0
-run_case ref250_out500_int 4 0 4.0
-run_case ref250_out1g_int 8 0 4.0
-run_case ref25_frac 40 32768 40.0
-run_case ref25_high_frac 79 32768 40.0
-run_case ref100_frac 19 32768 10.0
-run_case ref250_frac 4 32768 4.0
-run_case ref250_high_frac 7 32768 4.0
+run_case ref25_out500_int 320 40.0
+run_case ref25_out1g_int 640 40.0
+run_case ref250_out500_int 32 4.0
+run_case ref250_out1g_int 64 4.0
+run_case ref25_frac 324 40.0
+run_case ref25_high_frac 636 40.0
+run_case ref100_frac 156 10.0
+run_case ref250_frac 36 4.0
+run_case ref250_high_frac 60 4.0
 
 echo "ALL BEHAVIORAL PLL TESTS PASSED"

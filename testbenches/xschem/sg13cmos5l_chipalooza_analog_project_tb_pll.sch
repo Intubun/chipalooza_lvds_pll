@@ -7,9 +7,9 @@ F {}
 E {}
 T {PLL bench: 250 MHz reference in, PRBS-7 at 500 Mb/s out.
 
-  pll_clk = REF * DIV_INT / 2, because clock_output_divider.v always
-  halves the VCO.  250 MHz and DIV_INT = 4 give a 1 GHz VCO and a
-  500 MHz bit clock.  DIV_INT[2] is dig_in[9].
+  pll_clk = REF * (DIV_RATIO / 8) / 2, because clock_output_divider.v
+  always halves the VCO.  250 MHz and DIV_RATIO = 4.0 (code 32) give
+  a 1 GHz VCO and a 500 MHz bit clock. DIV_RATIO[5] is dig_in[12].
 
   1 ns    PLL RESET_N released
   2 ns    PLL ENABLE
@@ -40,12 +40,12 @@ C {devices/vsource.sym} -1400 -1500 0 0 {name=Venable value="1.2"}
 N -1400 -1470 -1400 -1440 {lab=GND}
 C {devices/gnd.sym} -1400 -1440 0 0 {name=lg_enable lab=GND}
 T {project enable} -1340 -1505 0 0 0.3 0.3 {}
-N -1400 -1360 -1400 -1330 {lab=dig_in[9]}
-C {devices/lab_wire.sym} -1400 -1360 0 0 {name=ls_dig_in_9 sig_type=std_logic lab=dig_in[9]}
-C {devices/vsource.sym} -1400 -1300 0 0 {name=Vdig_in_9 value="1.2"}
+N -1400 -1360 -1400 -1330 {lab=dig_in[12]}
+C {devices/lab_wire.sym} -1400 -1360 0 0 {name=ls_dig_in_12 sig_type=std_logic lab=dig_in[12]}
+C {devices/vsource.sym} -1400 -1300 0 0 {name=Vdig_in_12 value="1.2"}
 N -1400 -1270 -1400 -1240 {lab=GND}
-C {devices/gnd.sym} -1400 -1240 0 0 {name=lg_dig_in_9 lab=GND}
-T {DIV_INT[2] -> DIV_INT = 4} -1340 -1305 0 0 0.3 0.3 {}
+C {devices/gnd.sym} -1400 -1240 0 0 {name=lg_dig_in_12 lab=GND}
+T {DIV_RATIO[5] -> DIV_RATIO = 4.0} -1340 -1305 0 0 0.3 0.3 {}
 N -1400 -1160 -1400 -1130 {lab=dig_in[6]}
 C {devices/lab_wire.sym} -1400 -1160 0 0 {name=ls_dig_in_6 sig_type=std_logic lab=dig_in[6]}
 C {devices/vsource.sym} -1400 -1100 0 0 {name=Vdig_in_6 value="PWL(0 0 1n 0 1.1n 1.2)"}

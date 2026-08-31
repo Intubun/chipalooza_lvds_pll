@@ -7,8 +7,7 @@ module pll_digital (
     input  wire        vco_clk,
     input  wire        reset_n,
     input  wire        enable,
-    input  wire [6:0]  div_integer,
-    input  wire [15:0] div_fractional,
+    input  wire [9:0]  div_ratio,
     input  wire [1:0]  test_div_select,
     output wire        feedback_clk,
     output wire        pll_clk,
@@ -20,8 +19,8 @@ module pll_digital (
         .vco_clk(vco_clk),
         .reset_n(reset_n),
         .enable(enable),
-        .integer_div(div_integer),
-        .fractional_num(div_fractional),
+        .integer_div(div_ratio[9:3]),
+        .fractional_num(div_ratio[2:0]),
         .feedback_clk(feedback_clk)
     );
 

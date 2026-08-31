@@ -2,8 +2,7 @@
 
 // Fast reusable-model test for integer and fractional lock.
 module tb_pll_behavioral;
-    parameter [6:0] DIV_INTEGER = 7'd19;
-    parameter [15:0] DIV_FRACTIONAL = 16'd32768;
+    parameter [9:0] DIV_RATIO = {7'd19, 3'd4};
     parameter real REF_PERIOD_NS = 10.0;
 
     reg ref_clk = 1'b0;
@@ -27,8 +26,7 @@ module tb_pll_behavioral;
         .ref_clk(ref_clk),
         .reset_n(reset_n),
         .enable(enable),
-        .div_integer(DIV_INTEGER),
-        .div_fractional(DIV_FRACTIONAL),
+        .div_ratio(DIV_RATIO),
         .test_div_select(2'b01),
         .pll_clk(pll_clk),
         .test_clk(test_clk)
@@ -61,7 +59,7 @@ module tb_pll_behavioral;
         rms_jitter = $sqrt(period_square_sum / settled_periods -
                            mean_period * mean_period);
         expected_frequency = (1e9 / REF_PERIOD_NS) *
-                             (DIV_INTEGER + DIV_FRACTIONAL / 65536.0) / 2.0;
+                             (DIV_RATIO / 8.0) / 2.0;
         $display("PLL_BEHAVIORAL_RESULT expected_hz=%0.3f measured_hz=%0.3f vctrl=%0.6f rms_jitter_ps=%0.3f pp_jitter_ps=%0.3f periods=%0d",
                  expected_frequency, 1e9 / mean_period, dut.vctrl,
                  rms_jitter * 1e3, (period_max - period_min) * 1e3,

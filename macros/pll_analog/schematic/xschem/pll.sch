@@ -41,8 +41,7 @@ C {ipin.sym} -500 -120 0 0 {name=p_REF_CLK lab=REF_CLK}
 C {iopin.sym} -500 -60 2 0 {name=p_IREF lab=IREF}
 C {ipin.sym} -500 20 0 0 {name=p_ENABLE lab=ENABLE}
 C {ipin.sym} -500 50 0 0 {name=p_RESET_N lab=RESET_N}
-C {ipin.sym} -500 80 0 0 {name=p_DIV_INT lab=DIV_INT[6:0]}
-C {ipin.sym} -500 110 0 0 {name=p_DIV_FRAC lab=DIV_FRAC[15:0]}
+C {ipin.sym} -500 80 0 0 {name=p_DIV_RATIO lab=DIV_RATIO[9:0]}
 C {ipin.sym} -500 140 0 0 {name=p_TEST_DIV lab=TEST_DIV[1:0]}
 C {opin.sym} 700 -120 0 0 {name=p_PLL_CLK lab=PLL_CLK}
 C {opin.sym} 700 -80 0 0 {name=p_TEST_CLK lab=TEST_CLK}

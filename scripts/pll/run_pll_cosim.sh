@@ -5,8 +5,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 PLL_DIR="$PROJECT_ROOT/macros/pll_analog/schematic/xschem"
 RTL_DIR="$PROJECT_ROOT/macros/pll_digital/rtl"
-DIV_INTEGER=${DIV_INTEGER:-20}
-DIV_FRACTIONAL=${DIV_FRACTIONAL:-0}
+DIV_RATIO=${DIV_RATIO:-160}
 TEST_DIV=${TEST_DIV:-1}
 FREF_HZ=${FREF_HZ:-100e6}
 SIM_TIME_S=${SIM_TIME_S:-4e-6}
@@ -17,16 +16,17 @@ TEMP_C=${TEMP_C:-27}
 TOOLS_BIN=${TOOLS_BIN:-/foss/tools/bin}
 REAL_VERILATOR=${REAL_VERILATOR:-$TOOLS_BIN/verilator}
 
-python3 - "$DIV_INTEGER" "$DIV_FRACTIONAL" "$TEST_DIV" "$FREF_HZ" "$SIM_TIME_S" "$CORNER" "$TEMP_C" <<'PY'
+python3 - "$DIV_RATIO" "$TEST_DIV" "$FREF_HZ" "$SIM_TIME_S" "$CORNER" "$TEMP_C" <<'PY'
 import sys
-integer, fractional, test_div = map(int, sys.argv[1:4])
-fref, sim_time = map(float, sys.argv[4:6])
-corner = sys.argv[6]
-temp = float(sys.argv[7])
+ratio, test_div = map(int, sys.argv[1:3])
+fref, sim_time = map(float, sys.argv[3:5])
+corner = sys.argv[5]
+temp = float(sys.argv[6])
+integer = ratio >> 3
 if not 4 <= integer <= 80:
-    raise SystemExit("DIV_INTEGER must be 4-80")
-if not 0 <= fractional <= 65535:
-    raise SystemExit("DIV_FRACTIONAL must be 0-65535")
+    raise SystemExit("DIV_RATIO integer field must be 4-80")
+if not 0 <= ratio <= 1023:
+    raise SystemExit("DIV_RATIO must be a 10-bit unsigned value")
 if not 0 <= test_div <= 3:
     raise SystemExit("TEST_DIV must be 0-3")
 if not 25e6 <= fref <= 250e6:
@@ -80,16 +80,15 @@ VL_DATA(8, ref_clk, 0, 0)
 VL_DATA(8, vco_clk, 0, 0)
 VL_DATA(8, reset_n, 0, 0)
 VL_DATA(8, enable, 0, 0)
-VL_DATA(8, div_integer, 6, 0)
-VL_DATA(16, div_fractional, 15, 0)
 VL_DATA(8, test_div_select, 1, 0)
+VL_DATA(16, div_ratio, 9, 0)
 HEAD
   cat >"$mdir/outputs.h" <<'HEAD'
 VL_DATA(8, feedback_clk, 0, 0)
-VL_DATA(8, pll_clk, 0, 0)
-VL_DATA(8, test_clk, 0, 0)
 VL_DATA(8, up, 0, 0)
 VL_DATA(8, down, 0, 0)
+VL_DATA(8, pll_clk, 0, 0)
+VL_DATA(8, test_clk, 0, 0)
 HEAD
   : >"$mdir/inouts.h"
 fi
@@ -123,7 +122,7 @@ export SPICE_USERINIT_DIR=$PDKPATH/libs.tech/ngspice
   mv pll_digital.so pll_digital_cosim.so
 )
 
-expected_inputs='ref_clk vco_clk reset_n enable div_integer test_div_select div_fractional'
+expected_inputs='ref_clk vco_clk reset_n enable test_div_select div_ratio'
 expected_outputs='feedback_clk up down pll_clk test_clk'
 actual_inputs=$(sed -n 's/^VL_DATA([^,]*,\([^,]*\),.*/\1/p' "$WORK/pll_digital_obj_dir/inputs.h" | paste -sd' ' -)
 actual_outputs=$(sed -n 's/^VL_DATA([^,]*,\([^,]*\),.*/\1/p' "$WORK/pll_digital_obj_dir/outputs.h" | paste -sd' ' -)
@@ -139,7 +138,7 @@ fi
     >"$WORK/xschem.log" 2>&1 || [[ $? -eq 10 ]]
 )
 
-export DIV_INTEGER DIV_FRACTIONAL TEST_DIV FREF_HZ SIM_TIME_S MAX_STEP_S VDD CORNER TEMP_C
+export DIV_RATIO TEST_DIV FREF_HZ SIM_TIME_S MAX_STEP_S VDD CORNER TEMP_C
 python3 - "$WORK/pll_cosim.spice" <<'PY'
 import os
 import re
@@ -147,8 +146,7 @@ import sys
 
 path = sys.argv[1]
 text = open(path).read()
-integer = int(os.environ["DIV_INTEGER"])
-fractional = int(os.environ["DIV_FRACTIONAL"])
+ratio = int(os.environ["DIV_RATIO"])
 test_div = int(os.environ["TEST_DIV"])
 fref = float(os.environ["FREF_HZ"])
 sim_time = float(os.environ["SIM_TIME_S"])
@@ -171,8 +169,7 @@ text = text.replace("mos_tt", f"mos_{corner}")
 text = text.replace(".options temp=27", f".options temp={temp}")
 text = text.replace("v(x_pll.x_analog.x_vco.net1)=1.2", f"v(x_pll.x_analog.x_vco.net1)={vdd}")
 for prefix, width, value in (
-    ("DIV_INT", 7, integer),
-    ("DIV_FRAC", 16, fractional),
+    ("DIV_RATIO", 10, ratio),
     ("TEST_DIV", 2, test_div),
 ):
     source_prefix = "V" + prefix
@@ -233,16 +230,16 @@ if any(edge is None for edge in edges):
 periods = [edges[index + 1] - edges[index] for index in range(100)]
 mean_period = statistics.mean(periods)
 rms_jitter = math.sqrt(statistics.mean((period - mean_period) ** 2 for period in periods))
-integer = int(os.environ["DIV_INTEGER"])
-fractional = int(os.environ["DIV_FRACTIONAL"])
+ratio = int(os.environ["DIV_RATIO"])
 fref = float(os.environ["FREF_HZ"])
-target = fref * (integer + fractional / 65536.0) / 2.0
+divide = ratio / 8.0
+target = fref * divide / 2.0
 measured = 1.0 / mean_period
 if abs(measured / target - 1.0) > 0.01:
     raise SystemExit(f"co-simulation frequency error exceeds 1%: target={target} measured={measured}")
 print(json.dumps({
     "corner": os.environ["CORNER"],
-    "divide": integer + fractional / 65536.0,
+    "divide": divide,
     "reference_hz": fref,
     "target_output_hz": target,
     "temp_c": float(os.environ["TEMP_C"]),

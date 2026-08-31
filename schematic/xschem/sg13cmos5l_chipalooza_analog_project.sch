@@ -53,10 +53,11 @@ FB_CLK leaves the block.
   TEST_CLK  analog_pin[1]   the reserved pad
   IREF      analog_bus[0]   NOT ibias - the transmitter uses both, and
                             the references cannot be shared
-  DIV_INT   dig_in[13:7]    ENABLE dig_in[5], RESET_N dig_in[6]
-  TEST_DIV  dig_in[15:14]
-  DIV_FRAC  tied to vss_1v2 - integer-N only, the 27 PLL config bits
-            plus the 4 LVDS ones do not fit in dig_in[23:0]
+  DIV_RATIO dig_in[16:7]    unsigned Q7.3 divider ratio
+  TEST_DIV  dig_in[18:17]   ENABLE dig_in[5], RESET_N dig_in[6]
+
+The Q7.3 ratio supports integer-N when bits [2:0] are zero and fractional-N
+in eighth steps. The complete PLL and LVDS controls use 18 of 24 dig_in bits.
 
 NOT tapeout-ready: PFD and both dividers are XSPICE behavioural models
 (d_dff, d_and2, d_fdiv with adc/dac bridges).  The synthesisable version
@@ -144,9 +145,8 @@ N 1360 -1020 1360 -980 {lab=#net2}
 N 1080 -700 1120 -700 {lab=analog_bus[0]}
 N 1080 -680 1120 -680 {lab=dig_in[5]}
 N 1080 -660 1120 -660 {lab=dig_in[6]}
-N 1080 -640 1120 -640 {lab=dig_in[13:7]}
-N 1080 -620 1120 -620 {lab=vss_1v2}
-N 1080 -600 1120 -600 {lab=dig_in[15:14]}
+N 1080 -640 1120 -640 {lab=dig_in[16:7]}
+N 1080 -600 1120 -600 {lab=dig_in[18:17]}
 N 1320 -640 2270 -640 {lab=analog_pin[1]}
 N 1200 -800 1200 -760 {lab=vdd_1v2}
 N 1240 -560 1240 -520 {lab=vss_1v2}
@@ -294,9 +294,8 @@ C {lab_wire.sym} 1830 -1060 0 0 {name=p2 sig_type=std_logic lab=core_n}
 C {lab_pin.sym} 1080 -700 0 0 {name=l_xpll_iref sig_type=std_logic lab=analog_bus[0]}
 C {lab_pin.sym} 1080 -680 0 0 {name=l_xpll_enable sig_type=std_logic lab=dig_in[5]}
 C {lab_pin.sym} 1080 -660 0 0 {name=l_xpll_reset_n sig_type=std_logic lab=dig_in[6]}
-C {lab_pin.sym} 1080 -640 0 0 {name=l_xpll_div_int60 sig_type=std_logic lab=dig_in[13:7]}
-C {lab_pin.sym} 1080 -620 0 0 {name=l_xpll_div_frac150 sig_type=std_logic lab=vss_1v2}
-C {lab_pin.sym} 1080 -600 0 0 {name=l_xpll_test_div10 sig_type=std_logic lab=dig_in[15:14]}
+C {lab_pin.sym} 1080 -640 0 0 {name=l_xpll_div_ratio90 sig_type=std_logic lab=dig_in[16:7]}
+C {lab_pin.sym} 1080 -600 0 0 {name=l_xpll_test_div10 sig_type=std_logic lab=dig_in[18:17]}
 C {lab_pin.sym} 1200 -800 1 0 {name=l_xpll_vdd sig_type=std_logic lab=vdd_1v2}
 C {lab_pin.sym} 1240 -520 3 0 {name=l_xpll_vss sig_type=std_logic lab=vss_1v2}
 C {pll.sym} 1220 -660 0 0 {name=xpll}

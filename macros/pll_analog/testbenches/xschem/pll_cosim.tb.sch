@@ -12,8 +12,7 @@ C {lab_pin.sym} -100 -60 0 0 {name=p_ref sig_type=std_logic lab=REF_CLK}
 C {lab_pin.sym} -100 -40 0 0 {name=p_iref sig_type=std_logic lab=IREF}
 C {lab_pin.sym} -100 -20 0 0 {name=p_enable sig_type=std_logic lab=ENABLE}
 C {lab_pin.sym} -100 0 0 0 {name=p_reset sig_type=std_logic lab=RESET_N}
-C {lab_pin.sym} -100 20 0 0 {name=p_div_int sig_type=std_logic lab=DIV_INT[6..0]}
-C {lab_pin.sym} -100 40 0 0 {name=p_div_frac sig_type=std_logic lab=DIV_FRAC[15..0]}
+C {lab_pin.sym} -100 20 0 0 {name=p_div_ratio sig_type=std_logic lab=DIV_RATIO[9..0]}
 C {lab_pin.sym} -100 60 0 0 {name=p_test_div sig_type=std_logic lab=TEST_DIV[1..0]}
 C {lab_pin.sym} 100 -20 0 1 {name=p_pll_clk sig_type=std_logic lab=PLL_CLK}
 C {lab_pin.sym} 100 20 0 1 {name=p_test_clk sig_type=std_logic lab=TEST_CLK}
@@ -42,29 +41,16 @@ C {lab_pin.sym} 210 -10 1 0 {name=p_test_load sig_type=std_logic lab=TEST_CLK}
 C {gnd.sym} 210 50 0 0 {name=l_test_load lab=0}
 C {simulator_commands_shown.sym} -390 150 0 0 {name=Libs_Ngspice simulator=ngspice only_toplevel=false value="
 .lib cornerMOSlv.lib mos_tt
-VDIV_INT6 DIV_INT6 0 0
-VDIV_INT5 DIV_INT5 0 0
-VDIV_INT4 DIV_INT4 0 1.2
-VDIV_INT3 DIV_INT3 0 0
-VDIV_INT2 DIV_INT2 0 1.2
-VDIV_INT1 DIV_INT1 0 0
-VDIV_INT0 DIV_INT0 0 0
-VDIV_FRAC15 DIV_FRAC15 0 0
-VDIV_FRAC14 DIV_FRAC14 0 0
-VDIV_FRAC13 DIV_FRAC13 0 0
-VDIV_FRAC12 DIV_FRAC12 0 0
-VDIV_FRAC11 DIV_FRAC11 0 0
-VDIV_FRAC10 DIV_FRAC10 0 0
-VDIV_FRAC9 DIV_FRAC9 0 0
-VDIV_FRAC8 DIV_FRAC8 0 0
-VDIV_FRAC7 DIV_FRAC7 0 0
-VDIV_FRAC6 DIV_FRAC6 0 0
-VDIV_FRAC5 DIV_FRAC5 0 0
-VDIV_FRAC4 DIV_FRAC4 0 0
-VDIV_FRAC3 DIV_FRAC3 0 0
-VDIV_FRAC2 DIV_FRAC2 0 0
-VDIV_FRAC1 DIV_FRAC1 0 0
-VDIV_FRAC0 DIV_FRAC0 0 0
+VDIV_RATIO9 DIV_RATIO9 0 0
+VDIV_RATIO8 DIV_RATIO8 0 0
+VDIV_RATIO7 DIV_RATIO7 0 1.2
+VDIV_RATIO6 DIV_RATIO6 0 0
+VDIV_RATIO5 DIV_RATIO5 0 1.2
+VDIV_RATIO4 DIV_RATIO4 0 0
+VDIV_RATIO3 DIV_RATIO3 0 0
+VDIV_RATIO2 DIV_RATIO2 0 0
+VDIV_RATIO1 DIV_RATIO1 0 0
+VDIV_RATIO0 DIV_RATIO0 0 0
 VTEST_DIV1 TEST_DIV1 0 0
 VTEST_DIV0 TEST_DIV0 0 1.2
 "}

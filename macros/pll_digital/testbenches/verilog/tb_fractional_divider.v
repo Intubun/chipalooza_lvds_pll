@@ -5,7 +5,7 @@ module tb_fractional_divider;
     reg reset_n = 1'b0;
     reg enable = 1'b0;
     reg [6:0] integer_div = 7'd4;
-    reg [15:0] fractional_num = 16'd0;
+    reg [2:0] fractional_num = 3'd0;
     wire feedback_clk;
 
     fractional_divider dut (
@@ -21,7 +21,7 @@ module tb_fractional_divider;
 
     task run_case;
         input [6:0] n;
-        input [15:0] frac;
+        input [2:0] frac;
         input integer pulses_required;
         integer cycles;
         integer previous_cycle;
@@ -66,7 +66,7 @@ module tb_fractional_divider;
             end
 
             measured_ratio = interval_sum * 1.0 / pulses_required;
-            expected_ratio = n + frac / 65536.0;
+            expected_ratio = n + frac / 8.0;
             if ((measured_ratio - expected_ratio > 0.002) ||
                 (expected_ratio - measured_ratio > 0.002) ||
                 (minimum_interval < n) || (maximum_interval > n + 1)) begin
@@ -81,10 +81,10 @@ module tb_fractional_divider;
     endtask
 
     initial begin
-        run_case(7'd4, 16'd0, 128);
-        run_case(7'd7, 16'd32768, 256);
-        run_case(7'd39, 16'd16384, 256);
-        run_case(7'd79, 16'd49152, 256);
+        run_case(7'd4, 3'd0, 128);
+        run_case(7'd7, 3'd4, 256);
+        run_case(7'd39, 3'd2, 256);
+        run_case(7'd79, 3'd6, 256);
         $display("ALL FRACTIONAL DIVIDER TESTS PASSED");
         $finish;
     end
