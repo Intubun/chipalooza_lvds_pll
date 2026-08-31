@@ -12,7 +12,7 @@
 // for the PLL operating range.
 module fractional_divider #(
     parameter integer DIV_WIDTH = 7,
-    parameter integer FRAC_WIDTH = 16
+    parameter integer FRAC_WIDTH = 3
 ) (
     input  wire                  vco_clk,
     input  wire                  reset_n,

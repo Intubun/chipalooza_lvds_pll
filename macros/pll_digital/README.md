@@ -5,8 +5,9 @@ PLL: PFD, N/N+1 fractional feedback divider, fixed divide-by-two SerDes output,
 and programmable test divider.
 
 The macro receives `REF_CLK` (25-250 MHz) and the analog macro's `VCO_CLK`.
-Its external configuration inputs are `RESET_N`, `ENABLE`, `DIV_INT[6:0]`,
-`DIV_FRAC[15:0]`, and `TEST_DIV[1:0]`. It returns `PLL_CLK`, `TEST_CLK`, `UP`,
+Its external configuration inputs are `RESET_N`, `ENABLE`, `DIV_RATIO[9:0]`,
+and `TEST_DIV[1:0]`. `DIV_RATIO` is unsigned Q7.3 fixed point: bits `[9:3]`
+are the integer divider and bits `[2:0]` select eighths. It returns `PLL_CLK`, `TEST_CLK`, `UP`,
 and `DOWN`; `FB_CLK` is exposed only for debug and may be left unconnected.
 
 For the physical Xschem top, instantiate `schematic/xschem/pll_digital.sym`
@@ -16,4 +17,4 @@ and `VCO_CLK` between the macros. The top-level layout must place the matching
 
 The output relation is:
 
-`PLL_CLK = REF_CLK * (DIV_INT + DIV_FRAC / 65536) / 2`.
+`PLL_CLK = REF_CLK * (DIV_RATIO / 8) / 2`.

@@ -13,8 +13,7 @@ C {lab_pin.sym} -230 -120 0 0 {name=p_d_ref sig_type=std_logic lab=REF_CLK}
 C {lab_pin.sym} -230 -100 0 0 {name=p_d_vco sig_type=std_logic lab=VCO_CLK}
 C {lab_pin.sym} -230 -80 0 0 {name=p_d_reset sig_type=std_logic lab=RESET_N}
 C {lab_pin.sym} -230 -60 0 0 {name=p_d_enable sig_type=std_logic lab=ENABLE}
-C {lab_pin.sym} -230 -40 0 0 {name=p_d_int sig_type=std_logic lab=DIV_INT[6..0]}
-C {lab_pin.sym} -230 -20 0 0 {name=p_d_frac sig_type=std_logic lab=DIV_FRAC[15..0]}
+C {lab_pin.sym} -230 -40 0 0 {name=p_d_ratio sig_type=std_logic lab=DIV_RATIO[9..0]}
 C {lab_pin.sym} -230 0 0 0 {name=p_d_test_div sig_type=std_logic lab=TEST_DIV[1..0]}
 C {lab_pin.sym} -10 -120 0 1 {name=p_d_fb sig_type=std_logic lab=FB_CLK}
 C {lab_pin.sym} -10 -80 0 1 {name=p_d_pll sig_type=std_logic lab=PLL_CLK}
@@ -32,8 +31,7 @@ C {ipin.sym} -430 -120 0 0 {name=p_REF_CLK lab=REF_CLK}
 C {iopin.sym} -430 -80 2 0 {name=p_IREF lab=IREF}
 C {ipin.sym} -430 -40 0 0 {name=p_ENABLE lab=ENABLE}
 C {ipin.sym} -430 -10 0 0 {name=p_RESET_N lab=RESET_N}
-C {ipin.sym} -430 20 0 0 {name=p_DIV_INT lab=DIV_INT[6..0]}
-C {ipin.sym} -430 50 0 0 {name=p_DIV_FRAC lab=DIV_FRAC[15..0]}
+C {ipin.sym} -430 20 0 0 {name=p_DIV_RATIO lab=DIV_RATIO[9..0]}
 C {ipin.sym} -430 80 0 0 {name=p_TEST_DIV lab=TEST_DIV[1..0]}
 C {opin.sym} 420 -80 0 0 {name=p_PLL_CLK lab=PLL_CLK}
 C {opin.sym} 420 -40 0 0 {name=p_TEST_CLK lab=TEST_CLK}

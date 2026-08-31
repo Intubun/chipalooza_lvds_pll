@@ -1,6 +1,6 @@
 v {xschem version=3.4.8RC file_version=1.3}
 K {type=primitive
-format="@name [ @@ref_clk @@vco_clk @@reset_n @@enable @@div_integer[6..0] @@test_div_select[1..0] @@div_fractional[15..0] ] [ @@feedback_clk @@up @@down @@pll_clk @@test_clk ] @model"
+format="@name [ @@ref_clk @@vco_clk @@reset_n @@enable @@test_div_select[1..0] @@div_ratio[9..0] ] [ @@feedback_clk @@up @@down @@pll_clk @@test_clk ] @model"
 template="name=a1 model=pll_digital_cosim"
 }
 G {}
@@ -23,12 +23,9 @@ T {RESET_N} -85 -44 0 0 0.2 0.2 {}
 B 5 -112.5 -22.5 -107.5 -17.5 {name=enable dir=in}
 L 4 -110 -20 -90 -20 {}
 T {ENABLE} -85 -24 0 0 0.2 0.2 {}
-B 5 -112.5 -2.5 -107.5 2.5 {name=div_integer[6..0] dir=in}
+B 5 -112.5 -2.5 -107.5 2.5 {name=div_ratio[9..0] dir=in}
 L 4 -110 0 -90 0 {}
-T {DIV_INT[6:0]} -85 -4 0 0 0.2 0.2 {}
-B 5 -112.5 17.5 -107.5 22.5 {name=div_fractional[15..0] dir=in}
-L 4 -110 20 -90 20 {}
-T {DIV_FRAC[15:0]} -85 16 0 0 0.2 0.2 {}
+T {DIV_RATIO[9:0]} -85 -4 0 0 0.2 0.2 {}
 B 5 -112.5 37.5 -107.5 42.5 {name=test_div_select[1..0] dir=in}
 L 4 -110 40 -90 40 {}
 T {TEST_DIV[1:0]} -85 36 0 0 0.2 0.2 {}

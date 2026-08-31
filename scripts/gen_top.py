@@ -547,12 +547,12 @@ def gen_tb(path):
 # pattern generator runs off PLL_CLK instead of the reference.
 #
 # pll_clk is always VCO/2 (clock_output_divider.v), and the feedback divider
-# divides the VCO by DIV_INT, so
+# divides the VCO by DIV_RATIO / 8, so
 #
-#     pll_clk = REF * DIV_INT / 2
+#     pll_clk = REF * (DIV_RATIO / 8) / 2
 #
-# 250 MHz in and 500 Mb/s out therefore wants DIV_INT = 4, i.e. a 1 GHz VCO.
-# DIV_INT[6:0] sits on dig_in[13:7], so DIV_INT[2] is dig_in[9].
+# 250 MHz in and 500 Mb/s out therefore wants DIV_RATIO = 4.0 (code 32),
+# i.e. a 1 GHz VCO. DIV_RATIO[9:0] sits on dig_in[16:7], so bit 5 is dig_in[12].
 TB_PLL_DRIVE = {
     "vdd_3v3": ("v", "3.3", "gated 3.3 V"),
     "vdd_1v2": ("v", "1.2", "gated 1.2 V"),
@@ -568,7 +568,7 @@ TB_PLL_DRIVE = {
     "dig_in[3]": ("v", "1.2", "mode = 1, PRBS-7"),
     "dig_in[5]": ("v", "PWL(0 0 2n 0 2.1n 1.2)", "PLL ENABLE"),
     "dig_in[6]": ("v", "PWL(0 0 1n 0 1.1n 1.2)", "PLL RESET_N, active low"),
-    "dig_in[9]": ("v", "1.2", "DIV_INT[2] -> DIV_INT = 4"),
+    "dig_in[12]": ("v", "1.2", "DIV_RATIO[5] -> DIV_RATIO = 4.0"),
 }
 
 TB_PLL_CONTROL = r'''
@@ -621,9 +621,9 @@ wrdata ../plot_simulations/data/@schname\\\\.txt
 TB_PLL_TITLE = (
     "T {PLL bench: 250 MHz reference in, PRBS-7 at 500 Mb/s out.\n"
     "\n"
-    "  pll_clk = REF * DIV_INT / 2, because clock_output_divider.v always\n"
-    "  halves the VCO.  250 MHz and DIV_INT = 4 give a 1 GHz VCO and a\n"
-    "  500 MHz bit clock.  DIV_INT[2] is dig_in[9].\n"
+    "  pll_clk = REF * (DIV_RATIO / 8) / 2, because clock_output_divider.v\n"
+    "  always halves the VCO.  250 MHz and DIV_RATIO = 4.0 (code 32) give\n"
+    "  a 1 GHz VCO and a 500 MHz bit clock. DIV_RATIO[5] is dig_in[12].\n"
     "\n"
     "  1 ns    PLL RESET_N released\n"
     "  2 ns    PLL ENABLE\n"
