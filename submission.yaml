@@ -18,20 +18,20 @@ team-members:
 # small (500um x 200um), tiny (200um x 200um) or large (500um x 415um).
 # Must match the floorplan template this layout was started from.
 #
-# NOTE: slot-size and analog-pins come from the HeiChips-style template this
-# repository was seeded from. The real Chipalooza harness describes a slot by
-# its number of DEDICATED analog pads, which selects
+# NOTE: slot-size and analog-pins are fields of the HeiChips-style template this
+# repository was seeded from. The Chipalooza harness describes a slot by its
+# number of DEDICATED analog pads, which selects
 # verilog/rtl/user_project_wrapper_<N>a.v in
 # https://github.com/RTimothyEdwards/sg13cmos5l_ocd_chipalooza
-# This project uses four, so wrapper _4a and slot s1 or s16 - the only two that
-# have four dedicated pads.
+# This project uses four, so wrapper _4a and slot s1 or s16 - per config.txt
+# there, the only two slots with four dedicated pads.
 slot-size: large
 
-# Four dedicated analog pads: analog_pin[0..3] = ref_clk, pll_out, d_p, d_n.
-# All four are sg13cmos5l_IOPadAnalog in the harness config.txt.
+# Four dedicated analog pads, all sg13cmos5l_IOPadAnalog:
+#   analog_pin[0] ref_clk, [1] pll_out, [2] d_p, [3] d_n
 analog-pins: 4
 
-short-description: Low-Voltage Differential Signal Driver and Predriver and n-fraction adjustable PLL
+short-description: Hand-drawn analog-on-top macro built from the inverter sub-macro.
 
 # Please add the documentation about your project here.
 # Why did you choose to create it? How does it work? How can it be tested, etc.?
