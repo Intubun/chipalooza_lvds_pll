@@ -44,33 +44,44 @@ flops therefore hold the **complement** of the LFSR word. An all-zero complement
 *is* the all-ones seed, the feedback becomes `XNOR(s6, s5)` instead of XOR, and
 the bit that goes to the line is `s6_n`. No set-capable flop, no seed logic.
 
-**The output pair** is where the design effort went. `D_p` and `D_n` each drive
-two 40 µm/0.45 µm HV gates inside `predriver_comp`, about 170 fF, and
-`docs/predriver-findings.md` in the LVDS design repo puts the pre-driver's skew
-budget at roughly 40 ps. A single-ended source cannot produce a zero-skew
-complement in static CMOS — the two paths differ by one inversion — so the
-pairing was chosen by measurement into that load:
+**The pair is registered after the inversion.** `s6` and `s6_n` — the line bit and
+its native complement, both straight off the last shift-register flop — go into two
+identical `dfrbp_2` on the same clock, `xffp` and `xffn`. What leaves those flops is
+two edges from the same cell type at the same instant, so the Q/Q_N mismatch of
+`xs6` (~55 ps) is absorbed by the output flops' setup margin instead of appearing as
+output skew. From there the two sides are symmetric all the way out: one `mux2_2`
+per polarity and two identical `inv_2` → `inv_8` → `inv_16` chains.
 
-| output stage | measured `D_p`/`D_n` skew |
-|---|---|
-| `buf_4` / `inv_8` | 53 ps |
-| `xor2` / `xnor2` against `VSS`, then `buf_4` | 48 ps |
-| `dfrbp` `Q`/`Q_N` through a mirrored `mux2` pair | 39 ps |
-| **`inv_2`→`inv_8`→`buf_16` against `inv_2`→`inv_8`→`inv_16`** | **23 ps** |
+That symmetry is what removed the parity problem. The earlier version formed the
+complement *after* the mux, so one side saw four inversions and the other three, and
+the mismatch had to be traded off by sizing — 23.7 ps at best, 15…36 ps over PVT.
+With the pair registered, the chains are identical and there is nothing left to
+compensate:
 
-`buf_16` is two internal stages, so the true side sees four inversions against
-the complement side's three; the sizes make the two totals nearly equal. The
-`xor2`/`xnor2` pair looks like the textbook answer and is the *worst* of the
-symmetric options here, because the two cells are not built alike.
+| | skew | clock-to-out spread | data valid window |
+|---|---|---|---|
+| complement after the mux, sized to match | 23.7 ps | 15.8 ps | 98.4 % UI |
+| **registered pair, identical chains** | **12.4 ps** | **6.8 ps** | **99.3 % UI** |
+
+`dsum` — the sum of the two outputs, which is 2 × the common mode — went from
+0.81…1.61 V to 0.97…1.22 V, i.e. the crossing barely disturbs the pair any more.
+
+**Clock passthrough keeps one inverter of skew and that is deliberate.** The
+passthrough leg feeds `gclk_b` to one mux and `xclkn`'s inverted copy to the other,
+so in that mode the pair is one inverter apart (measured −50.9 ps). Registering the
+passthrough path is not possible — a flop clocked by the signal it samples produces
+a constant — and passthrough is a bring-up and debug mode, not the mode an eye is
+measured in.
 
 ## Files
 
 | path | what |
 |---|---|
-| `schematic/xschem/lvds_pattern.sch`, `.sym` | the block, **generated** |
-| `testbenches/xschem/lvds_pattern_tb_tran.sch` | transient bench, **generated** |
-| `scripts/gen_schematic.py` | the cell table the three files come from |
-| `scripts/check_prbs.py` | replays the polynomial over the simulation output |
+| `schematic/xschem/lvds_pattern.sch`, `.sym` | the block, **generated** and **drawn** - every local connection is a real wire |
+| `testbenches/xschem/lvds_pattern_tb_tran.sch` | walks the whole interface, **generated** |
+| `testbenches/xschem/lvds_pattern_tb_prbs.sch` | PRBS-7 only, for timing, **generated** |
+| `scripts/gen_schematic.py` | the cell table all four files come from |
+| `scripts/check_timing.py` | measures the sampling phase, then replays the polynomial |
 
 The schematic is written out from a table rather than drawn, so the drawing and
 the net list cannot drift: every pin of every cell is named exactly once in
@@ -79,7 +90,8 @@ the net list cannot drift: every pin of every cell is named exactly once in
 ## Running
 
 ```bash
-make sim-all        # transient bench, then the PRBS check
+make sim-all        # both benches and their checks
+make sim-prbs       # the PRBS-7 timing bench on its own
 make gen            # regenerate the schematic after editing the cell table
 ```
 
@@ -89,11 +101,53 @@ period, then `en` low to show the clock gate, then `clk_src` low to hand over to
 the 250 MHz reference. Current result at tt/27 °C, 1.2 V, 170 fF load:
 
 ```
-bit rate            1.000 Gb/s
-PRBS-7 mismatches   0 of 128 checked
-non-complementary   0 samples
-worst D_p/D_n skew  23.0 ps
+bit rate             1.000 Gb/s
+clock to output      479.6 ... 486.3 ps  (spread 6.8 ps)
+data valid window    0.486 ... 1.480 ns after the edge, 99.3% of a UI
+PRBS-7 mismatches    0 of 138 checked
+non-complementary    0 samples
+worst D_p/D_n skew   12.4 ps
 ```
+
+**The checker measures the sampling phase, it does not assume one.** An earlier
+version sampled half a bit after the clock edge, which happens to be almost
+exactly where this block's data transitions - clock to output is ~515 ps against
+a 1000 ps bit - so it was reading the eye at its worst point and reported half
+the samples as non-complementary. `check_timing.py` finds the transition each
+clock edge causes, closes the window from the spread of those delays, and samples
+in the middle of it. The window is 98.4 % of a UI because the clock-to-output
+spread is only 16 ps; the absolute delay does not cost eye, only latency.
+
+### Delay cells: measured, and not needed here
+
+Two places were considered.
+
+**In the output pair, to trim the skew.** That question is closed by construction —
+the two chains are identical now, so there is no systematic difference to trim. It
+was measured first: over 27 PVT points the old asymmetric pair drifted 15.1…36.3 ps,
+always the same sign, and the smallest PDK delay gate adds **63 ps** against a plain
+`buf_4` (`dlygate4sd2_1` 115 ps, `dlygate4sd3_1` 300 ps). The smallest cell was 2.5×
+the ~25 ps that wanted cancelling, so it would have flipped the sign rather than
+removed the skew. Symmetry was the cheaper fix.
+
+**In the shift register, against hold violations.** Measured directly: two `dfrbp_2`
+in series, artificial clock skew swept until the chain collapses.
+
+| corner | tolerated clock skew |
+|---|---|
+| ss, 27 °C, 1.2 V | between 300 and 400 ps |
+| tt, 27 °C, 1.2 V | between 250 and 300 ps |
+| ff, 27 °C, 1.2 V | between 200 and 250 ps |
+| **ff, −40 °C, 1.32 V** (hold-critical) | **between 160 and 180 ps** |
+
+Hold is worst at the fast corner, as expected, and the register still tolerates
+**~160 ps** of clock skew there. A block of twenty-odd cells will not see anything
+close to that from its clock tree, so there is nothing to fix at this level — and
+sizing a hold buffer now means guessing at a skew number that does not exist until
+after placement and clock tree synthesis. If the macro is hardened by a flow that
+does hold fixing, it will insert what it needs with the real numbers. If it is ever
+placed by hand, revisit this with the extracted clock skew: one `dlygate4sd1_1` per
+data path buys 63 ps of hold margin and costs 63 ps of the ~500 ps setup slack.
 
 ## Not done yet
 

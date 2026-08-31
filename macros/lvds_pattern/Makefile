@@ -129,13 +129,19 @@ gen: ## Regenerate the schematic, the symbol and the testbench from scripts/gen_
 	python3 $(SCRIPTS_DIR)/gen_schematic.py
 .PHONY: gen
 
-check-prbs: ## Replay the PRBS-7 polynomial over the last simulation and count mismatches
-	python3 $(SCRIPTS_DIR)/check_prbs.py
+check-prbs: ## Replay the PRBS-7 polynomial over the transient bench output
+	python3 $(SCRIPTS_DIR)/check_timing.py $(SIM_PLOT_DIR)/data/$(TOP)_tb_tran.txt 14e-9 149e-9
 .PHONY: check-prbs
 
-sim-all: ## Simulate the transient bench and verify the PRBS stream
+sim-prbs: ## PRBS-7 timing bench: measure the clock-to-output window, then check the sequence
+	$(MAKE) sim-xschem TB=$(TOP)_tb_prbs
+	python3 $(SCRIPTS_DIR)/check_timing.py
+.PHONY: sim-prbs
+
+sim-all: ## Simulate both benches and verify the PRBS stream
 	$(MAKE) sim-xschem TB=$(TOP)_tb_tran
 	$(MAKE) check-prbs
+	$(MAKE) sim-prbs
 .PHONY: sim-all
 # ================================================================================================
 

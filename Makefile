@@ -133,10 +133,6 @@ sim-all: ## Simulate the macro
 
 
 # Build Targets
-build-counter: ## Lint, build, verify and simulate the counter macro
-	@$(MAKE) -C $(MACROS_DIR)/counter all
-.PHONY: build-counter
-
 build-inverter: ## Verify, build and simulate the inverter macro
 	@$(MAKE) -C $(MACROS_DIR)/inverter all
 .PHONY: build-inverter
@@ -160,8 +156,7 @@ build-lvds-pattern: ## Simulate and check the LVDS pattern generator macro (sche
 	@$(MAKE) -C $(MACROS_DIR)/lvds_pattern sim-all
 .PHONY: build-lvds-pattern
 
-build-macros: ## Verify, build and simulate all macros (counter and inverter)
-	$(MAKE) build-counter
+build-macros: ## Verify, build and simulate all macros
 	$(MAKE) build-inverter
 #	ToDo: further macros
 .PHONY: build-macros
@@ -447,10 +442,6 @@ clean: ## Delete all generated files and folders of the TOP cell (final, netlist
 	rm -rf $(SCRIPTS_DIR)/__pycache__
 .PHONY: clean
 
-clean-counter: ## Delete all generated files and folders of the counter macro
-	@$(MAKE) -C $(MACROS_DIR)/counter clean
-.PHONY: clean-counter
-
 clean-inverter: ## Delete all generated files and folders of the inverter macro
 	@$(MAKE) -C $(MACROS_DIR)/inverter clean
 .PHONY: clean-inverter
@@ -474,8 +465,7 @@ clean-lvds-pattern: ## Delete generated files from the LVDS pattern generator ma
 	@$(MAKE) -C $(MACROS_DIR)/lvds_pattern clean
 .PHONY: clean-lvds-pattern
 
-clean-macros: ## Delete all generated files and folders of all macros (counter and inverter)
-	$(MAKE) clean-counter
+clean-macros: ## Delete all generated files and folders of all macros
 	$(MAKE) clean-inverter
 #	ToDo: further macros
 .PHONY: clean-macros
