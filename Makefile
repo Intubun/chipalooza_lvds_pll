@@ -101,13 +101,23 @@ SCRIPT ?= plot_$(CELL)
 sim-xschem: ## Run TB simulation with Xschem in batch mode (usage: make sim-xschem [TB=<testbenchname>])
 	mkdir -p $(XSCHEM_TB_DIR)/simulations
 	mkdir -p $(SIM_PLOT_DIR)/data
-	cd $(XSCHEM_TB_DIR) && xschem -r -x -q --rcfile xschemrc --command ' \
+	rm -f $(XSCHEM_TB_DIR)/simulations/$(TB).spice
+#	`xschem netlist` returns a non-zero status on some schematics while writing a
+#	perfectly good netlist, so the status is not trusted here; the generated netlist
+#	itself is checked instead.  Same guard as the macro Makefiles.
+	-cd $(XSCHEM_TB_DIR) && xschem -r -x -q --rcfile xschemrc --command ' \
 		xschem set netlist_type spice; \
 		set netlist_dir $(abspath $(XSCHEM_TB_DIR)/simulations); \
 		xschem save; \
 		write_data [save_params] $(abspath $(XSCHEM_TB_DIR)/simulations)/$(TB).save; \
 		xschem netlist \
 	' $(TB).sch
+	@if ! grep -qE '^[Xx]' $(XSCHEM_TB_DIR)/simulations/$(TB).spice 2>/dev/null; then \
+		echo "ERROR: xschem produced no usable netlist for $(TB)"; exit 1; \
+	fi
+	@if grep -q 'IS MISSING' $(XSCHEM_TB_DIR)/simulations/$(TB).spice; then \
+		echo "ERROR: $(TB).spice has unresolved symbols - is the PDK selected?"; exit 1; \
+	fi
 	cd $(XSCHEM_TB_DIR)/simulations && ngspice -b $(TB).spice
 .PHONY: sim-xschem
 
@@ -141,6 +151,14 @@ build-pll-digital: ## Lint, harden, verify and simulate the digital PLL macro
 
 build-pll: build-pll-digital build-pll-analog ## Build both physical PLL macros
 .PHONY: build-pll
+
+build-lvds-tx: ## Simulate the LVDS transmitter macro (schematic only, no layout yet)
+	@$(MAKE) -C $(MACROS_DIR)/lvds_tx sim-all
+.PHONY: build-lvds-tx
+
+build-lvds-pattern: ## Simulate and check the LVDS pattern generator macro (schematic only, no layout yet)
+	@$(MAKE) -C $(MACROS_DIR)/lvds_pattern sim-all
+.PHONY: build-lvds-pattern
 
 build-macros: ## Verify, build and simulate all macros (counter and inverter)
 	$(MAKE) build-counter
@@ -447,6 +465,14 @@ clean-pll-digital: ## Delete generated files from the digital PLL macro
 
 clean-pll: clean-pll-analog clean-pll-digital ## Delete generated files from both PLL macros
 .PHONY: clean-pll
+
+clean-lvds-tx: ## Delete generated files from the LVDS transmitter macro
+	@$(MAKE) -C $(MACROS_DIR)/lvds_tx clean
+.PHONY: clean-lvds-tx
+
+clean-lvds-pattern: ## Delete generated files from the LVDS pattern generator macro
+	@$(MAKE) -C $(MACROS_DIR)/lvds_pattern clean
+.PHONY: clean-lvds-pattern
 
 clean-macros: ## Delete all generated files and folders of all macros (counter and inverter)
 	$(MAKE) clean-counter

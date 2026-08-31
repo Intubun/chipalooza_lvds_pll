@@ -27,6 +27,10 @@ sim_build/
 /macros/pll_analog/testbenches/xschem/simulations
 /macros/pll_digital/schematic/xschem/simulations
 /macros/pll_digital/testbenches/xschem/simulations
+/macros/lvds_tx/schematic/xschem/simulations
+/macros/lvds_tx/testbenches/xschem/simulations
+/macros/lvds_pattern/schematic/xschem/simulations
+/macros/lvds_pattern/testbenches/xschem/simulations
 /macros/pll_digital/flow/final
 /macros/pll_digital/flow/librelane/runs
 /macros/counter/flow/final
