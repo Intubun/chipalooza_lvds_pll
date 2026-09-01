@@ -192,13 +192,16 @@ a different pad type changes that (an `InOut` pad becomes five core signals).
 
 | pad | carries | |
 |---|---|---|
-| `analog_pin[0]` | `ref_clk` | PLL reference in, feeds `lvds_pattern` |
-| `analog_pin[1]` | `pll_out` | **reserved** — nothing drives it until the PLL is placed |
+| `analog_pin[0]` | -- | spare; the reference moved to the `clk` pin |
+| `analog_pin[1]` | `pll_out` | the PLL's `TEST_CLK`, brought off chip |
 | `analog_pin[2]` | `d_p` | LVDS out + |
 | `analog_pin[3]` | `d_n` | LVDS out - |
 
 Bias comes straight off the harness: `ibias[0]`/`ibias[1]` are the transmitter's
-two 30 uA references and `vbias` its 1.25 V common-mode reference.
+two 2 uA references -- each mirrored 1:15 inside `lvds_tx` (`iref_x15.sch`) so
+the driver and the pre-driver still see the 30 uA they were characterised at,
+because the harness current DACs only reach 10 uA. The 1.25 V common-mode
+reference comes in on `analog_bus[1]`; the dedicated `vbias` pin is unused.
 
 `dig_in` map -- the housekeeping SPI routes every bit individually to a pin, a
 constant or the sequencer, so a configuration bit costs a register write and no pin:
@@ -206,11 +209,20 @@ constant or the sequencer, so a configuration bit costs a register write and no 
 | bit | function |
 |---|---|
 | `dig_in[0]` | `clk_src` -- 0 = `ref_clk`, 1 = `pll_clk` |
-| `dig_in[1]` | `en` -- ANDed with the project `enable` |
+| `dig_in[1]` | `en` -- gates the pattern clock |
 | `dig_in[2]` | `reset` -- active high, seeds the PRBS |
 | `dig_in[3]` | `mode` -- 0 = clock passthrough, 1 = PRBS-7 |
-| `dig_in[4]` | **provisional** `pll_clk`, until the PLL is placed |
-| `dig_in[23:5]` | unused, read as zero, and zero works |
+| `dig_in[4]` | unused |
+| `dig_in[5]` | PLL `ENABLE` |
+| `dig_in[6]` | PLL `RESET_N`, active low |
+| `dig_in[16:7]` | PLL `DIV_RATIO[9:0]`, unsigned Q7.3 |
+| `dig_in[18:17]` | PLL `TEST_DIV[1:0]` |
+| `dig_in[23:19]` | unused, read as zero, and zero works |
+
+The divider ratio is one unsigned Q7.3 word: integer-N when bits `[2:0]` are
+zero, fractional-N in eighth steps otherwise. At 10 bits instead of the 23 of
+the earlier `DIV_INT` + `DIV_FRAC` split, the PLL and the LVDS controls fit
+together in 18 of the 24 bits, so nothing has to be tied off any more.
 
 Unselected, the harness holds every `dig_in` at zero, which leaves the clock
 stopped and the output pair static -- a legal idle.
@@ -222,11 +234,32 @@ characterised with one, so that `Vos` is not the compliance number.
 
 Known gaps, all of them real:
 
+- **The transistor-level PLL ignores its own configuration pins.**
+  `DIV_RATIO[9:0]` and `TEST_DIV[1:0]` appear in
+  `macros/pll_analog/schematic/xschem/pll.sch` only as `ipin` declarations and
+  connect to nothing: `feedback_divider.sym` has just `VCO_IN` and `FB_OUT`,
+  and the divide comes from a model card,
+  `.model pll_feedback_div d_fdiv(div_factor=20 ...)`. `d_fdiv` is an XSPICE
+  primitive whose factor is a model parameter, so no signal can reach it. The
+  output divider is fixed the same way (`pll_out_div4`), which makes `TEST_CLK`
+  always VCO/4 whatever `TEST_DIV` says. Only the RTL in `macros/pll_digital`
+  (`fractional_divider.v`) decodes `DIV_RATIO`, and only the cosim flow
+  `scripts/pll/run_pll_cosim.sh` exercises it. Measured at the top level with
+  a 250 MHz reference and `DIV_RATIO` = 4.0: the loop asks for 20 x 250 MHz =
+  5 GHz, the ring oscillator stops at 4.05 GHz, so `vctrl` rails at 1.18 V and
+  `f_pll` comes out at 1.997 GHz instead of 500 MHz. The ten `dig_in` bits
+  routed to the PLL reach its boundary and stop there.
 - The `.subckt` port order differs from the wrapper declaration because xschem
   groups outputs last. Instantiate by name, not by position.
 - No ESD structure on the output pads.
+- The harness `enable` has no load: `dig_in[1]` alone gates the pattern clock.
+  The harness masks `dig_in` to zero for an unselected project
+  (`proj_dig_in = {24{select & dig_ena}} & dig_in`), so an unselected project is
+  still idle -- but `select` and `dig_ena` high with `enable` low now leaves the
+  block running with the project enable deasserted.
 - `analog_pin[0]` runs straight into a standard-cell input with no receiver, and
-  `analog_pin[1]` has nothing able to drive a pad.
+  `analog_pin[1]` is driven by the PLL's `TEST_CLK` with no pad driver in front
+  of it.
 - `core_p`/`core_n` cross from `vss_1v2` to `vss_3v3`.
 - The `ibias` direction and whether `vbias` can be 1.25 V are unverified against
   the harness bias generator.
@@ -377,6 +410,8 @@ make build-macros                        # verify, build and simulate all sub-ma
 make sim-all                             # run all top-level testbenches
 make sim-xschem                          # top-level transient (default: <CELL>_tb_tran, needs magic-pex first)
 make sim-xschem TB=<testbenchname>       # run another testbench
+make list-pll-sweep                      # list the generated PLL combination benches
+make sim-pll-sweep                       # run every PLL combination in turn (long)
 make sim-view-xschem                     # plot the results (default: plot_<CELL>)
 make sim-view-xschem SCRIPT=<scriptname> # run another plotting script
 make all                                 # build-macros + verify + build + simulate
@@ -430,6 +465,67 @@ The sub-macros have no such target: the box is only needed by the cell the chip 
 - `clean` deletes only the top level's generated files (`final/`, `netlist/`, `render/img/`, the DRC/LVS reports, and the simulation outputs). `clean-macros` runs `make clean` in every sub-macro, and `clean-all` combines both, mirroring `build-macros`/`all`.
 
 > [!NOTE]
+### PLL combination benches
+
+`scripts/gen_top.py` generates one bench per reference / `DIV_RATIO` pair from
+the `PLL_COMBOS` table. The first keeps the historical name
+`<TOP>_tb_pll.sch`; the rest are `<TOP>_tb_pll_<name>.sch`.
+
+| bench | `ref_clk` | `DIV_RATIO` | code | VCO | line rate | `TEST_DIV` |
+|---|---:|---:|---:|---:|---:|---:|
+| `tb_pll` (baseline) | 250 MHz | 4.0 | 32 | 1.000 GHz | 500 Mb/s | VCO/2 |
+| `tb_pll_ref125_r8` | 125 MHz | 8.0 | 64 | 1.000 GHz | 500 Mb/s | VCO/4 |
+| `tb_pll_ref25_r40` | 25 MHz | 40.0 | 320 | 1.000 GHz | 500 Mb/s | VCO/16 |
+| `tb_pll_ref100_r20` | 100 MHz | 20.0 | 160 | 2.000 GHz | 1.00 Gb/s | VCO/8 |
+| `tb_pll_ref250_r4p5` | 250 MHz | 4.5 | 36 | 1.125 GHz | 562.5 Mb/s | VCO/2 |
+| `tb_pll_ref200_r4p375` | 200 MHz | 4.375 | 35 | 875 MHz | 437.5 Mb/s | VCO/4 |
+
+The first three hold the VCO at 1 GHz and vary only the compare frequency, so a
+difference between them is the PFD and charge pump, not the oscillator. The last
+two are fractional-N; `fractional_divider.v` is a plain N/N+1 accumulator with no
+delta-sigma, so the instantaneous period alternates and each bench averages
+`f_pll` over thousands of cycles rather than across two adjacent edges.
+
+Every combination keeps the VCO between 0.7 and 2.1 GHz. The tuning curve in
+`macros/pll_analog/info/ring_oscillator_buffered_pvt.csv` runs from 322 MHz
+(`vctrl` 0.50 V) to 4.05 GHz (0.95 V) and does not start below 0.50 V, and
+`pll_combo()` asserts the band, so a new row that falls outside it fails at
+generation time instead of producing a bench that quietly never locks.
+
+> [!WARNING]
+> Only `tb_pll_ref100_r20` can lock as things stand. The transistor-level PLL
+> ignores `DIV_RATIO` and divides by a hard-wired 20 (see Known gaps), so the
+> `DIV_RATIO` column below describes what the bench *asks for*, not what the
+> schematic does. The five combinations whose reference times 20 lands outside
+> the ring oscillator's 0.32 - 4.05 GHz range drive `vctrl` to a rail. The table
+> becomes true once the divider takes its factor from the pins, or when the same
+> combinations are run through `scripts/pll/run_pll_cosim.sh`, which couples the
+> RTL divider to the analog loop and does decode `DIV_RATIO`.
+
+Confirmed result, `tb_pll_ref100_r20`, tt at 27 C, 6 us run:
+
+| | `pll_integer_characterization.csv` | this bench | delta |
+|---|---:|---:|---:|
+| output frequency | 1000.000 MHz | 999.9925 MHz | -7.5 ppm |
+| `vctrl` | 0.6772144 V | 0.6775588 V | +0.34 mV |
+| lock | 2.8 us | locked inside 6 us | -- |
+
+`vctrl` overshoots to 0.693 V and settles at 0.6776 V, `vco_pp` is 1.243 V and
+`fb_pp` 1.200 V. The macro's own characterisation and this top-level bench --
+through the pattern generator, the pads and the 49.9 + 49.9 ohm termination --
+agree on the control voltage to 0.05 %, which is the cross-check that the whole
+path is wired the way both sides think it is. The transmitter meanwhile measures
+|Vod| 383 mV, Vos 1.2438 V, Vos p-p 107.0 mV.
+
+> [!IMPORTANT]
+> These benches run **6 us**, not 1 us.
+> `macros/pll_analog/info/pll_integer_characterization.csv` measures lock at
+> 2.75 us typical and 4.50 us slow, so the earlier 1 us bench was reading a
+> frequency the loop had not settled to yet. Six of them back to back is a long
+> run -- `make sim-pll-sweep` is not a quick check. The maximum timestep is set
+> per combination to one fortieth of the VCO period, which keeps a 6 us run near
+> the point count of the old 1 us / 5 ps deck.
+
 > The top-level testbench `.include`s the extracted PEX netlist `netlist/pex/sg13cmos5l_chipalooza_analog_project_magic_pex_3.spice`, and `make verilog` reads its pin list from a PEX netlist as well. Directly after `make clean`, run `make magic-pex` (or the full `make all`) once before `make sim-xschem`, `make sim-all` or `make build-top`, otherwise the include fails.
 
 > [!WARNING]

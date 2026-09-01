@@ -171,7 +171,7 @@ value="
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
 .lib cornerDIO.lib dio_tt
-.include cap_mfringe.lib
+.include cap_cmomf.lib
 "
       }
 C {simulator_commands_shown.sym} 20 -390 0 0 {name=SimulatorNGSPICE
