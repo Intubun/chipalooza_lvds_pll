@@ -1,0 +1,7 @@
+# latexmk build products; the .tex is the source and the .pdf is committed
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz

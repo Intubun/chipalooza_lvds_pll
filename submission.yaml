@@ -84,7 +84,7 @@ long-description: |
 
   | Pad | Dir | Function |
   | --- | --- | --- |
-  | `analog_pin[0]` | in  | `ref_clk` - the PLL reference, and the fallback bit clock when `clk_src` is 0 |
+  | `analog_pin[0]` | -   | spare - the reference moved to the dedicated `clk` pin |
   | `analog_pin[1]` | out | `pll_out` - the PLL's `TEST_CLK` brought off chip |
   | `analog_pin[2]` | out | `d_p` |
   | `analog_pin[3]` | out | `d_n` |

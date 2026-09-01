@@ -98,7 +98,7 @@ TB ?= $(CELL)_tb_tran
 # Override with: make <target> SCRIPT=<scriptname>
 SCRIPT ?= plot_$(CELL)
 
-sim-xschem: ## Run TB simulation with Xschem in batch mode (usage: make sim-xschem [TB=<testbenchname>])
+sim-xschem: $(PLL_COSIM_SO) ## Run TB simulation with Xschem in batch mode (usage: make sim-xschem [TB=<testbenchname>])
 	mkdir -p $(XSCHEM_TB_DIR)/simulations
 	mkdir -p $(SIM_PLOT_DIR)/data
 	rm -f $(XSCHEM_TB_DIR)/simulations/$(TB).spice
@@ -125,6 +125,7 @@ sim-xschem: ## Run TB simulation with Xschem in batch mode (usage: make sim-xsch
 #	nets while it netlists.  The arrow inside xschem therefore gets exactly the
 #	same treatment as this target - rewriting it again here with sed would give
 #	the two paths different net names.
+	$(SCRIPTS_DIR)/pll/inject_cosim_bridges.py $(XSCHEM_TB_DIR)/simulations/$(TB).spice
 	cd $(XSCHEM_TB_DIR)/simulations && ngspice -b $(TB).spice
 .PHONY: sim-xschem
 
@@ -132,6 +133,23 @@ sim-view-xschem: ## Plot Xschem simulation results (usage: make sim-view-xschem 
 	SHOW_PLOTS=1 python3 $(SIM_PLOT_DIR)/$(SCRIPT).py
 .PHONY: sim-view-xschem
 
+
+# The top cell instantiates pll_cosim, whose PFD and dividers are the RTL of
+# macros/pll_digital run through ngspice's d_cosim.  Every top-level bench
+# therefore needs the compiled shared object next to the netlist, including the
+# LVDS-only ones - they carry the top cell and so they carry the PLL.
+PLL_RTL_DIR  := $(MACROS_DIR)/pll_digital/rtl
+PLL_RTL_SRCS := $(PLL_RTL_DIR)/pll_digital.v $(PLL_RTL_DIR)/pfd.v                 $(PLL_RTL_DIR)/fractional_divider.v $(PLL_RTL_DIR)/clock_output_divider.v
+PLL_COSIM_SO := $(XSCHEM_TB_DIR)/simulations/pll_digital_cosim.so
+
+pll-cosim-so: $(PLL_COSIM_SO) ## Compile macros/pll_digital into the d_cosim shared object
+.PHONY: pll-cosim-so
+
+$(PLL_COSIM_SO): $(PLL_RTL_SRCS)
+	mkdir -p $(XSCHEM_TB_DIR)/simulations
+	cd $(XSCHEM_TB_DIR)/simulations && ngspice vlnggen $(abspath $(PLL_RTL_SRCS))
+	$(SCRIPTS_DIR)/pll/check_cosim_ports.sh $(XSCHEM_TB_DIR)/simulations/pll_digital_obj_dir
+	mv $(XSCHEM_TB_DIR)/simulations/pll_digital.so $@
 
 # The PLL bench family from scripts/gen_top.py: <TOP>_tb_pll.sch is the baseline
 # combination and <TOP>_tb_pll_<name>.sch is one per reference / DIV_RATIO pair.

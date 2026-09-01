@@ -33,7 +33,7 @@ PORTS = (
 )
 
 # what the four dedicated pads carry
-PAD_USE = [("analog_pin[0]", "PLL reference in, feeds lvds_pattern"),
+PAD_USE = [("analog_pin[0]", "SPARE - the reference moved to the clk pin"),
            ("analog_pin[1]", "PLL clock out - the PLL's TEST_CLK"),
            ("analog_pin[2]", "LVDS out +"),
            ("analog_pin[3]", "LVDS out -")]
@@ -49,7 +49,7 @@ PIN_USE = dict(
      ("vss_1v2", "xpat.VSS, xpll.VSS, Cd12 decoupling"),
      ("vssio", NC),
      ("enable", NC),
-     ("clk", NC + " - the reference comes in on analog_pin[0]"),
+     ("clk", "xpat.ref_clk and xpll.REF_CLK - the PLL reference"),
      ("dig_in[18]", "xpll.TEST_DIV[1]"),
      ("dig_in[17]", "xpll.TEST_DIV[0]"),
      ("dig_in[6]", "xpll.RESET_N - active low"),
@@ -63,7 +63,7 @@ PIN_USE = dict(
      ("ibias[0]", "xlvds.Iref_pd - 2 uA, mirrored 1:15 to the pre-driver's 30 uA"),
      ("vbias", NC),
      ("analog_bus[0]", "xpll.IREF - 2 uA charge-pump reference"),
-     ("analog_bus[1]", "xlvds.Vref - 1.25 V common-mode reference")]
+     ("analog_bus[1]", "xlvds.Vref - 1.2 V common-mode reference")]
     # DIV_RATIO is unsigned Q7.3, so bit 3 is the ones digit and bits 2..0 the eighths
     + [("dig_in[%d]" % (b + 7), "xpll.DIV_RATIO[%d] - weight %s" % (b, w))
        for b, w in ((9, "64"), (8, "32"), (7, "16"), (6, "8"), (5, "4"),
@@ -106,7 +106,7 @@ CELLS = [
     # PLL is placed; the rest of the control from dig_in bits, which the
     # housekeeping SPI routes individually to a pin, a constant or the sequencer.
     ("xpat", "lvds_pattern.sym", "lvds_pattern", 900, -500, {
-        "ref_clk": "analog_pin[0]", "pll_clk": "dig_in[4]", "clk_src": "dig_in[0]",
+        "ref_clk": "clk", "pll_clk": "dig_in[4]", "clk_src": "dig_in[0]",
         "en": "dig_in[1]", "reset": "dig_in[2]", "mode": "dig_in[3]",
         "D_p": "core_p", "D_n": "core_n", "VDD": "vdd_1v2", "VSS": "vss_1v2"}, ""),
     # bias straight off the harness, output pair onto two dedicated pads
@@ -137,7 +137,7 @@ RTimothyEdwards/sg13cmos5l_ocd_chipalooza, every bus expanded into
 individual pins.  Four dedicated analog pads means slot s1 or s16 -
 per config.txt the only two that have four.
 
-  analog_pin[0]  ref_clk   PLL reference in
+  analog_pin[0]  SPARE     was the PLL reference before it moved to clk
   analog_pin[1]  pll_out   the PLL's TEST_CLK, brought off chip
   analog_pin[2]  d_p       LVDS out +
   analog_pin[3]  d_n       LVDS out -
@@ -146,10 +146,12 @@ All four are sg13cmos5l_IOPadAnalog in config.txt, so each pad is one core
 signal carrying the pad name.  A different pad type changes that: an InOut
 pad becomes five core signals (_in, _out, _ena, _one, _zero).
 
-Not connected: dig_out[11:0], analog_bus[3:0], vssio, clk - the reference
-arrives on its own dedicated pad instead of the shared clock pin - and enable.
+Not connected: dig_out[11:0], analog_bus[3:2], vssio, analog_pin[0] and
+enable.  The reference arrives on the harness clock pin: proj_clk = select & clk
+in user_project_control.v, so an unselected project sees no reference at all.
 The harness already masks dig_in to zero for an unselected project
-(proj_dig_in = {24{select & dig_ena}} & dig_in in user_project_control.v), so
+(proj_dig_in is dig_in ANDed with 24 copies of select & dig_ena, in
+user_project_control.v), so
 dig_in[1] alone stops the pattern clock.  Note this drops the one case the
 gate used to cover: select and dig_ena high with enable low leaves dig_in[1]
 live, and the block then runs with the project enable deasserted.} 300 -1820 0 0 0.4 0.4 {}
@@ -309,7 +311,7 @@ TB_LVDS_DRIVE = {
     "analog_bus[1]": ("v", "1.2", "LVDS common-mode reference, 1.2 V (the IDAC grid has no 1.25 V)"),
     "ibias[0]": ("i", "-2u", "pre-driver reference, 2 uA"),
     "ibias[1]": ("i", "-2u", "driver reference, 2 uA"),
-    "analog_pin[0]": ("v", "PULSE(0 1.2 0 50p 50p 0.9n 2n)", "ref_clk, 500 MHz"),
+    "clk": ("v", "PULSE(0 1.2 0 50p 50p 0.9n 2n)", "ref_clk, 500 MHz"),
     "dig_in[0]": ("v", "0", "clk_src = 0, take ref_clk"),
     "dig_in[1]": ("v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
     "dig_in[2]": ("v", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset, high until 2 ns"),
@@ -335,6 +337,11 @@ TB_LVDS_CONTROL = r'''
 * own benches place cmfb the same way and run no operating point.
 .ic v(x1.xlvds.xdrv.cmfb)=1.54
 .control
+* xpll is pll_cosim: the PFD and both dividers are the RTL of
+* macros/pll_digital, through d_cosim.  The analog/digital bridges are
+* inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
+* cannot live here, xschem's value="..." property ends at their quotes.
+* Build the shared object first: make pll-cosim-so.
 * save all over 120 ns at 5 ps writes a 292 MB rawfile; name what the
 * measurements, the wrdata and the three graph panels actually need
 save d_p d_n vos x1.core_p x1.core_n x1.xpat.gclk_b i(Vvdd_3v3) i(Vvdd_1v2)
@@ -569,7 +576,7 @@ TB_LVDS_GROUPS = [
     ("bias", ["analog_bus[1]", "ibias[0]", "ibias[1]"]),
     ("pattern control", ["dig_in[0]", "dig_in[1]",
                          "dig_in[2]", "dig_in[3]"]),
-    ("clocks", ["analog_pin[0]"]),
+    ("clocks", ["clk"]),
 ]
 
 LVDS_TITLE = """LVDS bench for the top cell.
@@ -620,7 +627,7 @@ TB_SOURCES = [
     ("vdd_3v3", "v", "3.3", "gated 3.3 V"),
     ("vdd_1v2", "v", "1.2", "gated 1.2 V"),
     ("analog_bus[1]", "v", "1.2", "LVDS common-mode reference, 1.2 V"),
-    ("analog_pin[0]", "v", "PULSE(0 1.2 0 50p 50p 1.9n 4n)", "ref_clk, 250 MHz"),
+    ("clk", "v", "PULSE(0 1.2 0 50p 50p 1.9n 4n)", "ref_clk, 250 MHz"),
     ("dig_in[0]", "v", "0", "clk_src = 0, take ref_clk"),
     ("dig_in[1]", "v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
     ("dig_in[2]", "v", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset, high until 2 ns"),
@@ -642,6 +649,11 @@ TB_CONTROL = r'''
 * there whatever tstop says.  trap gets through the full span.
 .options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 .control
+* xpll is pll_cosim: the PFD and both dividers are the RTL of
+* macros/pll_digital, through d_cosim.  The analog/digital bridges are
+* inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
+* cannot live here, xschem's value="..." property ends at their quotes.
+* Build the shared object first: make pll-cosim-so.
 save all
 op
 remzerovec
@@ -670,7 +682,7 @@ wrdata ../plot_simulations/data/@schname\\\\.txt
 def gen_tb(path):
     out = [HEADER]
     out.append("T {Top-level transient bench.\n\n"
-               "  analog_pin[0]  250 MHz reference on the dedicated pad\n"
+               "  clk            250 MHz reference on the harness clock pin\n"
                "  dig_in[0]      clk_src = 0, the bit clock is the reference\n"
                "  dig_in[1]      en, low until 3 ns\n"
                "  dig_in[2]      reset, high until 2 ns\n"
@@ -830,9 +842,9 @@ def pll_drive(c):
         "analog_bus[0]": ("i", "-2u",
                           "PLL charge-pump reference - 2 uA, not the "
                           "transmitter's 30 uA"),
-        "analog_pin[0]": ("v", "PULSE(0 1.2 0 50p 50p %.4fn %.4fn)"
-                          % (ref_ns / 2 - 0.05, ref_ns),
-                          "REF_CLK, %s" % eng(c["ref"], "Hz")),
+        "clk": ("v", "PULSE(0 1.2 0 50p 50p %.4fn %.4fn)"
+                % (ref_ns / 2 - 0.05, ref_ns),
+                "REF_CLK, %s" % eng(c["ref"], "Hz")),
         "dig_in[0]": ("v", "1.2", "clk_src = 1, pattern generator off the PLL"),
         "dig_in[1]": ("v", "PWL(0 0 %.3fu 0 %.3fu 1.2)" % (on, on + 0.001),
                       "pattern en, held off until the loop has locked"),
@@ -869,7 +881,7 @@ def pll_groups(c):
          % (c["test_div"], 2 ** (1 + c["test_div"])),
          ["dig_in[18]", "dig_in[17]"]),
         ("pattern control", ["dig_in[0]", "dig_in[1]", "dig_in[2]", "dig_in[3]"]),
-        ("reference clock", ["analog_pin[0]"]),
+        ("reference clock", ["clk"]),
     ]
 
 
@@ -926,19 +938,27 @@ PLL_CONTROL_FMT = r'''
 * and the run then stops early whatever tstop says.  trap gets through.
 .options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 .control
+* xpll is pll_cosim: the PFD and both dividers are the RTL of
+* macros/pll_digital, through d_cosim.  The analog/digital bridges are
+* inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
+* cannot live here, xschem's value="..." property ends at their quotes.
+* Build the shared object first: make pll-cosim-so.
 save d_p d_n vos x1.core_p x1.core_n x1.pll_clk
-+ x1.xpll.VCTRL x1.xpll.VCO_CLK x1.xpll.FB_CLK x1.xpll.UP x1.xpll.DOWN
++ x1.xpll.x_analog.VCTRL x1.xpll.VCO_CLK x1.xpll.FB_CLK x1.xpll.UP x1.xpll.DOWN
 tran %(step).4g %(tstop).4g 0 %(step).4g
 write @schname\\\\.raw
 
 * First: does the loop do anything at all?  VCTRL has to move and the VCO has
 * to oscillate before any number below means anything.
-meas tran vctrl_min MIN v(x1.xpll.VCTRL) from=50n to=%(tend).4g
-meas tran vctrl_max MAX v(x1.xpll.VCTRL) from=50n to=%(tend).4g
-meas tran vctrl_end AVG v(x1.xpll.VCTRL) from=%(tsettle).4g to=%(tend).4g
+meas tran vctrl_min MIN v(x1.xpll.x_analog.VCTRL) from=50n to=%(tend).4g
+meas tran vctrl_max MAX v(x1.xpll.x_analog.VCTRL) from=50n to=%(tend).4g
+meas tran vctrl_end AVG v(x1.xpll.x_analog.VCTRL) from=%(tsettle).4g to=%(tend).4g
 meas tran vco_pp PP v(x1.xpll.VCO_CLK) from=%(tsettle).4g to=%(tend).4g
-meas tran fb_pp PP v(x1.xpll.FB_CLK) from=%(tsettle).4g to=%(tend).4g
-print vctrl_min vctrl_max vctrl_end vco_pp fb_pp
+* FB_CLK used to be measurable because the XSPICE divider drove it through a
+* dac_bridge.  Under d_cosim it is a digital output that no analog node
+* consumes, so it carries no voltage waveform - and f_pll answers the question
+* it was there to answer.
+print vctrl_min vctrl_max vctrl_end vco_pp
 
 * Second: is pll_clk on target?  Averaged over %(ncyc)d cycles, because the
 * N/N+1 divider makes any single period the wrong thing to measure.
@@ -963,7 +983,7 @@ print vod_max vod_min vos_avg vos_pp core_pp
 set wr_vecnames
 set wr_singlescale
 wrdata ../plot_simulations/data/@schname\\\\.txt
-+ v(d_p) v(d_n) v(vos) vod v(x1.pll_clk) v(x1.xpll.VCTRL)
++ v(d_p) v(d_n) v(vos) vod v(x1.pll_clk) v(x1.xpll.x_analog.VCTRL)
 .endc
 '''
 
@@ -991,7 +1011,7 @@ def gen_tb_pll(path, symbol, c):
     # panels top to bottom is reading the signal path
     zoom = c["pattern_on"] + 300e-9
     out += view_panels(
-        [(["x1.xpll.VCTRL"], [8], 0.0, 1.3, 0.0, PLL_TSTOP),
+        [(["x1.xpll.x_analog.VCTRL"], [8], 0.0, 1.3, 0.0, PLL_TSTOP),
          (["x1.pll_clk", "x1.core_p"], [4, 7], -0.2, 1.4, zoom, zoom + 10e-9),
          (["d_p", "d_n", "vos"], [4, 5, 8], 0.9, 1.6, zoom, zoom + 10e-9)],
         os.path.basename(path)[:-4])
