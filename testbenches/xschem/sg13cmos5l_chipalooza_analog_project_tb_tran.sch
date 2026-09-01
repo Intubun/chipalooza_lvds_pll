@@ -8,8 +8,7 @@ E {}
 T {Top-level transient bench.
 
   analog_pin[0]  250 MHz reference on the dedicated pad
-  dig_in[4]      1 GHz, standing in for the PLL
-  dig_in[0]      clk_src = 1
+  dig_in[0]      clk_src = 0, the bit clock is the reference
   dig_in[1]      en, low until 3 ns
   dig_in[2]      reset, high until 2 ns
   dig_in[3]      mode, PRBS-7 from 10 ns
@@ -30,66 +29,54 @@ C {devices/vsource.sym} -1200 -1700 0 0 {name=Vvdd_1v2 value="1.2"}
 N -1200 -1670 -1200 -1640 {lab=GND}
 C {devices/gnd.sym} -1200 -1640 0 0 {name=lg_vdd_1v2 lab=GND}
 T {gated 1.2 V} -1140 -1705 0 0 0.3 0.3 {}
-N -1200 -1560 -1200 -1530 {lab=vbias}
-C {lab_pin.sym} -1200 -1560 1 0 {name=ls_vbias sig_type=std_logic lab=vbias}
-C {devices/vsource.sym} -1200 -1500 0 0 {name=Vvbias value="1.25"}
+N -1200 -1560 -1200 -1530 {lab=analog_bus[1]}
+C {lab_pin.sym} -1200 -1560 1 0 {name=ls_analog_bus_1 sig_type=std_logic lab=analog_bus[1]}
+C {devices/vsource.sym} -1200 -1500 0 0 {name=Vanalog_bus_1 value="1.2"}
 N -1200 -1470 -1200 -1440 {lab=GND}
-C {devices/gnd.sym} -1200 -1440 0 0 {name=lg_vbias lab=GND}
-T {shared voltage bias, the driver wants 1.25 V} -1140 -1505 0 0 0.3 0.3 {}
+C {devices/gnd.sym} -1200 -1440 0 0 {name=lg_analog_bus_1 lab=GND}
+T {LVDS common-mode reference, 1.2 V} -1140 -1505 0 0 0.3 0.3 {}
 N -1200 -1360 -1200 -1330 {lab=analog_pin[0]}
 C {lab_pin.sym} -1200 -1360 1 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
 C {devices/vsource.sym} -1200 -1300 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 1.9n 4n)"}
 N -1200 -1270 -1200 -1240 {lab=GND}
 C {devices/gnd.sym} -1200 -1240 0 0 {name=lg_analog_pin_0 lab=GND}
 T {ref_clk, 250 MHz} -1140 -1305 0 0 0.3 0.3 {}
-N -1200 -1160 -1200 -1130 {lab=dig_in[4]}
-C {lab_pin.sym} -1200 -1160 1 0 {name=ls_dig_in_4 sig_type=std_logic lab=dig_in[4]}
-C {devices/vsource.sym} -1200 -1100 0 0 {name=Vdig_in_4 value="PULSE(0 1.2 0 30p 30p 470p 1n)"}
+N -1200 -1160 -1200 -1130 {lab=dig_in[0]}
+C {lab_pin.sym} -1200 -1160 1 0 {name=ls_dig_in_0 sig_type=std_logic lab=dig_in[0]}
+C {devices/vsource.sym} -1200 -1100 0 0 {name=Vdig_in_0 value="0"}
 N -1200 -1070 -1200 -1040 {lab=GND}
-C {devices/gnd.sym} -1200 -1040 0 0 {name=lg_dig_in_4 lab=GND}
-T {PROVISIONAL pll_clk, 1 GHz} -1140 -1105 0 0 0.3 0.3 {}
-N -1200 -960 -1200 -930 {lab=dig_in[0]}
-C {lab_pin.sym} -1200 -960 1 0 {name=ls_dig_in_0 sig_type=std_logic lab=dig_in[0]}
-C {devices/vsource.sym} -1200 -900 0 0 {name=Vdig_in_0 value="1.2"}
+C {devices/gnd.sym} -1200 -1040 0 0 {name=lg_dig_in_0 lab=GND}
+T {clk_src = 0, take ref_clk} -1140 -1105 0 0 0.3 0.3 {}
+N -1200 -960 -1200 -930 {lab=dig_in[1]}
+C {lab_pin.sym} -1200 -960 1 0 {name=ls_dig_in_1 sig_type=std_logic lab=dig_in[1]}
+C {devices/vsource.sym} -1200 -900 0 0 {name=Vdig_in_1 value="PWL(0 0 3n 0 3.1n 1.2)"}
 N -1200 -870 -1200 -840 {lab=GND}
-C {devices/gnd.sym} -1200 -840 0 0 {name=lg_dig_in_0 lab=GND}
-T {clk_src = 1, take the fast clock} -1140 -905 0 0 0.3 0.3 {}
-N -1200 -760 -1200 -730 {lab=enable}
-C {lab_pin.sym} -1200 -760 1 0 {name=ls_enable sig_type=std_logic lab=enable}
-C {devices/vsource.sym} -1200 -700 0 0 {name=Venable value="1.2"}
+C {devices/gnd.sym} -1200 -840 0 0 {name=lg_dig_in_1 lab=GND}
+T {en, low until 3 ns} -1140 -905 0 0 0.3 0.3 {}
+N -1200 -760 -1200 -730 {lab=dig_in[2]}
+C {lab_pin.sym} -1200 -760 1 0 {name=ls_dig_in_2 sig_type=std_logic lab=dig_in[2]}
+C {devices/vsource.sym} -1200 -700 0 0 {name=Vdig_in_2 value="PWL(0 1.2 2n 1.2 2.1n 0)"}
 N -1200 -670 -1200 -640 {lab=GND}
-C {devices/gnd.sym} -1200 -640 0 0 {name=lg_enable lab=GND}
-T {project enable} -1140 -705 0 0 0.3 0.3 {}
-N -1200 -560 -1200 -530 {lab=dig_in[1]}
-C {lab_pin.sym} -1200 -560 1 0 {name=ls_dig_in_1 sig_type=std_logic lab=dig_in[1]}
-C {devices/vsource.sym} -1200 -500 0 0 {name=Vdig_in_1 value="PWL(0 0 3n 0 3.1n 1.2)"}
+C {devices/gnd.sym} -1200 -640 0 0 {name=lg_dig_in_2 lab=GND}
+T {reset, high until 2 ns} -1140 -705 0 0 0.3 0.3 {}
+N -1200 -560 -1200 -530 {lab=dig_in[3]}
+C {lab_pin.sym} -1200 -560 1 0 {name=ls_dig_in_3 sig_type=std_logic lab=dig_in[3]}
+C {devices/vsource.sym} -1200 -500 0 0 {name=Vdig_in_3 value="PWL(0 0 10n 0 10.1n 1.2)"}
 N -1200 -470 -1200 -440 {lab=GND}
-C {devices/gnd.sym} -1200 -440 0 0 {name=lg_dig_in_1 lab=GND}
-T {en, low until 3 ns} -1140 -505 0 0 0.3 0.3 {}
-N -1200 -360 -1200 -330 {lab=dig_in[2]}
-C {lab_pin.sym} -1200 -360 1 0 {name=ls_dig_in_2 sig_type=std_logic lab=dig_in[2]}
-C {devices/vsource.sym} -1200 -300 0 0 {name=Vdig_in_2 value="PWL(0 1.2 2n 1.2 2.1n 0)"}
+C {devices/gnd.sym} -1200 -440 0 0 {name=lg_dig_in_3 lab=GND}
+T {mode -> PRBS-7 at 10 ns} -1140 -505 0 0 0.3 0.3 {}
+N -1200 -360 -1200 -330 {lab=ibias[0]}
+C {lab_pin.sym} -1200 -360 1 0 {name=ls_ibias_0 sig_type=std_logic lab=ibias[0]}
+C {isource.sym} -1200 -300 0 0 {name=Iibias_0 value=-2u}
 N -1200 -270 -1200 -240 {lab=GND}
-C {devices/gnd.sym} -1200 -240 0 0 {name=lg_dig_in_2 lab=GND}
-T {reset, high until 2 ns} -1140 -305 0 0 0.3 0.3 {}
-N -1200 -160 -1200 -130 {lab=dig_in[3]}
-C {lab_pin.sym} -1200 -160 1 0 {name=ls_dig_in_3 sig_type=std_logic lab=dig_in[3]}
-C {devices/vsource.sym} -1200 -100 0 0 {name=Vdig_in_3 value="PWL(0 0 10n 0 10.1n 1.2)"}
+C {devices/gnd.sym} -1200 -240 0 0 {name=lg_ibias_0 lab=GND}
+T {pre-driver reference, 2 uA} -1140 -305 0 0 0.3 0.3 {}
+N -1200 -160 -1200 -130 {lab=ibias[1]}
+C {lab_pin.sym} -1200 -160 1 0 {name=ls_ibias_1 sig_type=std_logic lab=ibias[1]}
+C {isource.sym} -1200 -100 0 0 {name=Iibias_1 value=-2u}
 N -1200 -70 -1200 -40 {lab=GND}
-C {devices/gnd.sym} -1200 -40 0 0 {name=lg_dig_in_3 lab=GND}
-T {mode -> PRBS-7 at 10 ns} -1140 -105 0 0 0.3 0.3 {}
-N -1200 40 -1200 70 {lab=ibias[0]}
-C {lab_pin.sym} -1200 40 1 0 {name=ls_ibias_0 sig_type=std_logic lab=ibias[0]}
-C {isource.sym} -1200 100 0 0 {name=Iibias_0 value=-30u}
-N -1200 130 -1200 160 {lab=GND}
-C {devices/gnd.sym} -1200 160 0 0 {name=lg_ibias_0 lab=GND}
-T {pre-driver reference, 30 uA} -1140 95 0 0 0.3 0.3 {}
-N -1200 240 -1200 270 {lab=ibias[1]}
-C {lab_pin.sym} -1200 240 1 0 {name=ls_ibias_1 sig_type=std_logic lab=ibias[1]}
-C {isource.sym} -1200 300 0 0 {name=Iibias_1 value=-30u}
-N -1200 330 -1200 360 {lab=GND}
-C {devices/gnd.sym} -1200 360 0 0 {name=lg_ibias_1 lab=GND}
-T {driver reference, 30 uA} -1140 295 0 0 0.3 0.3 {}
+C {devices/gnd.sym} -1200 -40 0 0 {name=lg_ibias_1 lab=GND}
+T {driver reference, 2 uA} -1140 -105 0 0 0.3 0.3 {}
 N -280 -350 -220 -350 {lab=vdd_3v3}
 C {lab_pin.sym} -280 -350 0 0 {name=lx_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
 N -280 -330 -220 -330 {lab=vdd_1v2}
@@ -225,10 +212,13 @@ value="
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
 .lib cornerDIO.lib dio_tt
-.include cap_mfringe.lib
+.include cap_cmomf.lib
 .include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
 .temp 27
-.options savecurrents klu method=gear reltol=1e-3 abstol=1e-12 gmin=1e-12
+* gear2 collapses the timestep to 6e-24 s at 414 ns on vvdd_1v2#branch
+* once the PLL's XSPICE bridges are in the netlist, and the run stops
+* there whatever tstop says.  trap gets through the full span.
+.options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 .control
 save all
 op
@@ -247,7 +237,6 @@ meas tran vos_min MIN v(vos) from=20n to=40n
 let vos_pp = vos_max - vos_min
 print vod_max vod_min vos_avg vos_pp
 
-unset appendwrite
 set wr_vecnames
 set wr_singlescale
 wrdata ../plot_simulations/data/@schname\\\\.txt

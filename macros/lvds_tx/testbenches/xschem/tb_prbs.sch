@@ -342,10 +342,10 @@ C {gnd.sym} -760 -1270 0 0 {name=g34 lab=0}
 C {vsource.sym} -500 -1300 0 0 {name=V6 value="1.2" savecurrent=false}
 C {lab_pin.sym} -440 -1330 0 0 {name=l35 lab=VDDC}
 C {gnd.sym} -560 -1270 0 0 {name=g36 lab=0}
-C {isource.sym} -300 -1300 0 0 {name=I0 value=-30u}
+C {isource.sym} -300 -1300 0 0 {name=I0 value=-2u}
 C {lab_pin.sym} -240 -1330 0 0 {name=l37 lab=Irf_pdd}
 C {gnd.sym} -360 -1270 0 0 {name=g38 lab=0}
-C {isource.sym} -100 -1300 0 0 {name=I1 value=-30u}
+C {isource.sym} -100 -1300 0 0 {name=I1 value=-2u}
 C {lab_pin.sym} -40 -1330 0 0 {name=l39 lab=Irf_drvd}
 C {gnd.sym} -160 -1270 0 0 {name=g40 lab=0}
 C {serdes.sym} -2000 0 0 0 {name=Xsd}
@@ -430,7 +430,7 @@ value="
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
 .lib cornerDIO.lib dio_tt
-.include cap_mfringe.lib
+.include cap_cmomf.lib
 "
 }
 C {simulator_commands_shown.sym} -2600 -1800 0 0 {

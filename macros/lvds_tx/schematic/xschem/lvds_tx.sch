@@ -30,12 +30,23 @@ WHAT THE TWO WIRES BETWEEN THE BLOCKS ARE:
                    analog delay line that made the tap.
 
 TWO SEPARATE REFERENCE CURRENTS, Iref_pd and Iref_drv, and they must stay
-separate.  Tie them together and feed 60 uA and neither block gets 30: the two
-reference diodes sit in parallel and split the current by width -- M9 in the
-driver is 0.8 um, Mref in the pre-driver is 8 um -- so the driver would run at
-about a tenth of its bias while every waveform still looked plausible and |Vod|
-quietly landed at 110 mV.  That is the reason they are two pins on this symbol
-and not one.
+separate.  Tie them together and feed twice one pin's current and neither block
+gets its share: the two reference diodes sit in parallel and split the current
+by width -- M9 in the driver is 0.8 um, Mref in the pre-driver is 8 um -- so the
+driver would run at about a tenth of its bias while every waveform still looked
+plausible and |Vod| quietly landed at 110 mV.  That is the reason they are two
+pins on this symbol and not one.
+
+BOTH PINS NOW TAKE 2 uA, NOT 30 uA.  The harness current DACs deliver 50 nA to
+10 uA, so the 30 uA the driver and the pre-driver were characterised at cannot
+come off a pin at all.  Xm_pd and Xm_drv are 1:15 pre-mirrors (iref_x15.sch):
+each takes 2 uA from its pin and hands 30 uA to the block behind it on
+Iref_pd_30u / Iref_drv_30u, so Driver.sch and predriver.sch are untouched and
+still see exactly the bias they were measured at.
+
+The macro's own Driver.tb, predriver.tb and tb_dc drive those blocks directly,
+below the pre-mirror, and therefore still use 30 uA.  tb_alt, tb_prbs, tb_slow,
+tb_startup and tb_word drive this symbol's pins and use 2 uA.
 
 Va is 3.3 V and runs along the top; Vss along the bottom.  The 1.2 V core rail
 does not appear here at all -- the pre-driver's input stage takes core-level
@@ -46,10 +57,16 @@ output, and the clause 4.1.4 and 4.1.5 numbers depend on that capacitance, so
 it stays visible in the testbench rather than being buried in a block.} -1480 -590 0 0 0.4 0.4 {}
 N -400 -50 -150 -50 {lab=D_p}
 N -400 -30 -150 -30 {lab=D_n}
-N -400 30 -150 30 {lab=Iref_pd}
-N -400 120 400 120 {lab=Iref_drv}
-N 400 10 400 120 {lab=Iref_drv}
-N 400 10 550 10 {lab=Iref_drv}
+N -400 30 -340 30 {lab=Iref_pd}
+C {lab_wire.sym} -340 30 0 0 {name=wpin_pd sig_type=std_logic lab=Iref_pd}
+N -210 30 -150 30 {lab=Iref_pd_30u}
+C {lab_wire.sym} -210 30 0 0 {name=wblk_pd sig_type=std_logic lab=Iref_pd_30u}
+N -400 120 -340 120 {lab=Iref_drv}
+C {lab_wire.sym} -340 120 0 0 {name=wpin_dv sig_type=std_logic lab=Iref_drv}
+N -210 120 400 120 {lab=Iref_drv_30u}
+C {lab_wire.sym} -210 120 0 0 {name=wblk_dv sig_type=std_logic lab=Iref_drv_30u}
+N 400 10 400 120 {lab=Iref_drv_30u}
+N 400 10 550 10 {lab=Iref_drv_30u}
 N -400 160 460 160 {lab=Vref}
 N 460 30 460 160 {lab=Vref}
 N 460 30 550 30 {lab=Vref}
@@ -75,6 +92,24 @@ N 850 -10 1100 -10 {lab=Out_p}
 N 850 10 1100 10 {lab=Out_n}
 N 320 -250 600 -250 {lab=Va}
 N 260 250 600 250 {lab=Vss}
+N -180 400 -220 400 {lab=Iref_pd}
+C {lab_wire.sym} -220 400 0 0 {name=wm_pd_in sig_type=std_logic lab=Iref_pd}
+N -20 400 20 400 {lab=Iref_pd_30u}
+C {lab_wire.sym} 20 400 0 0 {name=wm_pd_out sig_type=std_logic lab=Iref_pd_30u}
+N -120 320 -120 280 {lab=Va}
+C {lab_wire.sym} -120 280 0 0 {name=wm_pd_va sig_type=std_logic lab=Va}
+N -80 480 -80 520 {lab=Vss}
+C {lab_wire.sym} -80 520 0 0 {name=wm_pd_vss sig_type=std_logic lab=Vss}
+C {iref_x15.sym} -100 400 0 0 {name=Xm_pd}
+N -180 650 -220 650 {lab=Iref_drv}
+C {lab_wire.sym} -220 650 0 0 {name=wm_drv_in sig_type=std_logic lab=Iref_drv}
+N -20 650 20 650 {lab=Iref_drv_30u}
+C {lab_wire.sym} 20 650 0 0 {name=wm_drv_out sig_type=std_logic lab=Iref_drv_30u}
+N -120 570 -120 530 {lab=Va}
+C {lab_wire.sym} -120 530 0 0 {name=wm_drv_va sig_type=std_logic lab=Va}
+N -80 730 -80 770 {lab=Vss}
+C {lab_wire.sym} -80 770 0 0 {name=wm_drv_vss sig_type=std_logic lab=Vss}
+C {iref_x15.sym} -100 650 0 0 {name=Xm_drv}
 C {predriver.sym} 0 0 0 0 {name=Xpd}
 C {Driver.sym} 700 0 0 0 {name=Xdrv}
 C {lab_wire.sym} 450 -30 0 0 {name=w1 sig_type=std_logic lab=In_p}

@@ -32,7 +32,7 @@ SIZING: pn[0] is 1.65, not the 1.2 it was.  In_p and In_n run ANTIPHASE
 through the same chain, so each stage rise/fall asymmetry adds up as
 differential delay.  Balancing the first stage took skew from 31..64 ps to
 1.6..16 ps over PVT and Vos p-p from 137..197 mV to 42..70 mV, at the same
-current.  docs/predriver-findings.md 5c.} -180 -1500 0 0 0.4 0.4 {}
+current.  docs/predriver-findings.md 5c.} -170 -1780 0 0 0.4 0.4 {}
 N 1400 -1000 3000 -1000 {lab=Va}
 N 200 340 3000 340 {lab=Vss}
 N -20 440 500 440 {lab=Iref}
@@ -40,18 +40,18 @@ N 60 500 500 500 {lab=D_p}
 N 20 560 500 560 {lab=D_n}
 N 200 -1000 200 -70 {lab=Va}
 N 200 70 200 340 {lab=Vss}
-N 60 -20 100 -20 {}
+N 60 -20 100 -20 {lab=D_p}
 N 60 -20 60 500 {lab=D_p}
-N 20 0 100 0 {}
+N 20 0 100 0 {lab=D_n}
 N 20 0 20 560 {lab=D_n}
-N -20 20 100 20 {}
+N -20 20 100 20 {lab=Iref}
 N -20 20 -20 440 {lab=Iref}
-N 300 0 1280 0 {lab=lspm}
-N -80 60 -40 60 {}
+N 300 0 1280 0 {lab=#net1}
+N -80 60 -40 60 {lab=Vss}
 N -40 60 -40 340 {lab=Vss}
-N -120 20 -120 440 {}
-N -120 20 -80 20 {}
-N -80 20 -80 30 {}
+N -120 20 -120 440 {lab=Iref}
+N -120 20 -80 20 {lab=Iref}
+N -80 20 -80 30 {lab=Iref}
 N -80 90 -80 340 {lab=Vss}
 N 200 700 3000 700 {lab=Va}
 N 1400 2040 3000 2040 {lab=Vss}
@@ -60,15 +60,15 @@ N 20 2200 500 2200 {lab=D_p}
 N 60 2260 500 2260 {lab=D_n}
 N 200 700 200 1630 {lab=Va}
 N 200 1770 200 2040 {lab=Vss}
-N 60 1680 100 1680 {}
+N 60 1680 100 1680 {lab=D_n}
 N 60 1680 60 2260 {lab=D_n}
-N 20 1700 100 1700 {}
+N 20 1700 100 1700 {lab=D_p}
 N 20 1700 20 2200 {lab=D_p}
-N -20 1720 100 1720 {}
+N -20 1720 100 1720 {lab=Iref}
 N -20 1720 -20 2140 {lab=Iref}
-N 300 1700 1280 1700 {lab=lsnm}
-N 1280 0 1280 830 {lab=lspm}
-N 1280 870 1280 1700 {lab=lsnm}
+N 300 1700 1280 1700 {lab=#net2}
+N 1280 0 1280 830 {lab=#net1}
+N 1280 870 1280 1700 {lab=#net2}
 N 1520 830 3000 830 {lab=In_p}
 N 1520 870 3000 870 {lab=In_n}
 N 1400 -1000 1400 780 {lab=Va}

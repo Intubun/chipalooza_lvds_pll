@@ -44,10 +44,10 @@ if {![llength [info commands append_xschem_library_path_unique]]} {
 append_xschem_library_path_unique [file dirname [info script]]
 append_xschem_library_path_unique [file join [file dirname [info script]] ../../testbenches/xschem]
 
-# Source macro xschemrc.  macros/inverter is deliberately NOT on this path:
-# it carries a cell also called `inverter`, which shadowed the ring
-# oscillator's own stage in macros/pll_analog and put the wrong devices
-# into the VCO.  The top level instantiates neither, so the path can go.
+# Source macro xschemrc.  macros/inverter used to sit here and carried a cell
+# also called `inverter`, which shadowed the ring oscillator's own stage in
+# macros/pll_analog and put the wrong devices into the VCO.  That macro was the
+# seeded template example and has been deleted, so the collision is gone.
 source [file dirname [info script]]/../../macros/pll_analog/schematic/xschem/xschemrc
 source [file dirname [info script]]/../../macros/pll_digital/schematic/xschem/xschemrc
 source [file dirname [info script]]/../../macros/lvds_tx/schematic/xschem/xschemrc

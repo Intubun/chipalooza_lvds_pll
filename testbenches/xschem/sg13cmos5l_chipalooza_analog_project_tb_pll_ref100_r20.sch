@@ -5,16 +5,16 @@ V {}
 S {}
 F {}
 E {}
-T {PLL bench ref250_r4: 250 MHz reference in, PRBS-7 at 500 Mb/s out.
+T {PLL bench ref100_r20: 100 MHz reference in, PRBS-7 at 1 Gb/s out.
 
-  baseline - the operating point the rest of the project assumes
+  2 GHz VCO, the fast end - the other characterised row
 
-  VCO      = REF * DIV_RATIO   = 1 GHz
-  pll_clk  = VCO / 2           = 500 MHz   <- the line rate
-  test_clk = VCO / 2           = 500 MHz   <- on analog_pin[1]
+  VCO      = REF * DIV_RATIO   = 2 GHz
+  pll_clk  = VCO / 2           = 1 GHz   <- the line rate
+  test_clk = VCO / 8           = 250 MHz   <- on analog_pin[1]
 
-  DIV_RATIO = 4, code 32 = 0000100000
-              integer part 4 in div_ratio[9:3], 0/8 in div_ratio[2:0]
+  DIV_RATIO = 20, code 160 = 0010100000
+              integer part 20 in div_ratio[9:3], 0/8 in div_ratio[2:0]
 
   1 ns       PLL RESET_N released
   2 ns       PLL ENABLE
@@ -24,7 +24,7 @@ The run is 6 us because the loop needs it: pll_integer_characterization.csv
 measures lock at 2.75 us typical and 4.50 us slow, so the earlier 1 us bench was
 reading a frequency the loop had not settled to yet.
 
-f_pll is averaged over ~600 cycles late in the run rather than across two
+f_pll is averaged over ~1200 cycles late in the run rather than across two
 adjacent edges.  fractional_divider.v is a plain N/N+1 accumulator with no
 delta-sigma, so at a fractional ratio the instantaneous period alternates and
 only the average over a whole accumulator cycle is the number worth reading.
@@ -109,10 +109,10 @@ C {devices/gnd.sym} -2000 520 0 0 {name=lg_dig_in_15 lab=GND}
 T {DIV_RATIO[8] = 0   weight integer 32} -1920 455 0 0 0.3 0.3 {}
 N -2000 600 -2000 630 {lab=dig_in[14]}
 C {devices/lab_wire.sym} -2000 600 0 0 {name=ls_dig_in_14 sig_type=std_logic lab=dig_in[14]}
-C {devices/vsource.sym} -2000 660 0 0 {name=Vdig_in_14 value="0"}
+C {devices/vsource.sym} -2000 660 0 0 {name=Vdig_in_14 value="1.2"}
 N -2000 690 -2000 720 {lab=GND}
 C {devices/gnd.sym} -2000 720 0 0 {name=lg_dig_in_14 lab=GND}
-T {DIV_RATIO[7] = 0   weight integer 16} -1920 655 0 0 0.3 0.3 {}
+T {DIV_RATIO[7] = 1   weight integer 16} -1920 655 0 0 0.3 0.3 {}
 N -2000 800 -2000 830 {lab=dig_in[13]}
 C {devices/lab_wire.sym} -2000 800 0 0 {name=ls_dig_in_13 sig_type=std_logic lab=dig_in[13]}
 C {devices/vsource.sym} -2000 860 0 0 {name=Vdig_in_13 value="0"}
@@ -159,13 +159,13 @@ L 3 -2260 140 -1340 140 {}
 L 3 -1340 140 -1340 2180 {}
 L 3 -2260 2180 -1340 2180 {}
 L 3 -2260 140 -2260 2180 {}
-T {DIV_RATIO = 4   code 32 = 0000100000} -2260 85 0 0 0.4 0.4 {}
+T {DIV_RATIO = 20   code 160 = 0010100000} -2260 85 0 0 0.4 0.4 {}
 N -2000 2320 -2000 2350 {lab=dig_in[18]}
 C {devices/lab_wire.sym} -2000 2320 0 0 {name=ls_dig_in_18 sig_type=std_logic lab=dig_in[18]}
-C {devices/vsource.sym} -2000 2380 0 0 {name=Vdig_in_18 value="0"}
+C {devices/vsource.sym} -2000 2380 0 0 {name=Vdig_in_18 value="1.2"}
 N -2000 2410 -2000 2440 {lab=GND}
 C {devices/gnd.sym} -2000 2440 0 0 {name=lg_dig_in_18 lab=GND}
-T {TEST_DIV[1] = 0} -1920 2375 0 0 0.3 0.3 {}
+T {TEST_DIV[1] = 1} -1920 2375 0 0 0.3 0.3 {}
 N -2000 2520 -2000 2550 {lab=dig_in[17]}
 C {devices/lab_wire.sym} -2000 2520 0 0 {name=ls_dig_in_17 sig_type=std_logic lab=dig_in[17]}
 C {devices/vsource.sym} -2000 2580 0 0 {name=Vdig_in_17 value="0"}
@@ -176,7 +176,7 @@ L 3 -2260 2260 -1340 2260 {}
 L 3 -1340 2260 -1340 2700 {}
 L 3 -2260 2700 -1340 2700 {}
 L 3 -2260 2260 -2260 2700 {}
-T {TEST_DIV = 0   TEST_CLK = VCO/2} -2260 2205 0 0 0.4 0.4 {}
+T {TEST_DIV = 2   TEST_CLK = VCO/8} -2260 2205 0 0 0.4 0.4 {}
 N -2000 2840 -2000 2870 {lab=dig_in[0]}
 C {devices/lab_wire.sym} -2000 2840 0 0 {name=ls_dig_in_0 sig_type=std_logic lab=dig_in[0]}
 C {devices/vsource.sym} -2000 2900 0 0 {name=Vdig_in_0 value="1.2"}
@@ -208,10 +208,10 @@ L 3 -2260 2780 -2260 3620 {}
 T {pattern control} -2260 2725 0 0 0.4 0.4 {}
 N -2000 3760 -2000 3790 {lab=analog_pin[0]}
 C {devices/lab_wire.sym} -2000 3760 0 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
-C {devices/vsource.sym} -2000 3820 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 1.9500n 4.0000n)"}
+C {devices/vsource.sym} -2000 3820 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 4.9500n 10.0000n)"}
 N -2000 3850 -2000 3880 {lab=GND}
 C {devices/gnd.sym} -2000 3880 0 0 {name=lg_analog_pin_0 lab=GND}
-T {REF_CLK, 250 MHz} -1920 3815 0 0 0.3 0.3 {}
+T {REF_CLK, 100 MHz} -1920 3815 0 0 0.3 0.3 {}
 L 3 -2260 3700 -1340 3700 {}
 L 3 -1340 3700 -1340 3940 {}
 L 3 -2260 3940 -1340 3940 {}
@@ -355,7 +355,7 @@ simulate
 "}
 C {launcher.sym} 2050 -2110 0 0 {name=h_waves
 descr="Load waves"
-tclcommand="xschem raw_read $netlist_dir/sg13cmos5l_chipalooza_analog_project_tb_pll.raw tran"
+tclcommand="xschem raw_read $netlist_dir/sg13cmos5l_chipalooza_analog_project_tb_pll_ref100_r20.raw tran"
 }
 C {launcher.sym} 2050 -2070 0 0 {name=h_check
 descr="Check PRBS + timing"
@@ -450,7 +450,7 @@ value="
 .control
 save d_p d_n vos x1.core_p x1.core_n x1.pll_clk
 + x1.xpll.VCTRL x1.xpll.VCO_CLK x1.xpll.FB_CLK x1.xpll.UP x1.xpll.DOWN
-tran 2.5e-11 6e-06 0 2.5e-11
+tran 1.25e-11 6e-06 0 1.25e-11
 write @schname\\\\.raw
 
 * First: does the loop do anything at all?  VCTRL has to move and the VCO has
@@ -462,12 +462,12 @@ meas tran vco_pp PP v(x1.xpll.VCO_CLK) from=5.45e-06 to=5.95e-06
 meas tran fb_pp PP v(x1.xpll.FB_CLK) from=5.45e-06 to=5.95e-06
 print vctrl_min vctrl_max vctrl_end vco_pp fb_pp
 
-* Second: is pll_clk on target?  Averaged over 600 cycles, because the
+* Second: is pll_clk on target?  Averaged over 1200 cycles, because the
 * N/N+1 divider makes any single period the wrong thing to measure.
-meas tran t1 WHEN v(x1.pll_clk)=0.6 RISE=2250
-meas tran t2 WHEN v(x1.pll_clk)=0.6 RISE=2850
-let f_pll = 600/(t2-t1)
-let f_pll_target = 5e+08
+meas tran t1 WHEN v(x1.pll_clk)=0.6 RISE=4500
+meas tran t2 WHEN v(x1.pll_clk)=0.6 RISE=5700
+let f_pll = 1200/(t2-t1)
+let f_pll_target = 1e+09
 let f_pll_err_ppm = 1e6*(f_pll-f_pll_target)/f_pll_target
 print f_pll f_pll_target f_pll_err_ppm
 

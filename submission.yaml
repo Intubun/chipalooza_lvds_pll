@@ -25,38 +25,156 @@ team-members:
 # https://github.com/RTimothyEdwards/sg13cmos5l_ocd_chipalooza
 # This project uses four, so wrapper _4a and slot s1 or s16 - per config.txt
 # there, the only two slots with four dedicated pads.
+#
+# UNVERIFIED: the value below is the intent, not a measured fact. The layout in
+# this repository is still the seeded 200um x 200um template, and the geometry
+# of slots s1 and s16 has to come from the harness repository before this field
+# can be filled in with any confidence. See "Status" in long-description.
 slot-size: large
 
 # Four dedicated analog pads, all sg13cmos5l_IOPadAnalog:
 #   analog_pin[0] ref_clk, [1] pll_out, [2] d_p, [3] d_n
+#
+# NOTE: README.md documents this field as "how many of analog_0 ... analog_2 the
+# macro uses, 0-3", so a 4 is outside the range the seeded template defines. It
+# is kept because it is what the project actually needs; if the precheck rejects
+# it, the field has to be reconciled with the harness definition rather than the
+# design changed.
 analog-pins: 4
 
-short-description: Hand-drawn analog-on-top macro built from the inverter sub-macro.
+short-description: LVDS transmitter fed by an on-chip PLL, with a standard-cell PRBS-7 generator.
 
 # Please add the documentation about your project here.
 # Why did you choose to create it? How does it work? How can it be tested, etc.?
 # If your project requires additional external hardware, e.g. a USB port,
 # please mention this so it can be considered when designing the PCB.
 long-description: |
-  An analog-on-top example macro for the ihp-sg13cmos5l Open-PDK.
+  An LVDS transmitter fed by an on-chip PLL, drawn for the IHP sg13cmos5l
+  Open-PDK and wired to the Chipalooza harness interface
+  (`verilog/rtl/user_project_wrapper_4a.v`).
 
-  The top level is drawn **by hand** in KLayout on top of the `tiny` floorplan
-  template and instantiates four `inverter` unit cells from the `inverter`
-  sub-macro in `macros/inverter/`.
+  The point of the project is to get a standards-compliant differential line
+  driver off an on-chip clock rather than an external one, and to be able to
+  prove it on the bench: the pattern the driver sends is generated on chip, so
+  the link can be checked without feeding data in through a pad.
 
-  The macro is signed off with the full analog flow:
+  ## What is in the top cell
 
-  * Xschem schematic and transient testbench, simulated with ngspice
-  * KLayout and Magic DRC
-  * KLayout and Magic + Netgen LVS
-  * Magic parasitic extraction, followed by a post-layout simulation
-  * CACE characterization of the inverter unit cell
+  * **`lvds_pattern`** (`xpat`) - a PRBS-7 generator (x^7 + x^6 + 1) and clock
+    multiplexer built **only** from PDK standard cells. `clk_src` selects the
+    reference or the PLL, `mode` selects clock passthrough or PRBS-7, `reset`
+    reseeds the shift register and `en` gates the clock. The line bit and its
+    complement are re-timed through a flip-flop pair after the inversion, so
+    both edges leave the block synchronously.
+  * **`lvds_tx`** (`xlvds`) - the pre-driver and the LVDS output driver, a
+    hand-drawn analog block with its own common-mode feedback loop.
+  * **`pll`** (`xpll`) - the PLL by Rahul Bhagwat: the analog loop from
+    `macros/pll_analog` with the divider and control from
+    `macros/pll_digital`. The feedback divider takes an unsigned Q7.3 ratio
+    and the output divider always halves the VCO, so
+    `pll_clk = ref_clk * (DIV_RATIO / 8) / 2`.
 
-  Testing: drive `uio_in[0]` and observe the inverter outputs on `analog_1`
-  and `analog_2`; `analog_0` is the analog input. `VPWR`/`VGND` supply the
-  digital rails and `VAPWR` the analog rail. Reproduce the committed results
-  with `make all` inside the IIC-OSIC-TOOLS container. No additional external
-  hardware is required.
+  The pattern generator's `en` comes straight off `dig_in[1]`; the harness
+  `enable` is not connected. One decoupling capacitor per rail sits across
+  `vdd_1v2` and `vdd_3v3`.
+
+  ## Interface
+
+  Four dedicated analog pads:
+
+  | Pad | Dir | Function |
+  | --- | --- | --- |
+  | `analog_pin[0]` | in  | `ref_clk` - the PLL reference, and the fallback bit clock when `clk_src` is 0 |
+  | `analog_pin[1]` | out | `pll_out` - the PLL's `TEST_CLK` brought off chip |
+  | `analog_pin[2]` | out | `d_p` |
+  | `analog_pin[3]` | out | `d_n` |
+
+  Digital control, every bit routed individually by the housekeeping SPI:
+
+  | Pin | Function |
+  | --- | --- |
+  | `dig_in[0]`     | `clk_src`: 0 takes `ref_clk`, 1 takes the PLL |
+  | `dig_in[1]`     | pattern `en`, gates the pattern clock |
+  | `dig_in[2]`     | PRBS reset |
+  | `dig_in[3]`     | `mode`: 0 clock passthrough, 1 PRBS-7 |
+  | `dig_in[5]`     | PLL `ENABLE` |
+  | `dig_in[6]`     | PLL `RESET_N`, active low |
+  | `dig_in[16:7]`  | `DIV_RATIO[9:0]`, unsigned Q7.3 |
+  | `dig_in[18:17]` | `TEST_DIV[1:0]` |
+
+  `DIV_RATIO` is integer-N when bits `[2:0]` are zero and fractional-N in
+  eighth steps otherwise, so the whole divider costs 10 bits rather than the
+  23 of the earlier split ratio. That leaves `dig_in[4]` and `dig_in[23:19]`
+  free - 18 of the 24 bits are used. Analog references, all inside the 50 nA to
+  10 uA the harness current DACs deliver: `ibias[0]` 2 uA for the pre-driver and
+  `ibias[1]` 2 uA for the driver, each mirrored 1:15 inside `lvds_tx` so the
+  blocks still see the 30 uA they were characterised at; `analog_bus[0]` 2 uA
+  for the PLL charge pump; `analog_bus[1]` 1.25 V as the LVDS common-mode
+  reference. `vbias` is not connected.
+
+  ## How it is tested
+
+  Everything below runs inside the IIC-OSIC-TOOLS container. Each bench also
+  carries Simulate / Load waves / Check arrows, so it can be run from inside
+  Xschem instead.
+
+  * `make sim-xschem TB=sg13cmos5l_chipalooza_analog_project_tb_lvds` - 600 ns
+    with the pattern generator on a provisional 1 GHz bit clock, ending in the
+    three TIA/EIA-644-A checks on the settled pattern.
+  * The PLL configuration pins are not wired inside the transistor-level PLL:
+    `DIV_RATIO[9:0]` and `TEST_DIV[1:0]` are unconnected `ipin`s in `pll.sch`,
+    the feedback divide is a hard-wired `d_fdiv(div_factor=20)` model card and
+    `TEST_CLK` is always VCO/4. Only `macros/pll_digital` decodes `DIV_RATIO`,
+    through `scripts/pll/run_pll_cosim.sh`. The top-level PLL bench therefore
+    locks only when the reference times 20 lands inside the oscillator's range.
+  * `make sim-xschem TB=sg13cmos5l_chipalooza_analog_project_tb_pll` - 250 MHz
+    in, `DIV_RATIO` = 4.0 (code 32), PRBS-7 at 500 Mb/s out, with the loop
+    checked before the transmitter so a dead VCO cannot be mistaken for a
+    bad driver.
+  * `make -C macros/lvds_pattern sim-xschem TB=lvds_pattern_tb_prbs`, then
+    `python3 macros/lvds_pattern/scripts/check_timing.py`, which measures the
+    clock-to-output spread, derives the data valid window from it and re-runs
+    the polynomial in the middle of that window.
+
+  Latest top-level LVDS bench, typical corner at 27 C:
+
+      |Vod|     383.0 mV     4.1.1 wants 247 ... 454 mV
+      Vos       1.2438 V     4.1.2 wants 1.125 ... 1.375 V
+      Vos p-p    107.0 mV    4.1.5 wants under 150 mV
+      I(3.3 V)    5.77 mA    I(1.2 V)  311 uA
+
+    Measured with the 2 uA pin references and the 1:15 pre-mirrors. |Vod| sits
+    6.7 % above the 359 mV the block reached on a direct 30 uA reference: the
+    residual is the mirrors' channel-length modulation, the diode sitting at
+    Vds = Vgs while its partner sits near 2.6 V. Lengthening the mirror devices
+    to L = 2 um cut that from 47 % to 6.7 %; closing it completely wants a
+    cascode on the NMOS output device rather than a trimmed finger count.
+
+  The pattern generator on its own runs 1 Gb/s with no PRBS-7 mismatches over a
+  full 127-bit period, a data valid window of 99.3 % of a UI and 12.4 ps of
+  D_p / D_n skew.
+
+  Note that the decks integrate with `trap`, not `gear`: Gear2 collapses the
+  timestep at 414 ns on the 1.2 V supply branch once the PLL is in the netlist.
+
+  ## External hardware
+
+  The differential pair needs a 100 ohm termination at the receiver - the
+  benches model it as 49.9 + 49.9 ohm with the mid-point tapped to measure Vos.
+  Nothing else is required. `ref_clk` wants a clock source on
+  `analog_pin[0]`; `pll_out` on `analog_pin[1]` is an observation point only.
+
+  ## Status
+
+  **Only the netlist side of this repository is on the Chipalooza interface.**
+  `schematic/`, `testbenches/` and this file describe
+  `user_project_wrapper_4a.v`. `floorplan/`, `layout/`, `final/` and every
+  DRC/LVS/PEX target still carry the HeiChips-style frame this repository was
+  seeded from: `final/lef` is 200 um x 200 um with `analog_0 ... analog_2` pins,
+  `final/vh` still declares `ui_in` / `uio_*` / `uo_out`, and `layout/` still
+  holds the four template inverter cells. The slot geometry has to come from the
+  harness repository before the physical targets mean anything, so the three
+  paths below currently match seeded artefacts rather than this project.
 
 # These paths are used to verify your
 # submission during the precheck.
