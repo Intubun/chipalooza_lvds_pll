@@ -94,11 +94,11 @@ L 3 -1340 -580 -1340 260 {}
 L 3 -2260 260 -1340 260 {}
 L 3 -2260 -580 -2260 260 {}
 T {pattern control} -2260 -635 0 0 0.4 0.4 {}
-N -2000 400 -2000 430 {lab=analog_pin[0]}
-C {devices/lab_wire.sym} -2000 400 0 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
-C {devices/vsource.sym} -2000 460 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 0.9n 2n)"}
+N -2000 400 -2000 430 {lab=clk}
+C {devices/lab_wire.sym} -2000 400 0 0 {name=ls_clk sig_type=std_logic lab=clk}
+C {devices/vsource.sym} -2000 460 0 0 {name=Vclk value="PULSE(0 1.2 0 50p 50p 0.9n 2n)"}
 N -2000 490 -2000 520 {lab=GND}
-C {devices/gnd.sym} -2000 520 0 0 {name=lg_analog_pin_0 lab=GND}
+C {devices/gnd.sym} -2000 520 0 0 {name=lg_clk lab=GND}
 T {ref_clk, 500 MHz} -1920 455 0 0 0.3 0.3 {}
 L 3 -2260 340 -1340 340 {}
 L 3 -1340 340 -1340 580 {}
@@ -343,6 +343,11 @@ value="
 * own benches place cmfb the same way and run no operating point.
 .ic v(x1.xlvds.xdrv.cmfb)=1.54
 .control
+* xpll is pll_cosim: the PFD and both dividers are the RTL of
+* macros/pll_digital, through d_cosim.  The analog/digital bridges are
+* inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
+* cannot live here, xschem's value="..." property ends at their quotes.
+* Build the shared object first: make pll-cosim-so.
 * save all over 120 ns at 5 ps writes a 292 MB rawfile; name what the
 * measurements, the wrdata and the three graph panels actually need
 save d_p d_n vos x1.core_p x1.core_n x1.xpat.gclk_b i(Vvdd_3v3) i(Vvdd_1v2)

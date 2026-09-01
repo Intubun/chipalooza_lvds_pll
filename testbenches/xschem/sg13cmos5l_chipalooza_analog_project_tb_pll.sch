@@ -206,11 +206,11 @@ L 3 -1340 2780 -1340 3620 {}
 L 3 -2260 3620 -1340 3620 {}
 L 3 -2260 2780 -2260 3620 {}
 T {pattern control} -2260 2725 0 0 0.4 0.4 {}
-N -2000 3760 -2000 3790 {lab=analog_pin[0]}
-C {devices/lab_wire.sym} -2000 3760 0 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
-C {devices/vsource.sym} -2000 3820 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 1.9500n 4.0000n)"}
+N -2000 3760 -2000 3790 {lab=clk}
+C {devices/lab_wire.sym} -2000 3760 0 0 {name=ls_clk sig_type=std_logic lab=clk}
+C {devices/vsource.sym} -2000 3820 0 0 {name=Vclk value="PULSE(0 1.2 0 50p 50p 1.9500n 4.0000n)"}
 N -2000 3850 -2000 3880 {lab=GND}
-C {devices/gnd.sym} -2000 3880 0 0 {name=lg_analog_pin_0 lab=GND}
+C {devices/gnd.sym} -2000 3880 0 0 {name=lg_clk lab=GND}
 T {REF_CLK, 250 MHz} -1920 3815 0 0 0.3 0.3 {}
 L 3 -2260 3700 -1340 3700 {}
 L 3 -1340 3700 -1340 3940 {}
@@ -376,7 +376,7 @@ subdivx=1
 xlabmag=1.0
 ylabmag=1.0
 legendmag=1.0
-node="x1.xpll.VCTRL"
+node="x1.xpll.x_analog.VCTRL"
 color="8"
 dataset=-1
 unitx=1
@@ -448,19 +448,27 @@ value="
 * and the run then stops early whatever tstop says.  trap gets through.
 .options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 .control
+* xpll is pll_cosim: the PFD and both dividers are the RTL of
+* macros/pll_digital, through d_cosim.  The analog/digital bridges are
+* inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
+* cannot live here, xschem's value="..." property ends at their quotes.
+* Build the shared object first: make pll-cosim-so.
 save d_p d_n vos x1.core_p x1.core_n x1.pll_clk
-+ x1.xpll.VCTRL x1.xpll.VCO_CLK x1.xpll.FB_CLK x1.xpll.UP x1.xpll.DOWN
++ x1.xpll.x_analog.VCTRL x1.xpll.VCO_CLK x1.xpll.FB_CLK x1.xpll.UP x1.xpll.DOWN
 tran 2.5e-11 6e-06 0 2.5e-11
 write @schname\\\\.raw
 
 * First: does the loop do anything at all?  VCTRL has to move and the VCO has
 * to oscillate before any number below means anything.
-meas tran vctrl_min MIN v(x1.xpll.VCTRL) from=50n to=5.95e-06
-meas tran vctrl_max MAX v(x1.xpll.VCTRL) from=50n to=5.95e-06
-meas tran vctrl_end AVG v(x1.xpll.VCTRL) from=5.45e-06 to=5.95e-06
+meas tran vctrl_min MIN v(x1.xpll.x_analog.VCTRL) from=50n to=5.95e-06
+meas tran vctrl_max MAX v(x1.xpll.x_analog.VCTRL) from=50n to=5.95e-06
+meas tran vctrl_end AVG v(x1.xpll.x_analog.VCTRL) from=5.45e-06 to=5.95e-06
 meas tran vco_pp PP v(x1.xpll.VCO_CLK) from=5.45e-06 to=5.95e-06
-meas tran fb_pp PP v(x1.xpll.FB_CLK) from=5.45e-06 to=5.95e-06
-print vctrl_min vctrl_max vctrl_end vco_pp fb_pp
+* FB_CLK used to be measurable because the XSPICE divider drove it through a
+* dac_bridge.  Under d_cosim it is a digital output that no analog node
+* consumes, so it carries no voltage waveform - and f_pll answers the question
+* it was there to answer.
+print vctrl_min vctrl_max vctrl_end vco_pp
 
 * Second: is pll_clk on target?  Averaged over 600 cycles, because the
 * N/N+1 divider makes any single period the wrong thing to measure.
@@ -485,6 +493,6 @@ print vod_max vod_min vos_avg vos_pp core_pp
 set wr_vecnames
 set wr_singlescale
 wrdata ../plot_simulations/data/@schname\\\\.txt
-+ v(d_p) v(d_n) v(vos) vod v(x1.pll_clk) v(x1.xpll.VCTRL)
++ v(d_p) v(d_n) v(vos) vod v(x1.pll_clk) v(x1.xpll.x_analog.VCTRL)
 .endc
 "}

@@ -192,7 +192,7 @@ a different pad type changes that (an `InOut` pad becomes five core signals).
 
 | pad | carries | |
 |---|---|---|
-| `analog_pin[0]` | `ref_clk` | PLL reference in, feeds `lvds_pattern` |
+| `analog_pin[0]` | -- | spare; the reference moved to the `clk` pin |
 | `analog_pin[1]` | `pll_out` | the PLL's `TEST_CLK`, brought off chip |
 | `analog_pin[2]` | `d_p` | LVDS out + |
 | `analog_pin[3]` | `d_n` | LVDS out - |
@@ -212,7 +212,7 @@ constant or the sequencer, so a configuration bit costs a register write and no 
 | `dig_in[1]` | `en` -- gates the pattern clock |
 | `dig_in[2]` | `reset` -- active high, seeds the PRBS |
 | `dig_in[3]` | `mode` -- 0 = clock passthrough, 1 = PRBS-7 |
-| `dig_in[4]` | unused — carried the provisional `pll_clk` before the PLL was placed |
+| `dig_in[4]` | unused |
 | `dig_in[5]` | PLL `ENABLE` |
 | `dig_in[6]` | PLL `RESET_N`, active low |
 | `dig_in[16:7]` | PLL `DIV_RATIO[9:0]`, unsigned Q7.3 |

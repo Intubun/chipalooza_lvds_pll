@@ -46,3 +46,26 @@ set load_file_postprocess {pin_netlist_dir [xschem get current_dirname]}
 # produce the same netlist.  Deliberately not set in schematic/xschem/xschemrc -
 # the design netlist keeps its brackets for LVS against the wrapper.
 set bus_replacement_char {__}
+
+
+# The top cell instantiates pll_cosim, so its PFD and dividers are the RTL of
+# macros/pll_digital running under d_cosim.  ngspice only bridges that block to
+# the analog loop if auto_bridge_d_in / auto_bridge_d_out are set before the
+# circuit is parsed, and those two `pre_set` lines cannot live in the schematic:
+# xschem carries an ngspice block as a value="..." property and the pre_set
+# syntax needs double quotes of its own, which end the property early - the rest
+# of the control block, .endc included, is dropped without a word.
+#
+# So the netlist is patched after xschem writes it.  make sim-xschem does that
+# too; wiring it in here as well is what keeps the Simulate arrow inside xschem
+# honest.  Without it the cosim block never couples, nothing moves, and every
+# waveform comes out flat.
+set XSCHEM_COSIM_INJECT [file normalize [file join [file dirname [info script]] .. .. scripts pll inject_cosim_bridges.py]]
+foreach {_idx _run} {
+  0 {ngspice -i "$N" -a}
+  1 {ngspice "$N" -a}
+  2 {ngspice -b -r "$n.raw" "$N"}
+} {
+  set sim(spice,$_idx,cmd) "$XSCHEM_COSIM_INJECT \"\$N\" ; $_run"
+}
+unset _idx _run
