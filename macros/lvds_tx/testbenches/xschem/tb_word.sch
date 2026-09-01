@@ -163,12 +163,12 @@ C {lab_pin.sym} -440 -1330 0 0 {name=l35 lab=VDDC}
 N -500 -1270 -560 -1270 {lab=0}
 C {gnd.sym} -560 -1270 0 0 {name=g36 lab=0}
 T {1.2 V core rail: the digital bus levels} -700 -1420 0 0 0.3 0.3 {}
-C {isource.sym} -300 -1300 0 0 {name=I0 value=-30u}
+C {isource.sym} -300 -1300 0 0 {name=I0 value=-2u}
 N -300 -1330 -240 -1330 {lab=Irf_pdd}
 C {lab_pin.sym} -240 -1330 0 0 {name=l37 lab=Irf_pdd}
 N -300 -1270 -360 -1270 {lab=0}
 C {gnd.sym} -360 -1270 0 0 {name=g38 lab=0}
-C {isource.sym} -100 -1300 0 0 {name=I1 value=-30u}
+C {isource.sym} -100 -1300 0 0 {name=I1 value=-2u}
 N -100 -1330 -40 -1330 {lab=Irf_drvd}
 C {lab_pin.sym} -40 -1330 0 0 {name=l39 lab=Irf_drvd}
 N -100 -1270 -160 -1270 {lab=0}
@@ -432,7 +432,7 @@ value="
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
 .lib cornerDIO.lib dio_tt
-.include cap_mfringe.lib
+.include cap_cmomf.lib
 "
 }
 C {simulator_commands_shown.sym} -2600 -1800 0 0 {

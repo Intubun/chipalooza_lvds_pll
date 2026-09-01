@@ -248,18 +248,18 @@ b=0
  m=1
   mm_ok=1
 }
-C {sg13cmos5l_pr/cap_mfringe.sym} 1120 -260 0 0 {name=Cxp
-model=cap_mfringe
-w=4.4u
-l=4.4u
+C {sg13cmos5l_pr/cap_cmomf.sym} 1120 -260 0 0 {name=Cxp
+model=cap_cmomf
+w=5.913u
+l=5.913u
 mmin=1
 mmax=4
 spiceprefix=X
 }
-C {sg13cmos5l_pr/cap_mfringe.sym} 1220 -260 0 0 {name=Cxn
-model=cap_mfringe
-w=4.4u
-l=4.4u
+C {sg13cmos5l_pr/cap_cmomf.sym} 1220 -260 0 0 {name=Cxn
+model=cap_cmomf
+w=5.913u
+l=5.913u
 mmin=1
 mmax=4
 spiceprefix=X

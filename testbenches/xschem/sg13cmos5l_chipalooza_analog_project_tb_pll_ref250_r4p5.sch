@@ -5,16 +5,16 @@ V {}
 S {}
 F {}
 E {}
-T {PLL bench ref250_r4: 250 MHz reference in, PRBS-7 at 500 Mb/s out.
+T {PLL bench ref250_r4p5: 250 MHz reference in, PRBS-7 at 562.5 Mb/s out.
 
-  baseline - the operating point the rest of the project assumes
+  fractional-N, code 36: one eighth bit, N/N+1 alternates every other cycle
 
-  VCO      = REF * DIV_RATIO   = 1 GHz
-  pll_clk  = VCO / 2           = 500 MHz   <- the line rate
-  test_clk = VCO / 2           = 500 MHz   <- on analog_pin[1]
+  VCO      = REF * DIV_RATIO   = 1.125 GHz
+  pll_clk  = VCO / 2           = 562.5 MHz   <- the line rate
+  test_clk = VCO / 2           = 562.5 MHz   <- on analog_pin[1]
 
-  DIV_RATIO = 4, code 32 = 0000100000
-              integer part 4 in div_ratio[9:3], 0/8 in div_ratio[2:0]
+  DIV_RATIO = 4.5, code 36 = 0000100100
+              integer part 4 in div_ratio[9:3], 4/8 in div_ratio[2:0]
 
   1 ns       PLL RESET_N released
   2 ns       PLL ENABLE
@@ -24,7 +24,7 @@ The run is 6 us because the loop needs it: pll_integer_characterization.csv
 measures lock at 2.75 us typical and 4.50 us slow, so the earlier 1 us bench was
 reading a frequency the loop had not settled to yet.
 
-f_pll is averaged over ~600 cycles late in the run rather than across two
+f_pll is averaged over ~675 cycles late in the run rather than across two
 adjacent edges.  fractional_divider.v is a plain N/N+1 accumulator with no
 delta-sigma, so at a fractional ratio the instantaneous period alternates and
 only the average over a whole accumulator cycle is the number worth reading.
@@ -139,10 +139,10 @@ C {devices/gnd.sym} -2000 1520 0 0 {name=lg_dig_in_10 lab=GND}
 T {DIV_RATIO[3] = 0   weight integer 1} -1920 1455 0 0 0.3 0.3 {}
 N -2000 1600 -2000 1630 {lab=dig_in[9]}
 C {devices/lab_wire.sym} -2000 1600 0 0 {name=ls_dig_in_9 sig_type=std_logic lab=dig_in[9]}
-C {devices/vsource.sym} -2000 1660 0 0 {name=Vdig_in_9 value="0"}
+C {devices/vsource.sym} -2000 1660 0 0 {name=Vdig_in_9 value="1.2"}
 N -2000 1690 -2000 1720 {lab=GND}
 C {devices/gnd.sym} -2000 1720 0 0 {name=lg_dig_in_9 lab=GND}
-T {DIV_RATIO[2] = 0   weight 1/2} -1920 1655 0 0 0.3 0.3 {}
+T {DIV_RATIO[2] = 1   weight 1/2} -1920 1655 0 0 0.3 0.3 {}
 N -2000 1800 -2000 1830 {lab=dig_in[8]}
 C {devices/lab_wire.sym} -2000 1800 0 0 {name=ls_dig_in_8 sig_type=std_logic lab=dig_in[8]}
 C {devices/vsource.sym} -2000 1860 0 0 {name=Vdig_in_8 value="0"}
@@ -159,7 +159,7 @@ L 3 -2260 140 -1340 140 {}
 L 3 -1340 140 -1340 2180 {}
 L 3 -2260 2180 -1340 2180 {}
 L 3 -2260 140 -2260 2180 {}
-T {DIV_RATIO = 4   code 32 = 0000100000} -2260 85 0 0 0.4 0.4 {}
+T {DIV_RATIO = 4.5   code 36 = 0000100100} -2260 85 0 0 0.4 0.4 {}
 N -2000 2320 -2000 2350 {lab=dig_in[18]}
 C {devices/lab_wire.sym} -2000 2320 0 0 {name=ls_dig_in_18 sig_type=std_logic lab=dig_in[18]}
 C {devices/vsource.sym} -2000 2380 0 0 {name=Vdig_in_18 value="0"}
@@ -355,7 +355,7 @@ simulate
 "}
 C {launcher.sym} 2050 -2110 0 0 {name=h_waves
 descr="Load waves"
-tclcommand="xschem raw_read $netlist_dir/sg13cmos5l_chipalooza_analog_project_tb_pll.raw tran"
+tclcommand="xschem raw_read $netlist_dir/sg13cmos5l_chipalooza_analog_project_tb_pll_ref250_r4p5.raw tran"
 }
 C {launcher.sym} 2050 -2070 0 0 {name=h_check
 descr="Check PRBS + timing"
@@ -450,7 +450,7 @@ value="
 .control
 save d_p d_n vos x1.core_p x1.core_n x1.pll_clk
 + x1.xpll.VCTRL x1.xpll.VCO_CLK x1.xpll.FB_CLK x1.xpll.UP x1.xpll.DOWN
-tran 2.5e-11 6e-06 0 2.5e-11
+tran 2.222e-11 6e-06 0 2.222e-11
 write @schname\\\\.raw
 
 * First: does the loop do anything at all?  VCTRL has to move and the VCO has
@@ -462,12 +462,12 @@ meas tran vco_pp PP v(x1.xpll.VCO_CLK) from=5.45e-06 to=5.95e-06
 meas tran fb_pp PP v(x1.xpll.FB_CLK) from=5.45e-06 to=5.95e-06
 print vctrl_min vctrl_max vctrl_end vco_pp fb_pp
 
-* Second: is pll_clk on target?  Averaged over 600 cycles, because the
+* Second: is pll_clk on target?  Averaged over 675 cycles, because the
 * N/N+1 divider makes any single period the wrong thing to measure.
-meas tran t1 WHEN v(x1.pll_clk)=0.6 RISE=2250
-meas tran t2 WHEN v(x1.pll_clk)=0.6 RISE=2850
-let f_pll = 600/(t2-t1)
-let f_pll_target = 5e+08
+meas tran t1 WHEN v(x1.pll_clk)=0.6 RISE=2531
+meas tran t2 WHEN v(x1.pll_clk)=0.6 RISE=3206
+let f_pll = 675/(t2-t1)
+let f_pll_target = 5.625e+08
 let f_pll_err_ppm = 1e6*(f_pll-f_pll_target)/f_pll_target
 print f_pll f_pll_target f_pll_err_ppm
 

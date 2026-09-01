@@ -5,16 +5,16 @@ V {}
 S {}
 F {}
 E {}
-T {PLL bench ref250_r4: 250 MHz reference in, PRBS-7 at 500 Mb/s out.
+T {PLL bench ref125_r8: 125 MHz reference in, PRBS-7 at 500 Mb/s out.
 
-  baseline - the operating point the rest of the project assumes
+  same 1 GHz VCO as the baseline at half the compare frequency
 
   VCO      = REF * DIV_RATIO   = 1 GHz
   pll_clk  = VCO / 2           = 500 MHz   <- the line rate
-  test_clk = VCO / 2           = 500 MHz   <- on analog_pin[1]
+  test_clk = VCO / 4           = 250 MHz   <- on analog_pin[1]
 
-  DIV_RATIO = 4, code 32 = 0000100000
-              integer part 4 in div_ratio[9:3], 0/8 in div_ratio[2:0]
+  DIV_RATIO = 8, code 64 = 0001000000
+              integer part 8 in div_ratio[9:3], 0/8 in div_ratio[2:0]
 
   1 ns       PLL RESET_N released
   2 ns       PLL ENABLE
@@ -115,16 +115,16 @@ C {devices/gnd.sym} -2000 720 0 0 {name=lg_dig_in_14 lab=GND}
 T {DIV_RATIO[7] = 0   weight integer 16} -1920 655 0 0 0.3 0.3 {}
 N -2000 800 -2000 830 {lab=dig_in[13]}
 C {devices/lab_wire.sym} -2000 800 0 0 {name=ls_dig_in_13 sig_type=std_logic lab=dig_in[13]}
-C {devices/vsource.sym} -2000 860 0 0 {name=Vdig_in_13 value="0"}
+C {devices/vsource.sym} -2000 860 0 0 {name=Vdig_in_13 value="1.2"}
 N -2000 890 -2000 920 {lab=GND}
 C {devices/gnd.sym} -2000 920 0 0 {name=lg_dig_in_13 lab=GND}
-T {DIV_RATIO[6] = 0   weight integer 8} -1920 855 0 0 0.3 0.3 {}
+T {DIV_RATIO[6] = 1   weight integer 8} -1920 855 0 0 0.3 0.3 {}
 N -2000 1000 -2000 1030 {lab=dig_in[12]}
 C {devices/lab_wire.sym} -2000 1000 0 0 {name=ls_dig_in_12 sig_type=std_logic lab=dig_in[12]}
-C {devices/vsource.sym} -2000 1060 0 0 {name=Vdig_in_12 value="1.2"}
+C {devices/vsource.sym} -2000 1060 0 0 {name=Vdig_in_12 value="0"}
 N -2000 1090 -2000 1120 {lab=GND}
 C {devices/gnd.sym} -2000 1120 0 0 {name=lg_dig_in_12 lab=GND}
-T {DIV_RATIO[5] = 1   weight integer 4} -1920 1055 0 0 0.3 0.3 {}
+T {DIV_RATIO[5] = 0   weight integer 4} -1920 1055 0 0 0.3 0.3 {}
 N -2000 1200 -2000 1230 {lab=dig_in[11]}
 C {devices/lab_wire.sym} -2000 1200 0 0 {name=ls_dig_in_11 sig_type=std_logic lab=dig_in[11]}
 C {devices/vsource.sym} -2000 1260 0 0 {name=Vdig_in_11 value="0"}
@@ -159,7 +159,7 @@ L 3 -2260 140 -1340 140 {}
 L 3 -1340 140 -1340 2180 {}
 L 3 -2260 2180 -1340 2180 {}
 L 3 -2260 140 -2260 2180 {}
-T {DIV_RATIO = 4   code 32 = 0000100000} -2260 85 0 0 0.4 0.4 {}
+T {DIV_RATIO = 8   code 64 = 0001000000} -2260 85 0 0 0.4 0.4 {}
 N -2000 2320 -2000 2350 {lab=dig_in[18]}
 C {devices/lab_wire.sym} -2000 2320 0 0 {name=ls_dig_in_18 sig_type=std_logic lab=dig_in[18]}
 C {devices/vsource.sym} -2000 2380 0 0 {name=Vdig_in_18 value="0"}
@@ -168,15 +168,15 @@ C {devices/gnd.sym} -2000 2440 0 0 {name=lg_dig_in_18 lab=GND}
 T {TEST_DIV[1] = 0} -1920 2375 0 0 0.3 0.3 {}
 N -2000 2520 -2000 2550 {lab=dig_in[17]}
 C {devices/lab_wire.sym} -2000 2520 0 0 {name=ls_dig_in_17 sig_type=std_logic lab=dig_in[17]}
-C {devices/vsource.sym} -2000 2580 0 0 {name=Vdig_in_17 value="0"}
+C {devices/vsource.sym} -2000 2580 0 0 {name=Vdig_in_17 value="1.2"}
 N -2000 2610 -2000 2640 {lab=GND}
 C {devices/gnd.sym} -2000 2640 0 0 {name=lg_dig_in_17 lab=GND}
-T {TEST_DIV[0] = 0} -1920 2575 0 0 0.3 0.3 {}
+T {TEST_DIV[0] = 1} -1920 2575 0 0 0.3 0.3 {}
 L 3 -2260 2260 -1340 2260 {}
 L 3 -1340 2260 -1340 2700 {}
 L 3 -2260 2700 -1340 2700 {}
 L 3 -2260 2260 -2260 2700 {}
-T {TEST_DIV = 0   TEST_CLK = VCO/2} -2260 2205 0 0 0.4 0.4 {}
+T {TEST_DIV = 1   TEST_CLK = VCO/4} -2260 2205 0 0 0.4 0.4 {}
 N -2000 2840 -2000 2870 {lab=dig_in[0]}
 C {devices/lab_wire.sym} -2000 2840 0 0 {name=ls_dig_in_0 sig_type=std_logic lab=dig_in[0]}
 C {devices/vsource.sym} -2000 2900 0 0 {name=Vdig_in_0 value="1.2"}
@@ -208,10 +208,10 @@ L 3 -2260 2780 -2260 3620 {}
 T {pattern control} -2260 2725 0 0 0.4 0.4 {}
 N -2000 3760 -2000 3790 {lab=analog_pin[0]}
 C {devices/lab_wire.sym} -2000 3760 0 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
-C {devices/vsource.sym} -2000 3820 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 1.9500n 4.0000n)"}
+C {devices/vsource.sym} -2000 3820 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 3.9500n 8.0000n)"}
 N -2000 3850 -2000 3880 {lab=GND}
 C {devices/gnd.sym} -2000 3880 0 0 {name=lg_analog_pin_0 lab=GND}
-T {REF_CLK, 250 MHz} -1920 3815 0 0 0.3 0.3 {}
+T {REF_CLK, 125 MHz} -1920 3815 0 0 0.3 0.3 {}
 L 3 -2260 3700 -1340 3700 {}
 L 3 -1340 3700 -1340 3940 {}
 L 3 -2260 3940 -1340 3940 {}
@@ -355,7 +355,7 @@ simulate
 "}
 C {launcher.sym} 2050 -2110 0 0 {name=h_waves
 descr="Load waves"
-tclcommand="xschem raw_read $netlist_dir/sg13cmos5l_chipalooza_analog_project_tb_pll.raw tran"
+tclcommand="xschem raw_read $netlist_dir/sg13cmos5l_chipalooza_analog_project_tb_pll_ref125_r8.raw tran"
 }
 C {launcher.sym} 2050 -2070 0 0 {name=h_check
 descr="Check PRBS + timing"

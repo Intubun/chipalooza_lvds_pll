@@ -118,6 +118,13 @@ sim-xschem: ## Run TB simulation with Xschem in batch mode (usage: make sim-xsch
 	@if grep -q 'IS MISSING' $(XSCHEM_TB_DIR)/simulations/$(TB).spice; then \
 		echo "ERROR: $(TB).spice has unresolved symbols - is the PDK selected?"; exit 1; \
 	fi
+#	ngspice 47 rejects a bracketed net name inside an XSPICE port list: after
+#	subcircuit expansion the PLL's PFD reads `A_REF [ analog_pin[0] ] ...` and
+#	the parser calls that an array of arrays.  That is handled at the source:
+#	testbenches/xschem/xschemrc sets bus_replacement_char, so xschem renames the
+#	nets while it netlists.  The arrow inside xschem therefore gets exactly the
+#	same treatment as this target - rewriting it again here with sed would give
+#	the two paths different net names.
 	cd $(XSCHEM_TB_DIR)/simulations && ngspice -b $(TB).spice
 .PHONY: sim-xschem
 
@@ -126,6 +133,18 @@ sim-view-xschem: ## Plot Xschem simulation results (usage: make sim-view-xschem 
 .PHONY: sim-view-xschem
 
 
+# The PLL bench family from scripts/gen_top.py: <TOP>_tb_pll.sch is the baseline
+# combination and <TOP>_tb_pll_<name>.sch is one per reference / DIV_RATIO pair.
+PLL_TBS := $(notdir $(basename $(wildcard $(XSCHEM_TB_DIR)/$(TOP)_tb_pll*.sch)))
+
+list-pll-sweep: ## List the generated PLL combination benches
+	@for tb in $(PLL_TBS); do echo "  $$tb"; done
+.PHONY: list-pll-sweep
+
+sim-pll-sweep: ## Run every PLL combination bench in turn (long - see the note in the README)
+	@for tb in $(PLL_TBS); do 		echo "======================================================== $$tb"; 		$(MAKE) --no-print-directory sim-xschem TB=$$tb || echo "FAILED: $$tb"; 	done
+.PHONY: sim-pll-sweep
+
 sim-all: ## Simulate the macro
 	$(MAKE) sim-xschem TB=$(TOP)_tb_tran
 .PHONY: sim-all
@@ -133,10 +152,6 @@ sim-all: ## Simulate the macro
 
 
 # Build Targets
-build-inverter: ## Verify, build and simulate the inverter macro
-	@$(MAKE) -C $(MACROS_DIR)/inverter all
-.PHONY: build-inverter
-
 build-pll-analog: ## Verify, build and simulate the analog PLL macro
 	@$(MAKE) -C $(MACROS_DIR)/pll_analog all
 .PHONY: build-pll-analog
@@ -157,8 +172,9 @@ build-lvds-pattern: ## Simulate and check the LVDS pattern generator macro (sche
 .PHONY: build-lvds-pattern
 
 build-macros: ## Verify, build and simulate all macros
-	$(MAKE) build-inverter
-#	ToDo: further macros
+	$(MAKE) build-lvds-tx
+	$(MAKE) build-lvds-pattern
+#	ToDo: the two PLL macros are Rahul's and are built from their own Makefiles
 .PHONY: build-macros
 
 build-top: ## Build TOP cell (check PR boundary, Verilog, LEF, LIB, copy GDS, and render images)
@@ -442,10 +458,6 @@ clean: ## Delete all generated files and folders of the TOP cell (final, netlist
 	rm -rf $(SCRIPTS_DIR)/__pycache__
 .PHONY: clean
 
-clean-inverter: ## Delete all generated files and folders of the inverter macro
-	@$(MAKE) -C $(MACROS_DIR)/inverter clean
-.PHONY: clean-inverter
-
 clean-pll-analog: ## Delete generated files from the analog PLL macro
 	@$(MAKE) -C $(MACROS_DIR)/pll_analog clean
 .PHONY: clean-pll-analog
@@ -466,8 +478,9 @@ clean-lvds-pattern: ## Delete generated files from the LVDS pattern generator ma
 .PHONY: clean-lvds-pattern
 
 clean-macros: ## Delete all generated files and folders of all macros
-	$(MAKE) clean-inverter
-#	ToDo: further macros
+	$(MAKE) clean-lvds-tx
+	$(MAKE) clean-lvds-pattern
+#	ToDo: the two PLL macros are Rahul's and are cleaned from their own Makefiles
 .PHONY: clean-macros
 
 clean-all: ## Delete all generated files and folders of the macros and the TOP cell

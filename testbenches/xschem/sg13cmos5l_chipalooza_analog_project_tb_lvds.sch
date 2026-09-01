@@ -7,92 +7,104 @@ F {}
 E {}
 T {LVDS bench for the top cell.
 
-Reset, then clock passthrough of the provisional 1 GHz on dig_in[4],
-then PRBS-7 from 10 ns, through the pre-driver and the driver into
+Reset, then clock passthrough of the 500 MHz reference on the dedicated
+pad, then PRBS-7 from 10 ns, through the pre-driver and the driver into
 49.9 + 49.9 ohm across the two output pads with the Vos tap.
+
+clk_src is 0 here on purpose: this bench characterises the transmitter,
+so the bit clock comes straight off analog_pin[0] and the PLL is left
+out of the measurement.  tb_pll is the one that runs through the loop.
 
 The port list is read out of the symbol when this bench is generated,
 so it survives rewiring of the top cell.  Any harness pin without a
-source below is left open on purpose.
+source in the stimulus column is left open on purpose.
 
 clk_pp and core_pp are checked first: if the gated clock inside the
 pattern generator is not moving, the control path is broken and the
 LVDS numbers below it mean nothing.
 
 No pad or ESD model - the driver was characterised with one, so the
-Vos figure here is not the compliance number.} -2200 -1700 0 0 0.45 0.45 {}
-N -1400 -1560 -1400 -1530 {lab=vdd_3v3}
-C {devices/lab_wire.sym} -1400 -1560 0 0 {name=ls_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
-C {devices/vsource.sym} -1400 -1500 0 0 {name=Vvdd_3v3 value="3.3"}
-N -1400 -1470 -1400 -1440 {lab=GND}
-C {devices/gnd.sym} -1400 -1440 0 0 {name=lg_vdd_3v3 lab=GND}
-T {gated 3.3 V} -1340 -1505 0 0 0.3 0.3 {}
-N -1400 -1360 -1400 -1330 {lab=vdd_1v2}
-C {devices/lab_wire.sym} -1400 -1360 0 0 {name=ls_vdd_1v2 sig_type=std_logic lab=vdd_1v2}
-C {devices/vsource.sym} -1400 -1300 0 0 {name=Vvdd_1v2 value="1.2"}
-N -1400 -1270 -1400 -1240 {lab=GND}
-C {devices/gnd.sym} -1400 -1240 0 0 {name=lg_vdd_1v2 lab=GND}
-T {gated 1.2 V} -1340 -1305 0 0 0.3 0.3 {}
-N -1400 -1160 -1400 -1130 {lab=enable}
-C {devices/lab_wire.sym} -1400 -1160 0 0 {name=ls_enable sig_type=std_logic lab=enable}
-C {devices/vsource.sym} -1400 -1100 0 0 {name=Venable value="1.2"}
-N -1400 -1070 -1400 -1040 {lab=GND}
-C {devices/gnd.sym} -1400 -1040 0 0 {name=lg_enable lab=GND}
-T {project enable} -1340 -1105 0 0 0.3 0.3 {}
-N -1400 -960 -1400 -930 {lab=dig_in[4]}
-C {devices/lab_wire.sym} -1400 -960 0 0 {name=ls_dig_in_4 sig_type=std_logic lab=dig_in[4]}
-C {devices/vsource.sym} -1400 -900 0 0 {name=Vdig_in_4 value="PULSE(0 1.2 0 30p 30p 470p 1n)"}
-N -1400 -870 -1400 -840 {lab=GND}
-C {devices/gnd.sym} -1400 -840 0 0 {name=lg_dig_in_4 lab=GND}
-T {provisional pll_clk, 1 GHz} -1340 -905 0 0 0.3 0.3 {}
-N -1400 -760 -1400 -730 {lab=dig_in[3]}
-C {devices/lab_wire.sym} -1400 -760 0 0 {name=ls_dig_in_3 sig_type=std_logic lab=dig_in[3]}
-C {devices/vsource.sym} -1400 -700 0 0 {name=Vdig_in_3 value="1.2"}
-N -1400 -670 -1400 -640 {lab=GND}
-C {devices/gnd.sym} -1400 -640 0 0 {name=lg_dig_in_3 lab=GND}
-T {mode = 1, PRBS-7 throughout} -1340 -705 0 0 0.3 0.3 {}
-N -1400 -560 -1400 -530 {lab=dig_in[2]}
-C {devices/lab_wire.sym} -1400 -560 0 0 {name=ls_dig_in_2 sig_type=std_logic lab=dig_in[2]}
-C {devices/vsource.sym} -1400 -500 0 0 {name=Vdig_in_2 value="PWL(0 1.2 2n 1.2 2.1n 0)"}
-N -1400 -470 -1400 -440 {lab=GND}
-C {devices/gnd.sym} -1400 -440 0 0 {name=lg_dig_in_2 lab=GND}
-T {reset, high until 2 ns} -1340 -505 0 0 0.3 0.3 {}
-N -1400 -360 -1400 -330 {lab=dig_in[1]}
-C {devices/lab_wire.sym} -1400 -360 0 0 {name=ls_dig_in_1 sig_type=std_logic lab=dig_in[1]}
-C {devices/vsource.sym} -1400 -300 0 0 {name=Vdig_in_1 value="PWL(0 0 3n 0 3.1n 1.2)"}
-N -1400 -270 -1400 -240 {lab=GND}
-C {devices/gnd.sym} -1400 -240 0 0 {name=lg_dig_in_1 lab=GND}
-T {en, low until 3 ns} -1340 -305 0 0 0.3 0.3 {}
-N -1400 -160 -1400 -130 {lab=dig_in[0]}
-C {devices/lab_wire.sym} -1400 -160 0 0 {name=ls_dig_in_0 sig_type=std_logic lab=dig_in[0]}
-C {devices/vsource.sym} -1400 -100 0 0 {name=Vdig_in_0 value="0"}
-N -1400 -70 -1400 -40 {lab=GND}
-C {devices/gnd.sym} -1400 -40 0 0 {name=lg_dig_in_0 lab=GND}
-T {clk_src = 0, take ref_clk} -1340 -105 0 0 0.3 0.3 {}
-N -1400 40 -1400 70 {lab=ibias[1]}
-C {devices/lab_wire.sym} -1400 40 0 0 {name=ls_ibias_1 sig_type=std_logic lab=ibias[1]}
-C {isource.sym} -1400 100 0 0 {name=Iibias_1 value=-30u}
-N -1400 130 -1400 160 {lab=GND}
-C {devices/gnd.sym} -1400 160 0 0 {name=lg_ibias_1 lab=GND}
-T {driver reference, 30 uA} -1340 95 0 0 0.3 0.3 {}
-N -1400 240 -1400 270 {lab=ibias[0]}
-C {devices/lab_wire.sym} -1400 240 0 0 {name=ls_ibias_0 sig_type=std_logic lab=ibias[0]}
-C {isource.sym} -1400 300 0 0 {name=Iibias_0 value=-30u}
-N -1400 330 -1400 360 {lab=GND}
-C {devices/gnd.sym} -1400 360 0 0 {name=lg_ibias_0 lab=GND}
-T {pre-driver reference, 30 uA} -1340 295 0 0 0.3 0.3 {}
-N -1400 440 -1400 470 {lab=vbias}
-C {devices/lab_wire.sym} -1400 440 0 0 {name=ls_vbias sig_type=std_logic lab=vbias}
-C {devices/vsource.sym} -1400 500 0 0 {name=Vvbias value="1.25"}
-N -1400 530 -1400 560 {lab=GND}
-C {devices/gnd.sym} -1400 560 0 0 {name=lg_vbias lab=GND}
-T {shared voltage bias, the driver wants 1.25 V} -1340 495 0 0 0.3 0.3 {}
-N -1400 640 -1400 670 {lab=analog_pin[0]}
-C {devices/lab_wire.sym} -1400 640 0 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
-C {devices/vsource.sym} -1400 700 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 0.9n 2n)"}
-N -1400 730 -1400 760 {lab=GND}
-C {devices/gnd.sym} -1400 760 0 0 {name=lg_analog_pin_0 lab=GND}
-T {ref_clk, 500 MHz} -1340 695 0 0 0.3 0.3 {}
+Vos figure here is not the compliance number.} -3600 -2400 0 0 0.45 0.45 {}
+N -2000 -1760 -2000 -1730 {lab=vdd_3v3}
+C {devices/lab_wire.sym} -2000 -1760 0 0 {name=ls_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
+C {devices/vsource.sym} -2000 -1700 0 0 {name=Vvdd_3v3 value="3.3"}
+N -2000 -1670 -2000 -1640 {lab=GND}
+C {devices/gnd.sym} -2000 -1640 0 0 {name=lg_vdd_3v3 lab=GND}
+T {gated 3.3 V} -1920 -1705 0 0 0.3 0.3 {}
+N -2000 -1560 -2000 -1530 {lab=vdd_1v2}
+C {devices/lab_wire.sym} -2000 -1560 0 0 {name=ls_vdd_1v2 sig_type=std_logic lab=vdd_1v2}
+C {devices/vsource.sym} -2000 -1500 0 0 {name=Vvdd_1v2 value="1.2"}
+N -2000 -1470 -2000 -1440 {lab=GND}
+C {devices/gnd.sym} -2000 -1440 0 0 {name=lg_vdd_1v2 lab=GND}
+T {gated 1.2 V} -1920 -1505 0 0 0.3 0.3 {}
+L 3 -2260 -1820 -1340 -1820 {}
+L 3 -1340 -1820 -1340 -1380 {}
+L 3 -2260 -1380 -1340 -1380 {}
+L 3 -2260 -1820 -2260 -1380 {}
+T {supplies} -2260 -1875 0 0 0.4 0.4 {}
+N -2000 -1240 -2000 -1210 {lab=analog_bus[1]}
+C {devices/lab_wire.sym} -2000 -1240 0 0 {name=ls_analog_bus_1 sig_type=std_logic lab=analog_bus[1]}
+C {devices/vsource.sym} -2000 -1180 0 0 {name=Vanalog_bus_1 value="1.2"}
+N -2000 -1150 -2000 -1120 {lab=GND}
+C {devices/gnd.sym} -2000 -1120 0 0 {name=lg_analog_bus_1 lab=GND}
+T {LVDS common-mode reference, 1.2 V (the IDAC grid has no 1.25 V)} -1920 -1185 0 0 0.3 0.3 {}
+N -2000 -1040 -2000 -1010 {lab=ibias[0]}
+C {devices/lab_wire.sym} -2000 -1040 0 0 {name=ls_ibias_0 sig_type=std_logic lab=ibias[0]}
+C {isource.sym} -2000 -980 0 0 {name=Iibias_0 value=-2u}
+N -2000 -950 -2000 -920 {lab=GND}
+C {devices/gnd.sym} -2000 -920 0 0 {name=lg_ibias_0 lab=GND}
+T {pre-driver reference, 2 uA} -1920 -985 0 0 0.3 0.3 {}
+N -2000 -840 -2000 -810 {lab=ibias[1]}
+C {devices/lab_wire.sym} -2000 -840 0 0 {name=ls_ibias_1 sig_type=std_logic lab=ibias[1]}
+C {isource.sym} -2000 -780 0 0 {name=Iibias_1 value=-2u}
+N -2000 -750 -2000 -720 {lab=GND}
+C {devices/gnd.sym} -2000 -720 0 0 {name=lg_ibias_1 lab=GND}
+T {driver reference, 2 uA} -1920 -785 0 0 0.3 0.3 {}
+L 3 -2260 -1300 -1340 -1300 {}
+L 3 -1340 -1300 -1340 -660 {}
+L 3 -2260 -660 -1340 -660 {}
+L 3 -2260 -1300 -2260 -660 {}
+T {bias} -2260 -1355 0 0 0.4 0.4 {}
+N -2000 -520 -2000 -490 {lab=dig_in[0]}
+C {devices/lab_wire.sym} -2000 -520 0 0 {name=ls_dig_in_0 sig_type=std_logic lab=dig_in[0]}
+C {devices/vsource.sym} -2000 -460 0 0 {name=Vdig_in_0 value="0"}
+N -2000 -430 -2000 -400 {lab=GND}
+C {devices/gnd.sym} -2000 -400 0 0 {name=lg_dig_in_0 lab=GND}
+T {clk_src = 0, take ref_clk} -1920 -465 0 0 0.3 0.3 {}
+N -2000 -320 -2000 -290 {lab=dig_in[1]}
+C {devices/lab_wire.sym} -2000 -320 0 0 {name=ls_dig_in_1 sig_type=std_logic lab=dig_in[1]}
+C {devices/vsource.sym} -2000 -260 0 0 {name=Vdig_in_1 value="PWL(0 0 3n 0 3.1n 1.2)"}
+N -2000 -230 -2000 -200 {lab=GND}
+C {devices/gnd.sym} -2000 -200 0 0 {name=lg_dig_in_1 lab=GND}
+T {en, low until 3 ns} -1920 -265 0 0 0.3 0.3 {}
+N -2000 -120 -2000 -90 {lab=dig_in[2]}
+C {devices/lab_wire.sym} -2000 -120 0 0 {name=ls_dig_in_2 sig_type=std_logic lab=dig_in[2]}
+C {devices/vsource.sym} -2000 -60 0 0 {name=Vdig_in_2 value="PWL(0 1.2 2n 1.2 2.1n 0)"}
+N -2000 -30 -2000 0 {lab=GND}
+C {devices/gnd.sym} -2000 0 0 0 {name=lg_dig_in_2 lab=GND}
+T {reset, high until 2 ns} -1920 -65 0 0 0.3 0.3 {}
+N -2000 80 -2000 110 {lab=dig_in[3]}
+C {devices/lab_wire.sym} -2000 80 0 0 {name=ls_dig_in_3 sig_type=std_logic lab=dig_in[3]}
+C {devices/vsource.sym} -2000 140 0 0 {name=Vdig_in_3 value="1.2"}
+N -2000 170 -2000 200 {lab=GND}
+C {devices/gnd.sym} -2000 200 0 0 {name=lg_dig_in_3 lab=GND}
+T {mode = 1, PRBS-7 throughout} -1920 135 0 0 0.3 0.3 {}
+L 3 -2260 -580 -1340 -580 {}
+L 3 -1340 -580 -1340 260 {}
+L 3 -2260 260 -1340 260 {}
+L 3 -2260 -580 -2260 260 {}
+T {pattern control} -2260 -635 0 0 0.4 0.4 {}
+N -2000 400 -2000 430 {lab=analog_pin[0]}
+C {devices/lab_wire.sym} -2000 400 0 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
+C {devices/vsource.sym} -2000 460 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 0.9n 2n)"}
+N -2000 490 -2000 520 {lab=GND}
+C {devices/gnd.sym} -2000 520 0 0 {name=lg_analog_pin_0 lab=GND}
+T {ref_clk, 500 MHz} -1920 455 0 0 0.3 0.3 {}
+L 3 -2260 340 -1340 340 {}
+L 3 -1340 340 -1340 580 {}
+L 3 -2260 580 -1340 580 {}
+L 3 -2260 340 -2260 580 {}
+T {clocks} -2260 285 0 0 0.4 0.4 {}
 N -300 -350 -240 -350 {lab=vdd_3v3}
 C {devices/lab_wire.sym} -300 -350 0 0 {name=lx_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
 N -300 -330 -240 -330 {lab=vdd_1v2}
@@ -185,10 +197,6 @@ N 240 -150 300 -150 {lab=dig_out[1]}
 C {devices/lab_wire.sym} 300 -150 0 0 {name=lx_dig_out_1 sig_type=std_logic lab=dig_out[1]}
 N 240 -130 300 -130 {lab=dig_out[0]}
 C {devices/lab_wire.sym} 300 -130 0 0 {name=lx_dig_out_0 sig_type=std_logic lab=dig_out[0]}
-N 240 -110 300 -110 {lab=analog_pin[3]}
-C {devices/lab_wire.sym} 300 -110 0 0 {name=lx_analog_pin_3 sig_type=std_logic lab=analog_pin[3]}
-N 240 -90 300 -90 {lab=analog_pin[2]}
-C {devices/lab_wire.sym} 300 -90 0 0 {name=lx_analog_pin_2 sig_type=std_logic lab=analog_pin[2]}
 N 240 -70 300 -70 {lab=analog_pin[1]}
 C {devices/lab_wire.sym} 300 -70 0 0 {name=lx_analog_pin_1 sig_type=std_logic lab=analog_pin[1]}
 N 240 -50 300 -50 {lab=analog_pin[0]}
@@ -202,26 +210,46 @@ C {devices/lab_wire.sym} 300 10 0 0 {name=lx_analog_bus_1 sig_type=std_logic lab
 N 240 30 300 30 {lab=analog_bus[0]}
 C {devices/lab_wire.sym} 300 30 0 0 {name=lx_analog_bus_0 sig_type=std_logic lab=analog_bus[0]}
 C {sg13cmos5l_chipalooza_analog_project.sym} 0 0 0 0 {name=x1}
-N 700 -960 700 -930 {lab=analog_pin[3]}
-C {devices/lab_wire.sym} 700 -960 0 0 {name=lpad_d_n sig_type=std_logic lab=analog_pin[3]}
-C {devices/vsource.sym} 700 -900 0 0 {name=Vd_n value=0}
-N 700 -870 700 -840 {lab=d_n}
-C {devices/lab_wire.sym} 700 -840 0 0 {name=lmeas_d_n sig_type=std_logic lab=d_n}
-N 900 -960 900 -930 {lab=analog_pin[2]}
-C {devices/lab_wire.sym} 900 -960 0 0 {name=lpad_d_p sig_type=std_logic lab=analog_pin[2]}
-C {devices/vsource.sym} 900 -900 0 0 {name=Vd_p value=0}
-N 900 -870 900 -840 {lab=d_p}
-C {devices/lab_wire.sym} 900 -840 0 0 {name=lmeas_d_p sig_type=std_logic lab=d_p}
-N 800 -840 800 -810 {lab=d_n}
-C {devices/lab_wire.sym} 800 -840 0 0 {name=lt1 sig_type=std_logic lab=d_n}
-C {res.sym} 800 -810 0 0 {name=Rtp value=49.9}
-N 800 -780 800 -750 {lab=vos}
-N 800 -780 880 -780 {lab=vos}
-C {devices/lab_wire.sym} 880 -780 0 0 {name=lvos sig_type=std_logic lab=vos}
-C {res.sym} 800 -720 0 0 {name=Rtn value=49.9}
-N 800 -690 800 -660 {lab=d_p}
-C {devices/lab_wire.sym} 800 -660 0 0 {name=lt2 sig_type=std_logic lab=d_p}
-B 2 1500 -1240 3100 -940 {flags=graph
+N 240 -110 1000 -110 {lab=analog_pin[3]}
+N 1000 -305 1000 -110 {lab=analog_pin[3]}
+C {devices/lab_wire.sym} 1000 -208 0 0 {name=lpad_d_n sig_type=std_logic lab=analog_pin[3]}
+C {devices/vsource.sym} 1000 -335 0 0 {name=Vd_n value=0}
+N 1000 -560 1000 -365 {lab=d_n}
+C {devices/lab_wire.sym} 1000 -463 0 0 {name=lmeas_d_n sig_type=std_logic lab=d_n}
+N 1000 -560 1560 -560 {lab=d_n}
+N 240 -90 1120 -90 {lab=analog_pin[2]}
+N 1120 -90 1120 155 {lab=analog_pin[2]}
+C {devices/lab_wire.sym} 1120 32 0 0 {name=lpad_d_p sig_type=std_logic lab=analog_pin[2]}
+C {devices/vsource.sym} 1120 185 0 0 {name=Vd_p value=0}
+N 1120 215 1120 460 {lab=d_p}
+C {devices/lab_wire.sym} 1120 337 0 0 {name=lmeas_d_p sig_type=std_logic lab=d_p}
+N 1120 460 1560 460 {lab=d_p}
+N 1560 -560 1560 -335 {lab=d_n}
+C {res.sym} 1560 -305 0 0 {name=Rtd_n value=49.9}
+N 1560 -275 1560 -50 {lab=vos}
+N 1560 -50 1560 175 {lab=vos}
+C {res.sym} 1560 205 0 0 {name=Rtd_p value=49.9}
+N 1560 235 1560 460 {lab=d_p}
+N 1560 -50 1700 -50 {lab=vos}
+C {devices/lab_wire.sym} 1700 -50 0 0 {name=lvos sig_type=std_logic lab=vos}
+C {launcher.sym} 2050 -2150 0 0 {name=h_sim
+descr="Simulate"
+tclcommand="
+set_sim_defaults
+file mkdir $netlist_dir
+write_data [save_params] $netlist_dir/[file rootname [file tail [xschem get current_name]]].save
+xschem netlist
+simulate
+"}
+C {launcher.sym} 2050 -2110 0 0 {name=h_waves
+descr="Load waves"
+tclcommand="xschem raw_read $netlist_dir/sg13cmos5l_chipalooza_analog_project_tb_lvds.raw tran"
+}
+C {launcher.sym} 2050 -2070 0 0 {name=h_check
+descr="Check PRBS + timing"
+tclcommand="exec python3 [file dirname [xschem get current_dirname]]/../../scripts/check_timing.py &"
+}
+B 2 2050 -1950 3850 -1550 {flags=graph,unlocked
 y1=0.9
 y2=1.6
 ypos1=0
@@ -246,7 +274,7 @@ logx=0
 logy=0
 autoload=0
 hilight_wave=-1}
-B 2 1500 -920 3100 -620 {flags=graph
+B 2 2050 -1450 3850 -1050 {flags=graph
 y1=-0.2
 y2=1.4
 ypos1=0
@@ -271,7 +299,7 @@ logx=0
 logy=0
 autoload=0
 hilight_wave=-1}
-B 2 1500 -600 3100 -300 {flags=graph
+B 2 2050 -950 3850 -550 {flags=graph
 y1=-0.5
 y2=1.6
 ypos1=0
@@ -296,34 +324,20 @@ logx=0
 logy=0
 autoload=0
 hilight_wave=-1}
-C {launcher.sym} 1500 -1320 0 0 {name=h_sim
-descr="Simulate"
-tclcommand="
-set_sim_defaults
-file mkdir $netlist_dir
-write_data [save_params] $netlist_dir/[file rootname [file tail [xschem get current_name]]].save
-xschem netlist
-simulate
-"}
-C {launcher.sym} 1500 -1280 0 0 {name=h_waves
-descr="Load waves"
-tclcommand="xschem raw_read $netlist_dir/sg13cmos5l_chipalooza_analog_project_tb_lvds.raw tran"
-}
-C {launcher.sym} 1500 -1240 0 0 {name=h_check
-descr="Check PRBS + timing"
-tclcommand="exec python3 [file dirname [xschem get current_dirname]]/../../scripts/check_timing.py &"
-}
-C {devices/code_shown.sym} -2200 -1300 0 0 {name=NGSPICE
+C {devices/code_shown.sym} -3600 -1650 0 0 {name=NGSPICE
 only_toplevel=true
 value="
 .lib cornerMOSlv.lib mos_tt
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
 .lib cornerDIO.lib dio_tt
-.include cap_mfringe.lib
+.include cap_cmomf.lib
 .include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
 .temp 27
-.options savecurrents klu method=gear reltol=1e-3 abstol=1e-12 gmin=1e-12
+* gear2 collapses the timestep to 6e-24 s at 414 ns on vvdd_1v2#branch
+* once the PLL's XSPICE bridges are in the netlist, and the run stops
+* there whatever tstop says.  trap gets through the full span.
+.options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 * Without this the H-bridge cannot balance at t=0, cmfb runs to the rail and the
 * pair spends ~60 ns climbing back (tb_startup measures 61.3 ns).  The driver's
 * own benches place cmfb the same way and run no operating point.
@@ -356,7 +370,10 @@ meas tran vos_pp_early PP v(vos) from=20n to=100n
 meas tran vos_pp_mid PP v(vos) from=100n to=150n
 print vod_max vod_min vos_avg vos_pp
 print vos_pp_early vos_pp_mid
-print i(Vvdd_3v3) i(Vvdd_1v2)
+* print on a transient vector dumps every timepoint - measure instead
+meas tran i_3v3 AVG i(Vvdd_3v3) from=150n to=595n
+meas tran i_1v2 AVG i(Vvdd_1v2) from=150n to=595n
+print i_3v3 i_1v2
 
 set wr_vecnames
 set wr_singlescale

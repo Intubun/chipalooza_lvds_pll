@@ -310,10 +310,126 @@ def launchers(x, y, tb):
 # (box, nodes, colours, ymin, ymax) - the time window is filled in per bench.
 # Colour numbers are xschem layer indices: 4 blue, 5 red, 7 green, 8 orange.
 GRAPH_PANELS = [
-    ((1800, -1240, 3400, -940), ["x1.gclk_b"], [4], -0.2, 1.4),
-    ((1800, -920, 3400, -620), ["D_p", "D_n"], [4, 5], -0.2, 1.4),
-    ((1800, -600, 3400, -300), ["x1.s6", "x1.fp", "x1.fn"], [7, 4, 5], -0.2, 1.4),
+    (["x1.gclk_b"], [4], -0.2, 1.4),
+    (["D_p", "D_n"], [4, 5], -0.2, 1.4),
+    (["x1.s6", "x1.fp", "x1.fn"], [7, 4, 5], -0.2, 1.4),
 ]
+
+
+# ---------------------------------------------------------------- layout zones
+# The same bands as the top-level benches, scaled to this much smaller cell:
+# documentation, stimulus, the block under test, its load, and the analysis.
+# Left to right in signal order, and nothing is drawn outside its own band, so
+# the ngspice listing can never end up on top of a waveform panel again.
+DOC_X = -1500
+DOC_TITLE_Y = -1500
+DOC_CODE_Y = -800
+
+STIM_X = 150
+STIM_TOP = -1000
+STIM_PITCH = 200
+STIM_GROUP_GAP = 200
+STIM_FRAME_L = STIM_X - 180
+STIM_FRAME_R = STIM_X + 180
+
+DUT_X = 700
+LOAD_X = 1150
+
+VIEW_X = 1700
+VIEW_W = 1600
+VIEW_TOP = -1750
+
+# the sources, split by what they are for; both benches drive the same nets
+TB_GROUPS = [
+    ("supply", ["VDD"]),
+    ("clocks", ["ref_clk", "pll_clk"]),
+    ("control", ["clk_src", "en", "reset", "mode"]),
+]
+
+
+def title_block(x, y, text, scale=0.45):
+    return "T {%s} %d %d 0 0 %g %g {}" % (text, x, y, scale, scale)
+
+
+def code_block(x, y, control):
+    return '''C {devices/code_shown.sym} %d %d 0 0 {name=NGSPICE
+only_toplevel=true
+value="%s"}''' % (x, y, control)
+
+
+def stim_groups(sources):
+    """the source column, one framed and captioned group at a time"""
+    val = dict(sources)
+    covered = [n for _, nets in TB_GROUPS for n in nets]
+    assert sorted(covered) == sorted(val), "groups and sources disagree"
+    out, y = [], STIM_TOP
+    for caption, nets in TB_GROUPS:
+        top = y - 120
+        for net in nets:
+            out.append("N %d %d %d %d {lab=%s}"
+                       % (STIM_X, y - 60, STIM_X, y - 30, net))
+            out.append("C {devices/lab_wire.sym} %d %d 0 0 "
+                       "{name=lv_%s sig_type=std_logic lab=%s}"
+                       % (STIM_X, y - 60, net, net))
+            out.append('C {devices/vsource.sym} %d %d 0 0 {name=V%s value="%s"}'
+                       % (STIM_X, y, net, val[net]))
+            out.append("N %d %d %d %d {lab=GND}"
+                       % (STIM_X, y + 30, STIM_X, y + 60))
+            out.append("C {devices/gnd.sym} %d %d 0 0 {name=lg_%s lab=GND}"
+                       % (STIM_X, y + 60, net))
+            y += STIM_PITCH
+        bottom = y - STIM_PITCH + 120
+        for a, b, c, d in ((STIM_FRAME_L, top, STIM_FRAME_R, top),
+                           (STIM_FRAME_R, top, STIM_FRAME_R, bottom),
+                           (STIM_FRAME_L, bottom, STIM_FRAME_R, bottom),
+                           (STIM_FRAME_L, top, STIM_FRAME_L, bottom)):
+            out.append("L 3 %d %d %d %d {}" % (a, b, c, d))
+        out.append("T {%s} %d %d 0 0 0.4 0.4 {}" % (caption, STIM_FRAME_L, top - 55))
+        y = bottom + STIM_GROUP_GAP
+    return out
+
+
+def dut_and_load():
+    """the block under test with a labelled stub per pin, and its load"""
+    ports = [("ref_clk", -110, -100), ("pll_clk", -110, -80), ("clk_src", -110, -60),
+             ("en", -110, -40), ("reset", -110, -20), ("mode", -110, 0),
+             ("D_p", 110, -100), ("D_n", 110, -80),
+             ("VDD", 110, 80), ("VSS", 110, 100)]
+    out = []
+    for net, dx, dy in ports:
+        px, py = DUT_X + dx, dy
+        s = -1 if dx < 0 else 1
+        ex = px + s * 60
+        out.append("N %d %d %d %d {lab=%s}"
+                   % (min(px, ex), py, max(px, ex), py,
+                      "0" if net == "VSS" else net))
+        if net == "VSS":
+            out.append("C {devices/gnd.sym} %d %d 3 0 {name=lg_vss lab=GND}" % (ex, py))
+        else:
+            out.append("C {devices/lab_wire.sym} %d %d 0 0 "
+                       "{name=lx_%s sig_type=std_logic lab=%s}" % (ex, py, net, net))
+    out.append("C {lvds_pattern.sym} %d 0 0 0 {name=x1}" % DUT_X)
+    # the load the pre-driver actually presents: two 40u/0.45u HV gates per side
+    for net, cy in (("D_p", -300), ("D_n", -100)):
+        out.append("N %d %d %d %d {lab=%s}" % (LOAD_X, cy - 60, LOAD_X, cy - 30, net))
+        out.append("C {devices/lab_wire.sym} %d %d 0 0 "
+                   "{name=lc_%s sig_type=std_logic lab=%s}" % (LOAD_X, cy - 60, net, net))
+        out.append("C {capa.sym} %d %d 0 0 {name=C%s m=1 value=170f}" % (LOAD_X, cy, net))
+        out.append("N %d %d %d %d {lab=GND}" % (LOAD_X, cy + 30, LOAD_X, cy + 60))
+        out.append("C {devices/gnd.sym} %d %d 0 0 {name=lgc_%s lab=GND}"
+                   % (LOAD_X, cy + 60, net))
+    return out
+
+
+def view_panels(tb):
+    """the launchers, with the three waveform panels stacked below them"""
+    out = launchers(VIEW_X, VIEW_TOP, tb)
+    y = VIEW_TOP + 200
+    for nodes, colors, ymin, ymax in GRAPH_PANELS:
+        out.append(graph((VIEW_X, y, VIEW_X + VIEW_W, y + 400),
+                         nodes, colors, ymin, ymax, 2e-08, 2.6e-08))
+        y += 500
+    return out
 
 
 # ---------------------------------------------------------------- testbench
@@ -363,59 +479,24 @@ wrdata ../plot_simulations/data/@schname\\\\.txt
 '''
 
 
-def gen_tb(path):
-    out = [HEADER]
-    out.append("T {lvds_pattern transient bench.\n\n"
-               "  0...2 ns     reset high, clock stopped\n"
-               "  3 ns         en high, clock passthrough of pll_clk at 1 GHz\n"
-               "  12 ns        mode high, PRBS-7 at 1 Gb/s\n"
-               "  150...155 ns en low, the clock gate stops the pattern\n"
-               "  160 ns       clk_src low, the 250 MHz reference takes over\n\n"
-               "scripts/check_timing.py re-runs the polynomial over the exported\n"
-               "data and counts the bits that do not match.} "
-               "100 -1200 0 0 0.45 0.45 {}")
-    y = -1000
-    for net, val in TB_SOURCES:
-        out.append("N 150 %d 150 %d {lab=%s}" % (y - 60, y - 30, net))
-        out.append("C {devices/lab_wire.sym} 150 %d 0 0 "
-                   "{name=lv_%s sig_type=std_logic lab=%s}" % (y - 60, net, net))
-        out.append('C {devices/vsource.sym} 150 %d 0 0 {name=V%s value="%s"}'
-                   % (y, net, val))
-        out.append("N 150 %d 150 %d {lab=GND}" % (y + 30, y + 60))
-        out.append("C {devices/gnd.sym} 150 %d 0 0 {name=lg_%s lab=GND}" % (y + 60, net))
-        y += 200
+TB_TITLE = """lvds_pattern transient bench.
 
-    ports = [("ref_clk", -110, -100), ("pll_clk", -110, -80), ("clk_src", -110, -60),
-             ("en", -110, -40), ("reset", -110, -20), ("mode", -110, 0),
-             ("D_p", 110, -100), ("D_n", 110, -80),
-             ("VDD", 110, 80), ("VSS", 110, 100)]
-    ix, iy = 700, 0
-    for net, dx, dy in ports:
-        px, py = ix + dx, iy + dy
-        s = -1 if dx < 0 else 1
-        ex = px + s * 60
-        lab_ = "0" if net == "VSS" else net
-        out.append("N %d %d %d %d {lab=%s}" % (min(px, ex), py, max(px, ex), py, lab_))
-        if net == "VSS":
-            out.append("C {devices/gnd.sym} %d %d 3 0 {name=lg_vss lab=GND}" % (ex, py))
-        else:
-            out.append("C {devices/lab_wire.sym} %d %d 0 0 "
-                       "{name=lx_%s sig_type=std_logic lab=%s}" % (ex, py, net, net))
-    out.append("C {lvds_pattern.sym} %d %d 0 0 {name=x1}" % (ix, iy))
-    # the load the pre-driver actually presents: two 40u/0.45u HV gates per side
-    for net, cy in (("D_p", -300), ("D_n", -100)):
-        out.append("N 1000 %d 1000 %d {lab=%s}" % (cy - 60, cy - 30, net))
-        out.append("C {devices/lab_wire.sym} 1000 %d 0 0 "
-                   "{name=lc_%s sig_type=std_logic lab=%s}" % (cy - 60, net, net))
-        out.append("C {capa.sym} 1000 %d 0 0 {name=C%s m=1 value=170f}" % (cy, net))
-        out.append("N 1000 %d 1000 %d {lab=GND}" % (cy + 30, cy + 60))
-        out.append("C {devices/gnd.sym} 1000 %d 0 0 {name=lgc_%s lab=GND}" % (cy + 60, net))
-    for box, nodes, colors, ymin, ymax in GRAPH_PANELS:
-        out.append(graph(box, nodes, colors, ymin, ymax, 2e-08, 2.6e-08))
-    out += launchers(1800, -1320, "lvds_pattern_tb_tran")
-    out.append('C {devices/code_shown.sym} 1400 -1000 0 0 {name=NGSPICE\n'
-               'only_toplevel=true\n'
-               'value="%s"}' % TB_CONTROL)
+  0...2 ns     reset high, clock stopped
+  3 ns         en high, clock passthrough of pll_clk at 1 GHz
+  12 ns        mode high, PRBS-7 at 1 Gb/s
+  150...155 ns en low, the clock gate stops the pattern
+  160 ns       clk_src low, the 250 MHz reference takes over
+
+scripts/check_timing.py re-runs the polynomial over the exported
+data and counts the bits that do not match."""
+
+
+def gen_tb(path):
+    out = [HEADER, title_block(DOC_X, DOC_TITLE_Y, TB_TITLE)]
+    out += stim_groups(TB_SOURCES)
+    out += dut_and_load()
+    out += view_panels("lvds_pattern_tb_tran")
+    out.append(code_block(DOC_X, DOC_CODE_Y, TB_CONTROL))
     io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
 
 
@@ -456,65 +537,24 @@ wrdata ../plot_simulations/data/@schname\\\\.txt
 .endc
 '''
 
-TB_PRBS_TITLE = (
-    "T {lvds_pattern PRBS-7 timing bench.\n"
-    "\n"
-    "PRBS-7 from the first clock, 1 Gb/s, 160 ns - a full 127-bit period with\n"
-    "margin.  mode and clk_src are static, so nothing moves the data path timing\n"
-    "during the run.\n"
-    "\n"
-    "scripts/check_timing.py reads the export and reports the bit rate, the\n"
-    "clock-to-output spread, the data valid window that follows from it, the\n"
-    "D_p / D_n skew, and it re-runs the polynomial sampling in the middle of that\n"
-    "window rather than at a fixed phase.} 100 -1200 0 0 0.45 0.45 {}")
+TB_PRBS_TITLE = """lvds_pattern PRBS-7 timing bench.
+
+PRBS-7 from the first clock, 1 Gb/s, 160 ns - a full 127-bit period with
+margin.  mode and clk_src are static, so nothing moves the data path timing
+during the run.
+
+scripts/check_timing.py reads the export and reports the bit rate, the
+clock-to-output spread, the data valid window that follows from it, the
+D_p / D_n skew, and it re-runs the polynomial sampling in the middle of that
+window rather than at a fixed phase."""
 
 
 def gen_tb_prbs(path):
-    out = [HEADER, TB_PRBS_TITLE]
-    y = -1000
-    for net, val in TB_PRBS_SOURCES:
-        out.append("N 150 %d 150 %d {lab=%s}" % (y - 60, y - 30, net))
-        out.append("C {devices/lab_wire.sym} 150 %d 0 0 "
-                   "{name=lv_%s sig_type=std_logic lab=%s}" % (y - 60, net, net))
-        out.append('C {devices/vsource.sym} 150 %d 0 0 {name=V%s value="%s"}'
-                   % (y, net, val))
-        out.append("N 150 %d 150 %d {lab=GND}" % (y + 30, y + 60))
-        out.append("C {devices/gnd.sym} 150 %d 0 0 {name=lg_%s lab=GND}" % (y + 60, net))
-        y += 200
-
-    ports = [("ref_clk", -110, -100), ("pll_clk", -110, -80), ("clk_src", -110, -60),
-             ("en", -110, -40), ("reset", -110, -20), ("mode", -110, 0),
-             ("D_p", 110, -100), ("D_n", 110, -80),
-             ("VDD", 110, 80), ("VSS", 110, 100)]
-    ix, iy = 700, 0
-    for net, dx, dy in ports:
-        px, py = ix + dx, iy + dy
-        sgn = -1 if dx < 0 else 1
-        ex = px + sgn * 60
-        lab_ = "0" if net == "VSS" else net
-        out.append("N %d %d %d %d {lab=%s}" % (min(px, ex), py, max(px, ex), py, lab_))
-        if net == "VSS":
-            out.append("C {devices/gnd.sym} %d %d 3 0 {name=lg_vss lab=GND}" % (ex, py))
-        else:
-            out.append("C {devices/lab_wire.sym} %d %d 0 0 "
-                       "{name=lx_%s sig_type=std_logic lab=%s}" % (ex, py, net, net))
-    out.append("C {lvds_pattern.sym} %d %d 0 0 {name=x1}" % (ix, iy))
-
-    # the load the pre-driver actually presents: two 40u/0.45u HV gates per side
-    for net, cy in (("D_p", -300), ("D_n", -100)):
-        out.append("N 1000 %d 1000 %d {lab=%s}" % (cy - 60, cy - 30, net))
-        out.append("C {devices/lab_wire.sym} 1000 %d 0 0 "
-                   "{name=lc_%s sig_type=std_logic lab=%s}" % (cy - 60, net, net))
-        out.append("C {capa.sym} 1000 %d 0 0 {name=C%s m=1 value=170f}" % (cy, net))
-        out.append("N 1000 %d 1000 %d {lab=GND}" % (cy + 30, cy + 60))
-        out.append("C {devices/gnd.sym} 1000 %d 0 0 {name=lgc_%s lab=GND}" % (cy + 60, net))
-
-    for box, nodes, colors, ymin, ymax in GRAPH_PANELS:
-        out.append(graph(box, nodes, colors, ymin, ymax, 2e-08, 2.6e-08))
-    out += launchers(1800, -1320, "lvds_pattern_tb_prbs")
-    out.append('C {devices/code_shown.sym} 1400 -1000 0 0 {name=NGSPICE\n'
-               'only_toplevel=true\n'
-               'value="%s"}' % TB_PRBS_CONTROL)
+    out = [HEADER, title_block(DOC_X, DOC_TITLE_Y, TB_PRBS_TITLE)]
+    out += stim_groups(TB_PRBS_SOURCES)
+    out += dut_and_load()
+    out += view_panels("lvds_pattern_tb_prbs")
+    out.append(code_block(DOC_X, DOC_CODE_Y, TB_PRBS_CONTROL))
     io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
 
 

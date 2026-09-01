@@ -38,3 +38,11 @@ if {![llength [info commands pin_netlist_dir]]} {
 }
 pin_netlist_dir [file dirname [info script]]
 set load_file_postprocess {pin_netlist_dir [xschem get current_dirname]}
+
+# ngspice parses [ ] as XSPICE vector-node syntax, so a net called dig_in[0]
+# comes back as "Unexpected [ - Arrays of arrays not allowed".  Let xschem
+# rename bussed nets while it netlists: dig_in[0] -> dig_in_0_.  Doing it here
+# rather than with sed afterwards means the arrow inside xschem and the Makefile
+# produce the same netlist.  Deliberately not set in schematic/xschem/xschemrc -
+# the design netlist keeps its brackets for LVS against the wrapper.
+set bus_replacement_char {__}
