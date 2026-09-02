@@ -170,8 +170,11 @@ parameters:
           value: 0.150
       i_supply:
         display: Supply current
-        description: Mean current out of the 3.3 V supply while switching
-        unit: A
+        description: >-
+          Mean current out of the 3.3 V supply while switching. Declared in
+          mA: CACE takes the value in SI base units and uses the unit only
+          to scale the display, and an amps column reads 0.006 here.
+        unit: mA
         typical:
           value: any
         maximum:

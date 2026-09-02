@@ -8,7 +8,7 @@
 | Differential output  | ngspice              | vod                  |         0.247 V |    0.349 V |          any |    0.379 V |      0.454 V |    0.402 V |   Pass ✅    |
 | Offset voltage       | ngspice              | vos                  |         1.125 V |    1.191 V |          any |    1.194 V |      1.375 V |    1.195 V |   Pass ✅    |
 | Offset, peak-to-peak | ngspice              | vos_pp               |               ​ |          ​ |          any |    0.086 V |       0.15 V |    0.123 V |   Pass ✅    |
-| Supply current       | ngspice              | i_supply             |               ​ |          ​ |          any |    0.006 A |          any |    0.007 A |   Pass ✅    |
+| Supply current       | ngspice              | i_supply             |               ​ |          ​ |          any |   6.138 mA |          any |   6.954 mA |   Pass ✅    |
 
 
 ## Plots
