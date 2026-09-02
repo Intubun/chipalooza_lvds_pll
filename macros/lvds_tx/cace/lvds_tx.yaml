@@ -1,0 +1,216 @@
+name: lvds_tx
+description: >-
+  LVDS output driver with pre-driver and common-mode feedback, for the
+  Chipalooza 2026 LVDS transmitter. Takes a complementary CMOS pair on the
+  1.2 V core domain and drives a 100 ohm differential line from the 3.3 V
+  domain, to TIA/EIA-644-A.
+PDK: ihp-sg13cmos5l
+cace_format: 5.2
+
+authorship:
+  designer: Enno Schnackenberg
+  license: Apache 2.0
+
+paths:
+  root: ..
+  schematic: schematic/xschem
+  netlist: netlist
+  documentation: docs
+
+pins:
+  D_p:
+    description: Data input, true. Core domain, full swing on vddc.
+    type: signal
+    direction: input
+  D_n:
+    description: Data input, complement. Must be the complement of D_p at every instant.
+    type: signal
+    direction: input
+  Iref_pd:
+    description: >-
+      Pre-driver bias reference. Mirrored 1:15 inside the block, so the pin
+      takes 2 uA and the pre-driver sees the 30 uA it was characterised at.
+      The 1:15 step exists because the harness current DACs stop at 10 uA.
+    type: signal
+    direction: input
+  Iref_drv:
+    description: Output driver bias reference, 2 uA, mirrored 1:15 as above.
+    type: signal
+    direction: input
+  Vref:
+    description: >-
+      Output common-mode reference. The CMFB loop drives Vos to this voltage.
+      Clause 4.1.2 centres on 1.25 V; the harness supplies 1.2 V.
+    type: signal
+    direction: input
+  Va:
+    description: Analog supply, 3.3 V
+    type: power
+    direction: inout
+    Vmin: 2.97
+    Vmax: 3.63
+  Out_p:
+    description: LVDS output, true
+    type: signal
+    direction: output
+  Out_n:
+    description: LVDS output, complement
+    type: signal
+    direction: output
+  Vss:
+    description: Analog ground
+    type: ground
+    direction: inout
+
+default_conditions:
+  vdd:
+    description: Analog supply voltage
+    display: Va
+    unit: V
+    typical: 3.3
+  vddc:
+    description: Core-domain swing of the input pair
+    display: Vddc
+    unit: V
+    typical: 1.2
+  vref:
+    description: Common-mode reference into the CMFB loop
+    display: Vref
+    unit: V
+    typical: 1.2
+  iref:
+    description: Bias reference current per pin, mirrored 1:15 inside
+    display: Iref
+    unit: uA
+    typical: 2
+  period:
+    description: Bit period times two - one PULSE period carries two bits
+    display: Period
+    unit: ns
+    typical: 4
+  tedge:
+    description: Input edge rate
+    display: Tedge
+    unit: ps
+    typical: 50
+  tstep:
+    description: Transient timestep
+    display: Tstep
+    unit: ps
+    typical: 10
+  tstop:
+    description: Length of the transient run
+    display: Tstop
+    unit: ns
+    typical: 600
+  tmeas:
+    description: >-
+      Start of the measurement window. Everything before it is the
+      common-mode loop settling from the DC operating point, and measuring
+      across that is how a driver that is not compliant looks compliant.
+    display: Tmeas
+    unit: ns
+    typical: 160
+  cmfb_ic:
+    description: Initial condition on the CMFB node, near its settled value
+    display: CMFB ic
+    unit: V
+    typical: 1.54
+  corner:
+    description: Process corner
+    display: Corner
+    typical: tt
+  temperature:
+    description: Ambient temperature
+    display: Temp
+    unit: °C
+    typical: 27
+
+parameters:
+
+  lvds_compliance:
+    display: TIA/EIA-644-A compliance
+    description: >-
+      The three clauses that decide whether this is an LVDS driver at all,
+      measured on the settled part of a 500 Mb/s alternating pattern into
+      49.9 + 49.9 ohm with the mid-point tapped for Vos. No pad or ESD model,
+      so these are the driver's own numbers.
+    spec:
+      vod:
+        display: Differential output
+        description: >-
+          Magnitude of the differential output swing, the worse of the two
+          polarities rather than their average - an unbalanced driver has two.
+        unit: V
+        minimum:
+          value: 0.247
+        typical:
+          value: any
+        maximum:
+          value: 0.454
+      vos:
+        display: Offset voltage
+        description: Output common-mode voltage, averaged over the measurement window
+        unit: V
+        minimum:
+          value: 1.125
+        typical:
+          value: any
+        maximum:
+          value: 1.375
+      vos_pp:
+        display: Offset, peak-to-peak
+        description: >-
+          Common-mode ripple. Dominated by charge coupled from the switch
+          gates at every data edge, not by settling.
+        unit: V
+        typical:
+          value: any
+        maximum:
+          value: 0.150
+      i_supply:
+        display: Supply current
+        description: Mean current out of the 3.3 V supply while switching
+        unit: A
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: lvds_compliance.sch
+        format: ascii
+        suffix: .data
+        variables: [vod, vos, vos_pp, i_supply]
+    conditions:
+      corner:
+        enumerate: [ss, tt, ff]
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+      vdd:
+        minimum: 2.97
+        typical: 3.3
+        maximum: 3.63
+    plot:
+      vod_vs_temp:
+        type: xyplot
+        xaxis: temperature
+        yaxis: vod
+        limits: true
+      vos_vs_temp:
+        type: xyplot
+        xaxis: temperature
+        yaxis: vos
+        limits: true
+      vos_pp_vs_corner:
+        type: xyplot
+        xaxis: corner
+        yaxis: vos_pp
+        limits: true
+      vod_vs_vdd:
+        type: xyplot
+        xaxis: vdd
+        yaxis: vod
+        limits: true
