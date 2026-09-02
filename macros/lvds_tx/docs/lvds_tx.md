@@ -75,30 +75,30 @@
   + Unit: uA
   + Typical: 2
 - period
-  + Description: Bit period times two - one PULSE period carries two bits
+  + Description: One PULSE period carries two bits, so this is twice the bit period. 2 ns is the 1 Gb/s design target; the bench ran at 4 ns, 500 Mb/s, until the timing figures were added.
   + Display: Period
   + Unit: ns
-  + Typical: 4
+  + Typical: 2
 - tedge
-  + Description: Input edge rate
+  + Description: Edge rate of the input pair. Swept, because the output edge is not independent of it: lvds_pattern delivers 103.5 ps falling and 112.0 ps rising into this block's load, so 110 ps is the in-system case and 50 ps shows what the driver does with a faster source than it will ever see.
   + Display: Tedge
   + Unit: ps
-  + Typical: 50
+  + Typical: 110
 - tstep
   + Description: Transient timestep
   + Display: Tstep
   + Unit: ps
   + Typical: 10
 - tstop
-  + Description: Length of the transient run
+  + Description: Length of the transient run. 400 ns is 200 bit periods at 1 Gb/s, of which the last 300 are measured.
   + Display: Tstop
   + Unit: ns
-  + Typical: 600
+  + Typical: 400
 - tmeas
   + Description: Start of the measurement window. Everything before it is the common-mode loop settling from the DC operating point, and measuring across that is how a driver that is not compliant looks compliant.
   + Display: Tmeas
   + Unit: ns
-  + Typical: 160
+  + Typical: 100
 - cmfb_ic
   + Description: Initial condition on the CMFB node, near its settled value
   + Display: CMFB ic

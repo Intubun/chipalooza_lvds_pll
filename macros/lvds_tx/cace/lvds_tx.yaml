@@ -84,25 +84,34 @@ default_conditions:
     unit: uA
     typical: 2
   period:
-    description: Bit period times two - one PULSE period carries two bits
+    description: >-
+      One PULSE period carries two bits, so this is twice the bit period.
+      2 ns is the 1 Gb/s design target; the bench ran at 4 ns, 500 Mb/s,
+      until the timing figures were added.
     display: Period
     unit: ns
-    typical: 4
+    typical: 2
   tedge:
-    description: Input edge rate
+    description: >-
+      Edge rate of the input pair. Swept, because the output edge is not
+      independent of it: lvds_pattern delivers 103.5 ps falling and 112.0 ps
+      rising into this block's load, so 110 ps is the in-system case and 50 ps
+      shows what the driver does with a faster source than it will ever see.
     display: Tedge
     unit: ps
-    typical: 50
+    typical: 110
   tstep:
     description: Transient timestep
     display: Tstep
     unit: ps
     typical: 10
   tstop:
-    description: Length of the transient run
+    description: >-
+      Length of the transient run. 400 ns is 200 bit periods at 1 Gb/s, of
+      which the last 300 are measured.
     display: Tstop
     unit: ns
-    typical: 600
+    typical: 400
   tmeas:
     description: >-
       Start of the measurement window. Everything before it is the
@@ -110,7 +119,7 @@ default_conditions:
       across that is how a driver that is not compliant looks compliant.
     display: Tmeas
     unit: ns
-    typical: 160
+    typical: 100
   cmfb_ic:
     description: Initial condition on the CMFB node, near its settled value
     display: CMFB ic
@@ -132,7 +141,7 @@ parameters:
     display: TIA/EIA-644-A compliance
     description: >-
       The three clauses that decide whether this is an LVDS driver at all,
-      measured on the settled part of a 500 Mb/s alternating pattern into
+      measured on the settled part of a 1 Gb/s alternating pattern into
       49.9 + 49.9 ohm with the mid-point tapped for Vos. No pad or ESD model,
       so these are the driver's own numbers.
     spec:
@@ -168,6 +177,49 @@ parameters:
           value: any
         maximum:
           value: 0.150
+      t_rise:
+        display: Output rise time
+        description: >-
+          20 to 80 percent of the differential output's own swing. At 1 Gb/s a
+          bit is 1 ns, so the 300 ps limit is 30 percent of a unit interval -
+          a design target from the data rate, not a figure out of the clause.
+        unit: ps
+        typical:
+          value: any
+        maximum:
+          value: 300
+      t_fall:
+        display: Output fall time
+        description: 80 to 20 percent of the differential swing, same basis as t_rise
+        unit: ps
+        typical:
+          value: any
+        maximum:
+          value: 300
+      t_skew:
+        display: Pulse skew
+        description: >-
+          Difference between the rise and fall times. It is what turns into
+          duty-cycle distortion down the line, and it is the figure that a
+          driver with unequal pull-up and pull-down gives away.
+        unit: ps
+        typical:
+          value: any
+        maximum:
+          value: 100
+      duty:
+        display: Output duty cycle
+        description: >-
+          Fraction of the measurement window the differential output is
+          positive. The input pair is a clean 50 percent, so any deviation is
+          the driver's own pulse-width distortion.
+        unit: '%'
+        minimum:
+          value: 45
+        typical:
+          value: 50
+        maximum:
+          value: 55
       i_supply:
         display: Supply current
         description: >-
@@ -184,7 +236,7 @@ parameters:
         template: lvds_compliance.sch
         format: ascii
         suffix: .data
-        variables: [vod, vos, vos_pp, i_supply]
+        variables: [vod, vos, vos_pp, i_supply, t_rise, t_fall, t_skew, duty]
     conditions:
       corner:
         enumerate: [ss, tt, ff]
@@ -196,6 +248,8 @@ parameters:
         minimum: 2.97
         typical: 3.3
         maximum: 3.63
+      tedge:
+        enumerate: [50, 110]
     plot:
       vod_vs_temp:
         type: xyplot

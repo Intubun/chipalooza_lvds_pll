@@ -120,6 +120,26 @@ value="
     let vos_pp   = vos_max - vos_min
     let i_supply = -i_va
 
-    echo $&vod_mag $&vos_avg $&vos_pp $&i_supply > CACE\{simpath\}/CACE\{filename\}_CACE\{N\}.data
+    * Edge rates between 20 and 80 percent of the differential swing the block
+    * actually produces, not of a nominal value. The swing moves over PVT, and
+    * fixed thresholds would report that movement as an edge-rate change.
+    let v20 = vod_min + 0.2*(vod_max-vod_min)
+    let v80 = vod_min + 0.8*(vod_max-vod_min)
+    * On one line each: the + continuation is a netlist convention and does
+    * not carry into a .control block.
+    meas tran t_rise TRIG vod VAL=$&v20 TD=CACE\{tmeas\} RISE=3 TARG vod VAL=$&v80 TD=CACE\{tmeas\} RISE=3
+    meas tran t_fall TRIG vod VAL=$&v80 TD=CACE\{tmeas\} FALL=3 TARG vod VAL=$&v20 TD=CACE\{tmeas\} FALL=3
+    let t_skew = abs(t_rise - t_fall)
+
+    * Duty cycle as the fraction of time the differential output is positive.
+    * No edge indices: counting edges is what produced a skew of three whole
+    * bit periods in lvds_pattern, and a fraction cannot drift out of step.
+    let hi = vod > 0
+    * The fraction, not the percentage. CACE scales the value into the
+    * declared unit, and percent is a scaling - multiplying here as well
+    * turned a 50 percent duty cycle into 5000 percent.
+    meas tran duty AVG hi from=CACE\{tmeas\} to=CACE\{tstop\}
+
+    echo $&vod_mag $&vos_avg $&vos_pp $&i_supply $&t_rise $&t_fall $&t_skew $&duty > CACE\{simpath\}/CACE\{filename\}_CACE\{N\}.data
 .endc
 "}
