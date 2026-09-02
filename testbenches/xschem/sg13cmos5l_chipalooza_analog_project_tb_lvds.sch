@@ -17,7 +17,11 @@ out of the measurement.  tb_pll is the one that runs through the loop.
 
 The port list is read out of the symbol when this bench is generated,
 so it survives rewiring of the top cell.  Any harness pin without a
-source in the stimulus column is left open on purpose.
+source in the stimulus column is left open on purpose - except the
+PLL's, which are driven even though the loop is unused here.  They
+land on an XSPICE adc_bridge, where an open node has no defined logic
+value, so ENABLE and RESET_N hold the loop off and every ratio bit
+carries its own source.
 
 clk_pp and core_pp are checked first: if the gated clock inside the
 pattern generator is not moving, the control path is broken and the
@@ -105,6 +109,95 @@ L 3 -1340 340 -1340 580 {}
 L 3 -2260 580 -1340 580 {}
 L 3 -2260 340 -2260 580 {}
 T {clocks} -2260 285 0 0 0.4 0.4 {}
+N -2000 720 -2000 750 {lab=dig_in[6]}
+C {devices/lab_wire.sym} -2000 720 0 0 {name=ls_dig_in_6 sig_type=std_logic lab=dig_in[6]}
+C {devices/vsource.sym} -2000 780 0 0 {name=Vdig_in_6 value="0"}
+N -2000 810 -2000 840 {lab=GND}
+C {devices/gnd.sym} -2000 840 0 0 {name=lg_dig_in_6 lab=GND}
+T {PLL RESET_N = 0, held in reset} -1920 775 0 0 0.3 0.3 {}
+N -2000 920 -2000 950 {lab=dig_in[5]}
+C {devices/lab_wire.sym} -2000 920 0 0 {name=ls_dig_in_5 sig_type=std_logic lab=dig_in[5]}
+C {devices/vsource.sym} -2000 980 0 0 {name=Vdig_in_5 value="0"}
+N -2000 1010 -2000 1040 {lab=GND}
+C {devices/gnd.sym} -2000 1040 0 0 {name=lg_dig_in_5 lab=GND}
+T {PLL ENABLE = 0, the loop is not used here} -1920 975 0 0 0.3 0.3 {}
+N -2000 1120 -2000 1150 {lab=dig_in[16]}
+C {devices/lab_wire.sym} -2000 1120 0 0 {name=ls_dig_in_16 sig_type=std_logic lab=dig_in[16]}
+C {devices/vsource.sym} -2000 1180 0 0 {name=Vdig_in_16 value="0"}
+N -2000 1210 -2000 1240 {lab=GND}
+C {devices/gnd.sym} -2000 1240 0 0 {name=lg_dig_in_16 lab=GND}
+T {DIV_RATIO[9] = 0} -1920 1175 0 0 0.3 0.3 {}
+N -2000 1320 -2000 1350 {lab=dig_in[15]}
+C {devices/lab_wire.sym} -2000 1320 0 0 {name=ls_dig_in_15 sig_type=std_logic lab=dig_in[15]}
+C {devices/vsource.sym} -2000 1380 0 0 {name=Vdig_in_15 value="0"}
+N -2000 1410 -2000 1440 {lab=GND}
+C {devices/gnd.sym} -2000 1440 0 0 {name=lg_dig_in_15 lab=GND}
+T {DIV_RATIO[8] = 0} -1920 1375 0 0 0.3 0.3 {}
+N -2000 1520 -2000 1550 {lab=dig_in[14]}
+C {devices/lab_wire.sym} -2000 1520 0 0 {name=ls_dig_in_14 sig_type=std_logic lab=dig_in[14]}
+C {devices/vsource.sym} -2000 1580 0 0 {name=Vdig_in_14 value="0"}
+N -2000 1610 -2000 1640 {lab=GND}
+C {devices/gnd.sym} -2000 1640 0 0 {name=lg_dig_in_14 lab=GND}
+T {DIV_RATIO[7] = 0} -1920 1575 0 0 0.3 0.3 {}
+N -2000 1720 -2000 1750 {lab=dig_in[13]}
+C {devices/lab_wire.sym} -2000 1720 0 0 {name=ls_dig_in_13 sig_type=std_logic lab=dig_in[13]}
+C {devices/vsource.sym} -2000 1780 0 0 {name=Vdig_in_13 value="0"}
+N -2000 1810 -2000 1840 {lab=GND}
+C {devices/gnd.sym} -2000 1840 0 0 {name=lg_dig_in_13 lab=GND}
+T {DIV_RATIO[6] = 0} -1920 1775 0 0 0.3 0.3 {}
+N -2000 1920 -2000 1950 {lab=dig_in[12]}
+C {devices/lab_wire.sym} -2000 1920 0 0 {name=ls_dig_in_12 sig_type=std_logic lab=dig_in[12]}
+C {devices/vsource.sym} -2000 1980 0 0 {name=Vdig_in_12 value="0"}
+N -2000 2010 -2000 2040 {lab=GND}
+C {devices/gnd.sym} -2000 2040 0 0 {name=lg_dig_in_12 lab=GND}
+T {DIV_RATIO[5] = 0} -1920 1975 0 0 0.3 0.3 {}
+N -2000 2120 -2000 2150 {lab=dig_in[11]}
+C {devices/lab_wire.sym} -2000 2120 0 0 {name=ls_dig_in_11 sig_type=std_logic lab=dig_in[11]}
+C {devices/vsource.sym} -2000 2180 0 0 {name=Vdig_in_11 value="0"}
+N -2000 2210 -2000 2240 {lab=GND}
+C {devices/gnd.sym} -2000 2240 0 0 {name=lg_dig_in_11 lab=GND}
+T {DIV_RATIO[4] = 0} -1920 2175 0 0 0.3 0.3 {}
+N -2000 2320 -2000 2350 {lab=dig_in[10]}
+C {devices/lab_wire.sym} -2000 2320 0 0 {name=ls_dig_in_10 sig_type=std_logic lab=dig_in[10]}
+C {devices/vsource.sym} -2000 2380 0 0 {name=Vdig_in_10 value="0"}
+N -2000 2410 -2000 2440 {lab=GND}
+C {devices/gnd.sym} -2000 2440 0 0 {name=lg_dig_in_10 lab=GND}
+T {DIV_RATIO[3] = 0} -1920 2375 0 0 0.3 0.3 {}
+N -2000 2520 -2000 2550 {lab=dig_in[9]}
+C {devices/lab_wire.sym} -2000 2520 0 0 {name=ls_dig_in_9 sig_type=std_logic lab=dig_in[9]}
+C {devices/vsource.sym} -2000 2580 0 0 {name=Vdig_in_9 value="0"}
+N -2000 2610 -2000 2640 {lab=GND}
+C {devices/gnd.sym} -2000 2640 0 0 {name=lg_dig_in_9 lab=GND}
+T {DIV_RATIO[2] = 0} -1920 2575 0 0 0.3 0.3 {}
+N -2000 2720 -2000 2750 {lab=dig_in[8]}
+C {devices/lab_wire.sym} -2000 2720 0 0 {name=ls_dig_in_8 sig_type=std_logic lab=dig_in[8]}
+C {devices/vsource.sym} -2000 2780 0 0 {name=Vdig_in_8 value="0"}
+N -2000 2810 -2000 2840 {lab=GND}
+C {devices/gnd.sym} -2000 2840 0 0 {name=lg_dig_in_8 lab=GND}
+T {DIV_RATIO[1] = 0} -1920 2775 0 0 0.3 0.3 {}
+N -2000 2920 -2000 2950 {lab=dig_in[7]}
+C {devices/lab_wire.sym} -2000 2920 0 0 {name=ls_dig_in_7 sig_type=std_logic lab=dig_in[7]}
+C {devices/vsource.sym} -2000 2980 0 0 {name=Vdig_in_7 value="0"}
+N -2000 3010 -2000 3040 {lab=GND}
+C {devices/gnd.sym} -2000 3040 0 0 {name=lg_dig_in_7 lab=GND}
+T {DIV_RATIO[0] = 0} -1920 2975 0 0 0.3 0.3 {}
+N -2000 3120 -2000 3150 {lab=dig_in[18]}
+C {devices/lab_wire.sym} -2000 3120 0 0 {name=ls_dig_in_18 sig_type=std_logic lab=dig_in[18]}
+C {devices/vsource.sym} -2000 3180 0 0 {name=Vdig_in_18 value="0"}
+N -2000 3210 -2000 3240 {lab=GND}
+C {devices/gnd.sym} -2000 3240 0 0 {name=lg_dig_in_18 lab=GND}
+T {TEST_DIV[1] = 0} -1920 3175 0 0 0.3 0.3 {}
+N -2000 3320 -2000 3350 {lab=dig_in[17]}
+C {devices/lab_wire.sym} -2000 3320 0 0 {name=ls_dig_in_17 sig_type=std_logic lab=dig_in[17]}
+C {devices/vsource.sym} -2000 3380 0 0 {name=Vdig_in_17 value="0"}
+N -2000 3410 -2000 3440 {lab=GND}
+C {devices/gnd.sym} -2000 3440 0 0 {name=lg_dig_in_17 lab=GND}
+T {TEST_DIV[0] = 0} -1920 3375 0 0 0.3 0.3 {}
+L 3 -2260 660 -1340 660 {}
+L 3 -1340 660 -1340 3500 {}
+L 3 -2260 3500 -1340 3500 {}
+L 3 -2260 660 -2260 3500 {}
+T {PLL held off - see TB_LVDS_DRIVE} -2260 605 0 0 0.4 0.4 {}
 N -300 -350 -240 -350 {lab=vdd_3v3}
 C {devices/lab_wire.sym} -300 -350 0 0 {name=lx_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
 N -300 -330 -240 -330 {lab=vdd_1v2}

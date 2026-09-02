@@ -328,6 +328,29 @@ TB_LVDS_DRIVE = {
     "dig_in[1]": ("v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
     "dig_in[2]": ("v", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset, high until 2 ns"),
     "dig_in[3]": ("v", "1.2", "mode = 1, PRBS-7 throughout"),
+    # xpll is pll_cosim, so every one of these lands on an XSPICE
+    # adc_bridge, where an open node has no defined logic value.
+    # The loop is held off rather than left to guess.
+    #
+    # analog_bus[0], the charge-pump reference, is deliberately NOT driven
+    # here. It is a current mirror input, not a bridge, so open simply means
+    # unbiased - and biasing it lets VCTRL drift up until the ring oscillator
+    # starts, which cost this bench a factor of 30 in run time for a loop it
+    # does not measure. tb_pll is where the PLL gets its reference.
+    "dig_in[5]": ("v", "0", "PLL ENABLE = 0, the loop is not used here"),
+    "dig_in[6]": ("v", "0", "PLL RESET_N = 0, held in reset"),
+    "dig_in[7]": ("v", "0", "DIV_RATIO[0] = 0"),
+    "dig_in[8]": ("v", "0", "DIV_RATIO[1] = 0"),
+    "dig_in[9]": ("v", "0", "DIV_RATIO[2] = 0"),
+    "dig_in[10]": ("v", "0", "DIV_RATIO[3] = 0"),
+    "dig_in[11]": ("v", "0", "DIV_RATIO[4] = 0"),
+    "dig_in[12]": ("v", "0", "DIV_RATIO[5] = 0"),
+    "dig_in[13]": ("v", "0", "DIV_RATIO[6] = 0"),
+    "dig_in[14]": ("v", "0", "DIV_RATIO[7] = 0"),
+    "dig_in[15]": ("v", "0", "DIV_RATIO[8] = 0"),
+    "dig_in[16]": ("v", "0", "DIV_RATIO[9] = 0"),
+    "dig_in[17]": ("v", "0", "TEST_DIV[0] = 0"),
+    "dig_in[18]": ("v", "0", "TEST_DIV[1] = 0"),
 }
 TB_LVDS_GROUND = ("vss_3v3", "vss_1v2", "vssio")
 TB_LVDS_PADS = ("analog_pin[2]", "analog_pin[3]")     # the differential pair
@@ -614,6 +637,10 @@ TB_LVDS_GROUPS = [
     ("pattern control", ["dig_in[0]", "dig_in[1]",
                          "dig_in[2]", "dig_in[3]"]),
     ("clocks", ["analog_pin[0]"]),
+    ("PLL held off - see TB_LVDS_DRIVE",
+     ["dig_in[6]", "dig_in[5]"]
+     + ["dig_in[%d]" % (b + 7) for b in range(9, -1, -1)]
+     + ["dig_in[18]", "dig_in[17]"]),
 ]
 
 LVDS_TITLE = """LVDS bench for the top cell.
@@ -628,7 +655,11 @@ out of the measurement.  tb_pll is the one that runs through the loop.
 
 The port list is read out of the symbol when this bench is generated,
 so it survives rewiring of the top cell.  Any harness pin without a
-source in the stimulus column is left open on purpose.
+source in the stimulus column is left open on purpose - except the
+PLL's, which are driven even though the loop is unused here.  They
+land on an XSPICE adc_bridge, where an open node has no defined logic
+value, so ENABLE and RESET_N hold the loop off and every ratio bit
+carries its own source.
 
 clk_pp and core_pp are checked first: if the gated clock inside the
 pattern generator is not moving, the control path is broken and the
