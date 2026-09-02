@@ -56,7 +56,7 @@ into individual pins. Four dedicated analog pads means wrapper \texttt{\_4a},
 and therefore slot \texttt{s1} or \texttt{s16} --- per \texttt{config.txt} the
 only two with four.
 
-Signal flow: the reference arrives on \net{clk}; the PLL multiplies it by
+Signal flow: the reference arrives on \net{analog\_pin[0]}; the PLL multiplies
 \net{DIV\_RATIO} and halves the result; \net{lvds\_pattern} selects reference or
 PLL clock, generates PRBS-7 and hands a differential pair to \net{lvds\_tx},
 which drives two of the analog pads.
@@ -83,13 +83,18 @@ port list but reaches no logic inside this project.
 \net{vssio}         & inout & not connected \\
 \addlinespace
 \multicolumn{3}{@{}l}{\textit{Clock and enable}}\\
-\net{clk}           & in    & PLL reference, \SIrange{25}{250}{\mega\hertz} verified \\
+\net{clk}           & in    & not connected \\
 \net{enable}        & in    & not connected --- see \S\ref{sec:limits} \\
 \addlinespace
 \multicolumn{3}{@{}l}{\textit{Pattern generator control}}\\
-\net{dig\_in[0]}    & in    & \net{clk\_src}: 0 takes \net{clk}, 1 takes the PLL \\
+\net{dig\_in[0]}    & in    & \net{clk\_src}: 0 takes the pad, 1 takes the PLL \\
 \net{dig\_in[1]}    & in    & \net{en} --- gates the pattern clock \\
 \net{dig\_in[2]}    & in    & \net{reset}, active high, seeds the PRBS \\
+\addlinespace[2pt]
+\multicolumn{3}{@{}p{0.95\linewidth}}{\footnotesize Neither reaches the two
+output flops: they run on an ungated clock with \net{RESET\_B} tied high, so
+\net{D\_p} and \net{D\_n} are complementary from the first edge after
+power-up and the driver settles once rather than at every enable.}\\
 \net{dig\_in[3]}    & in    & \net{mode}: 0 clock passthrough, 1 PRBS-7 \\
 \net{dig\_in[4]}    & in    & not connected \\
 \addlinespace
@@ -104,7 +109,7 @@ port list but reaches no logic inside this project.
 \net{dig\_out[11:0]}& out   & not connected \\
 \addlinespace
 \multicolumn{3}{@{}l}{\textit{Dedicated analog pads}}\\
-\net{analog\_pin[0]}& inout & spare \\
+\net{analog\_pin[0]}& inout & \net{ref\_clk} --- PLL reference, \SIrange{25}{250}{\mega\hertz} verified \\
 \net{analog\_pin[1]}& inout & \net{TEST\_CLK} brought off chip \\
 \net{analog\_pin[2]}& inout & LVDS output, non-inverting \\
 \net{analog\_pin[3]}& inout & LVDS output, inverting \\
@@ -128,7 +133,7 @@ port list but reaches no logic inside this project.
 \midrule
 Core supply        & \net{vdd\_1v2}     & 1.08 & 1.20 & 1.32 & V \\
 Driver supply      & \net{vdd\_3v3}     & 2.97 & 3.30 & 3.63 & V \\
-Reference clock    & \net{clk}          & 25   & 250  & 500  & MHz \\
+Reference clock    & \net{analog\_pin[0]} & 25 & 250 & 500 & MHz \\
 Bias current       & \net{ibias[1:0]}   & 0.05 & 2    & 10   & \si{\micro\ampere} \\
 Charge-pump bias   & \net{analog\_bus[0]} & 0.05 & 2  & 10   & \si{\micro\ampere} \\
 Common-mode ref.   & \net{analog\_bus[1]} & {--} & 1.2 & {--} & V \\
@@ -151,7 +156,7 @@ The feedback ratio is one unsigned Q7.3 word on \net{dig\_in[16:7]}:
 the usable range is \numrange{4.000}{127.875} in steps of \num{0.125}.
 
 \begin{equation*}
-  f_{\mathrm{VCO}} = f_{\mathrm{clk}} \times \mathtt{DIV\_RATIO}
+  f_{\mathrm{VCO}} = f_{\mathrm{ref}} \times \mathtt{DIV\_RATIO}
   \qquad
   f_{\mathrm{pll\_clk}} = \frac{f_{\mathrm{VCO}}}{2}
   \qquad
@@ -160,12 +165,12 @@ the usable range is \numrange{4.000}{127.875} in steps of \num{0.125}.
 
 \noindent
 The output divider always halves, so the line rate equals
-$f_{\mathrm{clk}} \times \mathtt{DIV\_RATIO} / 2$. The ring oscillator covers
+$f_{\mathrm{ref}} \times \mathtt{DIV\_RATIO} / 2$. The ring oscillator covers
 \SIrange{322}{4050}{\mega\hertz} at typical / \SI{1.2}{\volt} /
 \SI{27}{\celsius} and does not start below \SI{0.50}{\volt} of control voltage,
 so combinations whose VCO frequency falls outside that band will not lock.
 
-\paragraph{Worked example.} \SI{250}{\mega\hertz} on \net{clk} and a line rate
+\paragraph{Worked example.} \SI{250}{\mega\hertz} on \net{analog\_pin[0]} and a
 of \SI{500}{\mega\bit\per\second} wants $\mathtt{DIV\_RATIO} = 4.0$, code
 $4.0 \times 8 = 32 = \mathtt{0000100000}_2$. Only bit 5 is set, which is
 \net{dig\_in[12]}; every other ratio bit is driven low. The VCO then runs at

@@ -192,7 +192,7 @@ a different pad type changes that (an `InOut` pad becomes five core signals).
 
 | pad | carries | |
 |---|---|---|
-| `analog_pin[0]` | -- | spare; the reference moved to the `clk` pin |
+| `analog_pin[0]` | `ref_clk` | PLL reference in, feeds `lvds_pattern` and the PLL |
 | `analog_pin[1]` | `pll_out` | the PLL's `TEST_CLK`, brought off chip |
 | `analog_pin[2]` | `d_p` | LVDS out + |
 | `analog_pin[3]` | `d_n` | LVDS out - |

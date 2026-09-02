@@ -33,7 +33,7 @@ PORTS = (
 )
 
 # what the four dedicated pads carry
-PAD_USE = [("analog_pin[0]", "SPARE - the reference moved to the clk pin"),
+PAD_USE = [("analog_pin[0]", "ref_clk - PLL reference, feeds lvds_pattern"),
            ("analog_pin[1]", "PLL clock out - the PLL's TEST_CLK"),
            ("analog_pin[2]", "LVDS out +"),
            ("analog_pin[3]", "LVDS out -")]
@@ -49,15 +49,15 @@ PIN_USE = dict(
      ("vss_1v2", "xpat.VSS, xpll.VSS, Cd12 decoupling"),
      ("vssio", NC),
      ("enable", NC),
-     ("clk", "xpat.ref_clk and xpll.REF_CLK - the PLL reference"),
+     ("clk", NC + " - the reference comes in on analog_pin[0]"),
      ("dig_in[18]", "xpll.TEST_DIV[1]"),
      ("dig_in[17]", "xpll.TEST_DIV[0]"),
      ("dig_in[6]", "xpll.RESET_N - active low"),
      ("dig_in[5]", "xpll.ENABLE"),
      ("dig_in[4]", NC + " - was the provisional pll_clk"),
      ("dig_in[3]", "xpat.mode - 0 = clock passthrough, 1 = PRBS-7"),
-     ("dig_in[2]", "xpat.reset - active high, seeds the PRBS"),
-     ("dig_in[1]", "xpat.en - gates the pattern clock"),
+     ("dig_in[2]", "xpat.reset - active high, seeds the PRBS shift register"),
+     ("dig_in[1]", "xpat.en - gates the pattern clock, not the output pair"),
      ("dig_in[0]", "xpat.clk_src - 0 = ref_clk, 1 = pll_clk"),
      ("ibias[1]", "xlvds.Iref_drv - 2 uA, mirrored 1:15 to the driver's 30 uA"),
      ("ibias[0]", "xlvds.Iref_pd - 2 uA, mirrored 1:15 to the pre-driver's 30 uA"),
@@ -106,7 +106,7 @@ CELLS = [
     # PLL is placed; the rest of the control from dig_in bits, which the
     # housekeeping SPI routes individually to a pin, a constant or the sequencer.
     ("xpat", "lvds_pattern.sym", "lvds_pattern", 900, -500, {
-        "ref_clk": "clk", "pll_clk": "dig_in[4]", "clk_src": "dig_in[0]",
+        "ref_clk": "analog_pin[0]", "pll_clk": "dig_in[4]", "clk_src": "dig_in[0]",
         "en": "dig_in[1]", "reset": "dig_in[2]", "mode": "dig_in[3]",
         "D_p": "core_p", "D_n": "core_n", "VDD": "vdd_1v2", "VSS": "vss_1v2"}, ""),
     # bias straight off the harness, output pair onto two dedicated pads
@@ -137,7 +137,7 @@ RTimothyEdwards/sg13cmos5l_ocd_chipalooza, every bus expanded into
 individual pins.  Four dedicated analog pads means slot s1 or s16 -
 per config.txt the only two that have four.
 
-  analog_pin[0]  SPARE     was the PLL reference before it moved to clk
+  analog_pin[0]  ref_clk   PLL reference in, feeds lvds_pattern and the PLL
   analog_pin[1]  pll_out   the PLL's TEST_CLK, brought off chip
   analog_pin[2]  d_p       LVDS out +
   analog_pin[3]  d_n       LVDS out -
@@ -146,9 +146,8 @@ All four are sg13cmos5l_IOPadAnalog in config.txt, so each pad is one core
 signal carrying the pad name.  A different pad type changes that: an InOut
 pad becomes five core signals (_in, _out, _ena, _one, _zero).
 
-Not connected: dig_out[11:0], analog_bus[3:2], vssio, analog_pin[0] and
-enable.  The reference arrives on the harness clock pin: proj_clk = select & clk
-in user_project_control.v, so an unselected project sees no reference at all.
+Not connected: dig_out[11:0], analog_bus[3:2], vssio, clk and enable - the
+reference arrives on its own dedicated pad instead of the shared clock pin.
 The harness already masks dig_in to zero for an unselected project
 (proj_dig_in is dig_in ANDed with 24 copies of select & dig_ena, in
 user_project_control.v), so
@@ -161,8 +160,12 @@ write and no pin.  Unselected holds every dig_in at zero, and all-zero
 leaves the clock stopped and the output pair static - a legal idle.
 
   dig_in[0]     clk_src    0 = ref_clk, 1 = pll_clk
-  dig_in[1]     en         gates the pattern clock
-  dig_in[2]     reset      active high, seeds the PRBS
+  dig_in[1]     en         gates the pattern clock, not the output pair
+  dig_in[2]     reset      active high, seeds the PRBS shift register
+                           Neither reaches the two output flops: they run on an
+                           ungated clock with RESET_B tied high, so D_p and D_n
+                           are complementary from the first edge after power-up
+                           and the LVDS driver settles once, not at every enable.
   dig_in[3]     mode       0 = clock passthrough, 1 = PRBS-7
   dig_in[4]     unused     carried the provisional pll_clk before the PLL was placed
   dig_in[5]     PLL ENABLE
@@ -285,8 +288,17 @@ def launchers(x, y, tb):
         'file mkdir $netlist_dir\n'
         'write_data [save_params] $netlist_dir/[file rootname '
         '[file tail [xschem get current_name]]].save\n'
+        # ngspice has to run from the netlist directory: the deck reaches the
+        # PDK through relative .lib / .include lines, writes its raw beside
+        # itself and its wrdata output to ../plot_simulations/data.  Started
+        # anywhere else it dies on Cannot compute substitute, and the d_cosim
+        # shared object would not resolve either.  make sim-xschem cds there;
+        # the launcher does the same and puts the directory back after.
         'xschem netlist\n'
+        'set _cwd [pwd]\n'
+        'cd $netlist_dir\n'
         'simulate\n'
+        'cd $_cwd\n'
         '"}' % (x, y),
         'C {launcher.sym} %d %d 0 0 {name=h_waves\n'
         'descr="Load waves"\n'
@@ -311,7 +323,7 @@ TB_LVDS_DRIVE = {
     "analog_bus[1]": ("v", "1.2", "LVDS common-mode reference, 1.2 V (the IDAC grid has no 1.25 V)"),
     "ibias[0]": ("i", "-2u", "pre-driver reference, 2 uA"),
     "ibias[1]": ("i", "-2u", "driver reference, 2 uA"),
-    "clk": ("v", "PULSE(0 1.2 0 50p 50p 0.9n 2n)", "ref_clk, 500 MHz"),
+    "analog_pin[0]": ("v", "PULSE(0 1.2 0 50p 50p 0.9n 2n)", "ref_clk, 500 MHz"),
     "dig_in[0]": ("v", "0", "clk_src = 0, take ref_clk"),
     "dig_in[1]": ("v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
     "dig_in[2]": ("v", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset, high until 2 ns"),
@@ -337,14 +349,39 @@ TB_LVDS_CONTROL = r'''
 * own benches place cmfb the same way and run no operating point.
 .ic v(x1.xlvds.xdrv.cmfb)=1.54
 .control
+* The top cell carries pll_cosim, whose RTL half only couples to the analog
+* loop once ngspice holds the auto-bridge templates.  Those are injected into
+* the netlist after xschem writes it, by scripts/pll/inject_cosim_bridges.py,
+* because the quotes their syntax needs would end xschem's value=... property
+* and silently take .endc with them.
+*
+* make sim-xschem netlists, injects, then simulates.  The Simulate arrow in
+* xschem does not netlist - it runs ngspice on whatever netlist is already
+* there, so it works after a make run and fails after xschem has written a
+* fresh one.  Without the bridges nothing couples and every waveform comes
+* out flat, so stop here rather than produce a plausible-looking lie.
+if $?auto_bridge_d_in = 0
+  echo
+  echo ERROR: d_cosim auto-bridges are not set, so the PLL is disconnected.
+  echo Fix: run make sim-xschem with the TB= name of this bench.
+  echo The Simulate arrow reuses that netlist afterwards and will work.
+  echo
+* quit 1 rather than quit: xschem runs ngspice in a terminal that falls back
+* to a shell only on a non-zero exit.  Quitting with zero closes the window
+* before the message above can be read.
+  quit 1
+end
 * xpll is pll_cosim: the PFD and both dividers are the RTL of
 * macros/pll_digital, through d_cosim.  The analog/digital bridges are
 * inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
-* cannot live here, xschem's value="..." property ends at their quotes.
+* cannot live here: xschem ends the value property at the first quote.
 * Build the shared object first: make pll-cosim-so.
 * save all over 120 ns at 5 ps writes a 292 MB rawfile; name what the
-* measurements, the wrdata and the three graph panels actually need
+* measurements, the wrdata and the four graph panels actually need.
+* In_p / In_n are the pre-driver pair inside xlvds - the last node before
+* the output stage, and where a common-mode problem shows up first.
 save d_p d_n vos x1.core_p x1.core_n x1.xpat.gclk_b i(Vvdd_3v3) i(Vvdd_1v2)
++ x1.xlvds.In_p x1.xlvds.In_n
 * 500 Mb/s means 2 ns a bit, so a full PRBS-7 period is 254 ns.  600 ns gives
 * one settling stretch plus about 225 bits of settled data to measure on.
 tran 5p 600n 0 5p
@@ -444,7 +481,7 @@ value="%s"}''' % (x, y, control)
 
 
 def view_panels(specs, tb):
-    """three stacked waveform panels with the launchers above them
+    """the stacked waveform panels, with the launchers above them
 
     Panels that share a time window stay locked to each other, so scrolling one
     scrolls its partners and the traces stay comparable.  A panel on a window of
@@ -576,7 +613,7 @@ TB_LVDS_GROUPS = [
     ("bias", ["analog_bus[1]", "ibias[0]", "ibias[1]"]),
     ("pattern control", ["dig_in[0]", "dig_in[1]",
                          "dig_in[2]", "dig_in[3]"]),
-    ("clocks", ["clk"]),
+    ("clocks", ["analog_pin[0]"]),
 ]
 
 LVDS_TITLE = """LVDS bench for the top cell.
@@ -616,7 +653,10 @@ def gen_tb_lvds(path, symbol):
         [(["d_p", "d_n", "vos"], [4, 5, 8], 0.9, 1.6, 0.0, 6.0e-7),
          (["x1.xpat.gclk_b", "x1.core_p", "x1.core_n"], [4, 7, 5],
           -0.2, 1.4, 3.00e-7, 3.10e-7),
-         (["d_p", "d_n", "vod"], [4, 5, 7], -0.5, 1.6, 3.00e-7, 3.10e-7)],
+         (["d_p", "d_n", "vod"], [4, 5, 7], -0.5, 1.6, 3.00e-7, 3.10e-7),
+         # the pre-driver output is full-swing on the 3.3 V rail
+         (["x1.xlvds.In_p", "x1.xlvds.In_n"], [4, 5],
+          -0.2, 3.5, 3.00e-7, 3.10e-7)],
         TOP + "_tb_lvds")
     out.append(code_block(DOC_X, DOC_CODE_Y, TB_LVDS_CONTROL))
     io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
@@ -627,7 +667,7 @@ TB_SOURCES = [
     ("vdd_3v3", "v", "3.3", "gated 3.3 V"),
     ("vdd_1v2", "v", "1.2", "gated 1.2 V"),
     ("analog_bus[1]", "v", "1.2", "LVDS common-mode reference, 1.2 V"),
-    ("clk", "v", "PULSE(0 1.2 0 50p 50p 1.9n 4n)", "ref_clk, 250 MHz"),
+    ("analog_pin[0]", "v", "PULSE(0 1.2 0 50p 50p 1.9n 4n)", "ref_clk, 250 MHz"),
     ("dig_in[0]", "v", "0", "clk_src = 0, take ref_clk"),
     ("dig_in[1]", "v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
     ("dig_in[2]", "v", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset, high until 2 ns"),
@@ -649,10 +689,32 @@ TB_CONTROL = r'''
 * there whatever tstop says.  trap gets through the full span.
 .options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 .control
+* The top cell carries pll_cosim, whose RTL half only couples to the analog
+* loop once ngspice holds the auto-bridge templates.  Those are injected into
+* the netlist after xschem writes it, by scripts/pll/inject_cosim_bridges.py,
+* because the quotes their syntax needs would end xschem's value=... property
+* and silently take .endc with them.
+*
+* make sim-xschem netlists, injects, then simulates.  The Simulate arrow in
+* xschem does not netlist - it runs ngspice on whatever netlist is already
+* there, so it works after a make run and fails after xschem has written a
+* fresh one.  Without the bridges nothing couples and every waveform comes
+* out flat, so stop here rather than produce a plausible-looking lie.
+if $?auto_bridge_d_in = 0
+  echo
+  echo ERROR: d_cosim auto-bridges are not set, so the PLL is disconnected.
+  echo Fix: run make sim-xschem with the TB= name of this bench.
+  echo The Simulate arrow reuses that netlist afterwards and will work.
+  echo
+* quit 1 rather than quit: xschem runs ngspice in a terminal that falls back
+* to a shell only on a non-zero exit.  Quitting with zero closes the window
+* before the message above can be read.
+  quit 1
+end
 * xpll is pll_cosim: the PFD and both dividers are the RTL of
 * macros/pll_digital, through d_cosim.  The analog/digital bridges are
 * inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
-* cannot live here, xschem's value="..." property ends at their quotes.
+* cannot live here: xschem ends the value property at the first quote.
 * Build the shared object first: make pll-cosim-so.
 save all
 op
@@ -682,7 +744,7 @@ wrdata ../plot_simulations/data/@schname\\\\.txt
 def gen_tb(path):
     out = [HEADER]
     out.append("T {Top-level transient bench.\n\n"
-               "  clk            250 MHz reference on the harness clock pin\n"
+               "  analog_pin[0]  250 MHz reference on the dedicated pad\n"
                "  dig_in[0]      clk_src = 0, the bit clock is the reference\n"
                "  dig_in[1]      en, low until 3 ns\n"
                "  dig_in[2]      reset, high until 2 ns\n"
@@ -842,9 +904,9 @@ def pll_drive(c):
         "analog_bus[0]": ("i", "-2u",
                           "PLL charge-pump reference - 2 uA, not the "
                           "transmitter's 30 uA"),
-        "clk": ("v", "PULSE(0 1.2 0 50p 50p %.4fn %.4fn)"
-                % (ref_ns / 2 - 0.05, ref_ns),
-                "REF_CLK, %s" % eng(c["ref"], "Hz")),
+        "analog_pin[0]": ("v", "PULSE(0 1.2 0 50p 50p %.4fn %.4fn)"
+                          % (ref_ns / 2 - 0.05, ref_ns),
+                          "REF_CLK, %s" % eng(c["ref"], "Hz")),
         "dig_in[0]": ("v", "1.2", "clk_src = 1, pattern generator off the PLL"),
         "dig_in[1]": ("v", "PWL(0 0 %.3fu 0 %.3fu 1.2)" % (on, on + 0.001),
                       "pattern en, held off until the loop has locked"),
@@ -881,7 +943,7 @@ def pll_groups(c):
          % (c["test_div"], 2 ** (1 + c["test_div"])),
          ["dig_in[18]", "dig_in[17]"]),
         ("pattern control", ["dig_in[0]", "dig_in[1]", "dig_in[2]", "dig_in[3]"]),
-        ("reference clock", ["clk"]),
+        ("reference clock", ["analog_pin[0]"]),
     ]
 
 
@@ -938,13 +1000,36 @@ PLL_CONTROL_FMT = r'''
 * and the run then stops early whatever tstop says.  trap gets through.
 .options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 .control
+* The top cell carries pll_cosim, whose RTL half only couples to the analog
+* loop once ngspice holds the auto-bridge templates.  Those are injected into
+* the netlist after xschem writes it, by scripts/pll/inject_cosim_bridges.py,
+* because the quotes their syntax needs would end xschem's value=... property
+* and silently take .endc with them.
+*
+* make sim-xschem netlists, injects, then simulates.  The Simulate arrow in
+* xschem does not netlist - it runs ngspice on whatever netlist is already
+* there, so it works after a make run and fails after xschem has written a
+* fresh one.  Without the bridges nothing couples and every waveform comes
+* out flat, so stop here rather than produce a plausible-looking lie.
+if $?auto_bridge_d_in = 0
+  echo
+  echo ERROR: d_cosim auto-bridges are not set, so the PLL is disconnected.
+  echo Fix: run make sim-xschem with the TB= name of this bench.
+  echo The Simulate arrow reuses that netlist afterwards and will work.
+  echo
+* quit 1 rather than quit: xschem runs ngspice in a terminal that falls back
+* to a shell only on a non-zero exit.  Quitting with zero closes the window
+* before the message above can be read.
+  quit 1
+end
 * xpll is pll_cosim: the PFD and both dividers are the RTL of
 * macros/pll_digital, through d_cosim.  The analog/digital bridges are
 * inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
-* cannot live here, xschem's value="..." property ends at their quotes.
+* cannot live here: xschem ends the value property at the first quote.
 * Build the shared object first: make pll-cosim-so.
 save d_p d_n vos x1.core_p x1.core_n x1.pll_clk
 + x1.xpll.x_analog.VCTRL x1.xpll.VCO_CLK x1.xpll.FB_CLK x1.xpll.UP x1.xpll.DOWN
++ x1.xlvds.In_p x1.xlvds.In_n
 tran %(step).4g %(tstop).4g 0 %(step).4g
 write @schname\\\\.raw
 
@@ -1013,7 +1098,10 @@ def gen_tb_pll(path, symbol, c):
     out += view_panels(
         [(["x1.xpll.x_analog.VCTRL"], [8], 0.0, 1.3, 0.0, PLL_TSTOP),
          (["x1.pll_clk", "x1.core_p"], [4, 7], -0.2, 1.4, zoom, zoom + 10e-9),
-         (["d_p", "d_n", "vos"], [4, 5, 8], 0.9, 1.6, zoom, zoom + 10e-9)],
+         (["d_p", "d_n", "vos"], [4, 5, 8], 0.9, 1.6, zoom, zoom + 10e-9),
+         # the pre-driver output is full-swing on the 3.3 V rail
+         (["x1.xlvds.In_p", "x1.xlvds.In_n"], [4, 5],
+          -0.2, 3.5, zoom, zoom + 10e-9)],
         os.path.basename(path)[:-4])
     out.append(code_block(DOC_X, DOC_CODE_Y, pll_control(c)))
     io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")

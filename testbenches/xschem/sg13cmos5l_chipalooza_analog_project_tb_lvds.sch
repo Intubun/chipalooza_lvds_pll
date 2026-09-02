@@ -94,11 +94,11 @@ L 3 -1340 -580 -1340 260 {}
 L 3 -2260 260 -1340 260 {}
 L 3 -2260 -580 -2260 260 {}
 T {pattern control} -2260 -635 0 0 0.4 0.4 {}
-N -2000 400 -2000 430 {lab=clk}
-C {devices/lab_wire.sym} -2000 400 0 0 {name=ls_clk sig_type=std_logic lab=clk}
-C {devices/vsource.sym} -2000 460 0 0 {name=Vclk value="PULSE(0 1.2 0 50p 50p 0.9n 2n)"}
+N -2000 400 -2000 430 {lab=analog_pin[0]}
+C {devices/lab_wire.sym} -2000 400 0 0 {name=ls_analog_pin_0 sig_type=std_logic lab=analog_pin[0]}
+C {devices/vsource.sym} -2000 460 0 0 {name=Vanalog_pin_0 value="PULSE(0 1.2 0 50p 50p 0.9n 2n)"}
 N -2000 490 -2000 520 {lab=GND}
-C {devices/gnd.sym} -2000 520 0 0 {name=lg_clk lab=GND}
+C {devices/gnd.sym} -2000 520 0 0 {name=lg_analog_pin_0 lab=GND}
 T {ref_clk, 500 MHz} -1920 455 0 0 0.3 0.3 {}
 L 3 -2260 340 -1340 340 {}
 L 3 -1340 340 -1340 580 {}
@@ -239,7 +239,10 @@ set_sim_defaults
 file mkdir $netlist_dir
 write_data [save_params] $netlist_dir/[file rootname [file tail [xschem get current_name]]].save
 xschem netlist
+set _cwd [pwd]
+cd $netlist_dir
 simulate
+cd $_cwd
 "}
 C {launcher.sym} 2050 -2110 0 0 {name=h_waves
 descr="Load waves"
@@ -324,6 +327,30 @@ logx=0
 logy=0
 autoload=0
 hilight_wave=-1}
+B 2 2050 -450 3850 -50 {flags=graph
+y1=-0.2
+y2=3.5
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=3e-07
+x2=3.1e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="x1.xlvds.In_p
+x1.xlvds.In_n"
+color="4 5"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
 C {devices/code_shown.sym} -3600 -1650 0 0 {name=NGSPICE
 only_toplevel=true
 value="
@@ -343,14 +370,39 @@ value="
 * own benches place cmfb the same way and run no operating point.
 .ic v(x1.xlvds.xdrv.cmfb)=1.54
 .control
+* The top cell carries pll_cosim, whose RTL half only couples to the analog
+* loop once ngspice holds the auto-bridge templates.  Those are injected into
+* the netlist after xschem writes it, by scripts/pll/inject_cosim_bridges.py,
+* because the quotes their syntax needs would end xschem's value=... property
+* and silently take .endc with them.
+*
+* make sim-xschem netlists, injects, then simulates.  The Simulate arrow in
+* xschem does not netlist - it runs ngspice on whatever netlist is already
+* there, so it works after a make run and fails after xschem has written a
+* fresh one.  Without the bridges nothing couples and every waveform comes
+* out flat, so stop here rather than produce a plausible-looking lie.
+if $?auto_bridge_d_in = 0
+  echo
+  echo ERROR: d_cosim auto-bridges are not set, so the PLL is disconnected.
+  echo Fix: run make sim-xschem with the TB= name of this bench.
+  echo The Simulate arrow reuses that netlist afterwards and will work.
+  echo
+* quit 1 rather than quit: xschem runs ngspice in a terminal that falls back
+* to a shell only on a non-zero exit.  Quitting with zero closes the window
+* before the message above can be read.
+  quit 1
+end
 * xpll is pll_cosim: the PFD and both dividers are the RTL of
 * macros/pll_digital, through d_cosim.  The analog/digital bridges are
 * inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
-* cannot live here, xschem's value="..." property ends at their quotes.
+* cannot live here: xschem ends the value property at the first quote.
 * Build the shared object first: make pll-cosim-so.
 * save all over 120 ns at 5 ps writes a 292 MB rawfile; name what the
-* measurements, the wrdata and the three graph panels actually need
+* measurements, the wrdata and the four graph panels actually need.
+* In_p / In_n are the pre-driver pair inside xlvds - the last node before
+* the output stage, and where a common-mode problem shows up first.
 save d_p d_n vos x1.core_p x1.core_n x1.xpat.gclk_b i(Vvdd_3v3) i(Vvdd_1v2)
++ x1.xlvds.In_p x1.xlvds.In_n
 * 500 Mb/s means 2 ns a bit, so a full PRBS-7 period is 254 ns.  600 ns gives
 * one settling stretch plus about 225 bits of settled data to measure on.
 tran 5p 600n 0 5p

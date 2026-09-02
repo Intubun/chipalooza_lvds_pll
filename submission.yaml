@@ -65,7 +65,12 @@ long-description: |
     reference or the PLL, `mode` selects clock passthrough or PRBS-7, `reset`
     reseeds the shift register and `en` gates the clock. The line bit and its
     complement are re-timed through a flip-flop pair after the inversion, so
-    both edges leave the block synchronously.
+    both edges leave the block synchronously. That pair answers to neither
+    `en` nor `reset` - ungated clock, `RESET_B` tied high - because a reset
+    `dfrbp` drives both of its outputs to 0, and a pair that is not
+    complementary leaves the driver's common-mode loop without an operating
+    point. The outputs are differential from the first clock edge after
+    power-up instead of from the first enable.
   * **`lvds_tx`** (`xlvds`) - the pre-driver and the LVDS output driver, a
     hand-drawn analog block with its own common-mode feedback loop.
   * **`pll`** (`xpll`) - the PLL by Rahul Bhagwat: the analog loop from
@@ -84,7 +89,7 @@ long-description: |
 
   | Pad | Dir | Function |
   | --- | --- | --- |
-  | `analog_pin[0]` | -   | spare - the reference moved to the dedicated `clk` pin |
+  | `analog_pin[0]` | in  | `ref_clk` - the PLL reference, and the fallback bit clock when `clk_src` is 0 |
   | `analog_pin[1]` | out | `pll_out` - the PLL's `TEST_CLK` brought off chip |
   | `analog_pin[2]` | out | `d_p` |
   | `analog_pin[3]` | out | `d_n` |
