@@ -49,7 +49,37 @@ its native complement, both straight off the last shift-register flop — go int
 identical `dfrbp_2` on the same clock, `xffp` and `xffn`. What leaves those flops is
 two edges from the same cell type at the same instant, so the Q/Q_N mismatch of
 `xs6` (~55 ps) is absorbed by the output flops' setup margin instead of appearing as
-output skew. From there the two sides are symmetric all the way out: one `mux2_2`
+output skew.
+
+**Those two flops answer to neither `en` nor `reset`, by construction.** They are
+clocked by `gclk_free_b`, an ungated copy of the clock — a second `lgcp_1` with its
+enable tied to VDD, then a second `buf_4`, so the cell types match the gated path —
+and their `RESET_B` is tied high. Everything else in the block, the whole shift
+register included, still stops on `en` and still seeds on `reset`.
+
+The reason is the transmitter, not this block. `dfrbp` drives **both** `Q` and `Q_N`
+to 0 on reset, so a reset output pair is not complementary: it leaves as two equal
+levels, and the driver's common-mode loop has no valid operating point to sit at. It
+runs to a rail and needs ~60 ns to climb back every time the pattern is enabled.
+Hanging the output flops off the gated clock had the same effect for `en = 0` — never
+clocked, never reset, both sides drifting to the same level.
+
+`s6` and `s6_n` are `Q` and `Q_N` of one cell, so they are opposite in *every* state
+the register can hold: held in reset, stopped by `en`, or running. Clocking the two
+output flops unconditionally therefore hands the driver a complementary pair from the
+first edge after power-up, and `en` still does its job — the register stops, the
+output pair just holds its last complementary value instead of collapsing.
+
+The library has no reset-less flop: `dfrbp`, `dfrbpq`, `sdfrbp` and `sdfbbp` all carry
+`RESET_B`. Tying it high is that flop. `sg13cmos5l_sdfbbp_1` would do the same with
+`SET_B` and `RESET_B` both tied off, but it only comes in drive 1 and adds two scan
+pins to tie down, so it buys nothing here.
+
+The capture clock is ~38 ps **earlier** than `gclk_b`, because its buffer drives two
+flop clock pins instead of seven. That is skew in the safe direction: the launch flop
+`xs6` sits on `gclk_b`, so an early capture edge adds hold margin and costs 38 ps of
+the ~500 ps setup slack. The hold table below puts the tolerated skew at ~160 ps at
+the hold-critical corner. From there the two sides are symmetric all the way out: one `mux2_2`
 per polarity and two identical `inv_2` → `inv_8` → `inv_16` chains.
 
 That symmetry is what removed the parity problem. The earlier version formed the
@@ -102,12 +132,16 @@ the 250 MHz reference. Current result at tt/27 °C, 1.2 V, 170 fF load:
 
 ```
 bit rate             1.000 Gb/s
-clock to output      479.6 ... 486.3 ps  (spread 6.8 ps)
-data valid window    0.486 ... 1.480 ns after the edge, 99.3% of a UI
+clock to output      441.1 ... 448.0 ps  (spread 6.9 ps)
+data valid window    0.448 ... 1.441 ns after the edge, 99.3% of a UI
 PRBS-7 mismatches    0 of 138 checked
 non-complementary    0 samples
-worst D_p/D_n skew   12.4 ps
+worst D_p/D_n skew   12.7 ps
 ```
+
+Clock-to-output is measured against `gclk_b`, the gated clock, while the output flops
+now run off the ungated copy — which is the ~38 ps that came off the figure. The two
+numbers that describe the eye, the 6.9 ps spread and the 12.7 ps skew, are unchanged.
 
 **The checker measures the sampling phase, it does not assume one.** An earlier
 version sampled half a bit after the clock edge, which happens to be almost

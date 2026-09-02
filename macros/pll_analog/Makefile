@@ -387,6 +387,17 @@ magic-verify-all: ## Verify all main subcells with Magic (DRC, LVS, PEX)
 
 
 # Verify, Build and Simulate All Target
+# The datasheet characterises the ring oscillator rather than the whole block:
+# its tuning curve is what decides which reference and DIV_RATIO combinations
+# the loop can lock, and it needs no digital half to measure.
+CACE_CELL   ?= ring_oscillator
+CACE_SOURCE ?= schematic
+
+cace: ## Characterise the VCO with CACE over the PVT grid and write docs/
+	cd cace && python3 gen_template.py
+	cd cace && cace $(CACE_CELL).yaml -s $(CACE_SOURCE)
+.PHONY: cace
+
 all: ## Verify, build and simulate the TOP cell
 	$(MAKE) klayout-verify-all
 	$(MAKE) magic-verify-all

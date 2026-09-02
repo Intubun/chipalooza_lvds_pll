@@ -8,7 +8,7 @@ E {}
 T {Configurable RTL/transistor PLL co-simulation hierarchy.
 pll_digital.v is loaded through ngspice d_cosim; pll_analog.sch remains hierarchical.} -430 -300 0 0 0.3 0.3 {}
 C {pll_digital_cosim.sym} -120 -40 0 0 {name=a_digital model=pll_digital_cosim
-device_model=".model pll_digital_cosim d_cosim simulation=\"./pll_digital_cosim.so\" delay=0"}
+device_model=".model pll_digital_cosim d_cosim simulation=\"./pll_digital_cosim.so\" delay=1e-12"}
 C {lab_pin.sym} -230 -120 0 0 {name=p_d_ref sig_type=std_logic lab=REF_CLK}
 C {lab_pin.sym} -230 -100 0 0 {name=p_d_vco sig_type=std_logic lab=VCO_CLK}
 C {lab_pin.sym} -230 -80 0 0 {name=p_d_reset sig_type=std_logic lab=RESET_N}

@@ -155,6 +155,10 @@ $(PLL_COSIM_SO): $(PLL_RTL_SRCS)
 # combination and <TOP>_tb_pll_<name>.sch is one per reference / DIV_RATIO pair.
 PLL_TBS := $(notdir $(basename $(wildcard $(XSCHEM_TB_DIR)/$(TOP)_tb_pll*.sch)))
 
+sim-prepare: $(PLL_COSIM_SO) ## Netlist every top-level bench and inject the d_cosim bridges, so the xschem Simulate arrow works
+	@$(SCRIPTS_DIR)/prepare_benches.sh $(abspath .)
+.PHONY: sim-prepare
+
 list-pll-sweep: ## List the generated PLL combination benches
 	@for tb in $(PLL_TBS); do echo "  $$tb"; done
 .PHONY: list-pll-sweep

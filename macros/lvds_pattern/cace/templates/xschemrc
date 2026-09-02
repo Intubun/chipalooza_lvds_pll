@@ -1,0 +1,9 @@
+# CACE netlists the template from this directory, so xschem has to find both
+# the PDK's symbols and this project's own (lvds_tx.sym and everything under
+# it). The template directory itself goes on the path so the DUT symbol
+# resolves; the block's own xschemrc brings in the rest.
+if {![info exists PDK]} {
+    source $env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/xschemrc
+}
+append XSCHEM_LIBRARY_PATH :[file dirname [info script]]
+append XSCHEM_LIBRARY_PATH :[file normalize [file join [file dirname [info script]] .. .. schematic xschem]]

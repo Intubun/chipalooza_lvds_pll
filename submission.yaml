@@ -65,7 +65,12 @@ long-description: |
     reference or the PLL, `mode` selects clock passthrough or PRBS-7, `reset`
     reseeds the shift register and `en` gates the clock. The line bit and its
     complement are re-timed through a flip-flop pair after the inversion, so
-    both edges leave the block synchronously.
+    both edges leave the block synchronously. That pair answers to neither
+    `en` nor `reset` - ungated clock, `RESET_B` tied high - because a reset
+    `dfrbp` drives both of its outputs to 0, and a pair that is not
+    complementary leaves the driver's common-mode loop without an operating
+    point. The outputs are differential from the first clock edge after
+    power-up instead of from the first enable.
   * **`lvds_tx`** (`xlvds`) - the pre-driver and the LVDS output driver, a
     hand-drawn analog block with its own common-mode feedback loop.
   * **`pll`** (`xpll`) - the PLL by Rahul Bhagwat: the analog loop from
@@ -84,7 +89,7 @@ long-description: |
 
   | Pad | Dir | Function |
   | --- | --- | --- |
-  | `analog_pin[0]` | -   | spare - the reference moved to the dedicated `clk` pin |
+  | `analog_pin[0]` | in  | `ref_clk` - the PLL reference, and the fallback bit clock when `clk_src` is 0 |
   | `analog_pin[1]` | out | `pll_out` - the PLL's `TEST_CLK` brought off chip |
   | `analog_pin[2]` | out | `d_p` |
   | `analog_pin[3]` | out | `d_n` |
@@ -109,7 +114,7 @@ long-description: |
   10 uA the harness current DACs deliver: `ibias[0]` 2 uA for the pre-driver and
   `ibias[1]` 2 uA for the driver, each mirrored 1:15 inside `lvds_tx` so the
   blocks still see the 30 uA they were characterised at; `analog_bus[0]` 2 uA
-  for the PLL charge pump; `analog_bus[1]` 1.25 V as the LVDS common-mode
+  for the PLL charge pump; `analog_bus[1]` 1.2 V as the LVDS common-mode
   reference. `vbias` is not connected.
 
   ## How it is tested
@@ -138,10 +143,38 @@ long-description: |
 
   Latest top-level LVDS bench, typical corner at 27 C:
 
-      |Vod|     383.0 mV     4.1.1 wants 247 ... 454 mV
-      Vos       1.2438 V     4.1.2 wants 1.125 ... 1.375 V
-      Vos p-p    107.0 mV    4.1.5 wants under 150 mV
-      I(3.3 V)    5.77 mA    I(1.2 V)  311 uA
+      |Vod|     380.3 mV     4.1.1 wants 247 ... 454 mV
+      Vos       1.1939 V     4.1.2 wants 1.125 ... 1.375 V
+      Vos p-p    117.8 mV    4.1.5 wants under 150 mV
+      I(3.3 V)   5.737 mA    I(1.2 V)  341 uA
+
+    Vos sits on `analog_bus[1]`, which the benches drive at 1.2 V while the
+    rest of the documentation calls that reference 1.25 V - which is where
+    clause 4.1.2 centres, and would split the margin evenly instead of
+    leaving 69 mV below and 181 mV above. Whether the harness bias generator
+    can deliver 1.25 V is unverified, so the figures above are the 1.2 V ones
+    and the discrepancy is open rather than decided.
+
+    The 117.8 mV of Vos p-p is not settling, it is a 93 mV dip at every
+    single data edge. It comes from the pre-driver pair, not the driver:
+    the falling gate edge is 103.5 ps against 112.0 ps rising, so at each
+    crossing the gate common mode (In_p+In_n)/2 dips 78 mV, and that
+    lands on the output common mode at a ratio of 1.11, identically in
+    both data directions. The cross-coupled caps XCxp/XCxn cannot cancel
+    it - they neutralise differential feedthrough, and this term is
+    common mode. The CMFB cannot either: it senses cm through rhigh into
+    XM11's gate, which sees only 36.8 mV of the 117.8, and no loop
+    reaches a 165 ps event. Ruled out by measurement: the tail current
+    imbalance contributes 3.3 fC where 34.6 fC would be needed.
+
+    Two levers were swept. The pre-driver's last PMOS has a narrow
+    optimum away from where it sits today - 36...38 um gives 102 mV
+    against 113 at 40 um, and 34 or 44 um are both back at 113 - and an
+    RC damper across the outputs (2 kohm each into 5 pF, common mode
+    only, invisible differentially) gives 97 mV for 2.6 % of |Vod|. The
+    damper is the more robust of the two: it does not rely on matching,
+    while the width optimum lives on the last inverter's switching
+    threshold and will move over PVT. Neither is in the design yet.
 
     Measured with the 2 uA pin references and the 1:15 pre-mirrors. |Vod| sits
     6.7 % above the 359 mV the block reached on a direct 30 uA reference: the
@@ -151,7 +184,7 @@ long-description: |
     cascode on the NMOS output device rather than a trimmed finger count.
 
   The pattern generator on its own runs 1 Gb/s with no PRBS-7 mismatches over a
-  full 127-bit period, a data valid window of 99.3 % of a UI and 12.4 ps of
+  full 127-bit period, a data valid window of 99.3 % of a UI and 12.7 ps of
   D_p / D_n skew.
 
   Note that the decks integrate with `trap`, not `gear`: Gear2 collapses the

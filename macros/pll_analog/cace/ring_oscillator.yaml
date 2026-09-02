@@ -1,0 +1,180 @@
+name: ring_oscillator
+description: >-
+  Voltage-controlled ring oscillator of the Chipalooza 2026 PLL, by Rahul
+  Bhagwat. Its tuning curve is what decides which reference and DIV_RATIO
+  combinations the loop can lock at all, so it is characterised on its own
+  rather than only inside the loop.
+PDK: ihp-sg13cmos5l
+cace_format: 5.2
+
+authorship:
+  designer: Rahul Bhagwat
+  license: Apache 2.0
+
+paths:
+  root: ..
+  schematic: schematic/xschem
+  netlist: netlist
+  documentation: docs
+
+pins:
+  VCTRL:
+    description: >-
+      Control voltage from the loop filter. The oscillator does not start
+      below about 0.50 V, which is the lower end of the usable range rather
+      than a specification limit.
+    type: signal
+    direction: input
+  VCO_OUT:
+    description: Buffered oscillator output
+    type: signal
+    direction: output
+  VDD:
+    description: Core supply, 1.2 V
+    type: power
+    direction: inout
+    Vmin: 1.08
+    Vmax: 1.32
+  VSS:
+    description: Core ground
+    type: ground
+    direction: inout
+
+default_conditions:
+  vdd:
+    description: Core supply voltage
+    display: Vdd
+    unit: V
+    typical: 1.2
+  vctrl:
+    description: Control voltage
+    display: Vctrl
+    unit: V
+    typical: 0.75
+  vhalf:
+    description: >-
+      Threshold the crossings are counted on. Held at 0.6 V across the supply
+      sweep so frequencies at different supplies are measured alike.
+    display: Vmid
+    unit: V
+    typical: 0.6
+  tstep:
+    description: Transient timestep
+    display: Tstep
+    unit: ps
+    typical: 1
+  tstop:
+    description: >-
+      Length of the run. Long enough that the slowest corner still delivers
+      well over edge_b crossings. At the slow corner and the low end of
+      the VCTRL range that is about 300 MHz, so 120 ns carries roughly
+      36 cycles - which is why edge_b is 30 and not 60.
+    display: Tstop
+    unit: ns
+    typical: 120
+  tmeas:
+    description: Start of the measurement window, past the startup transient
+    display: Tmeas
+    unit: ns
+    typical: 20
+  edge_a:
+    description: First counted rising edge
+    display: EdgeA
+    typical: 5
+  edge_b:
+    description: >-
+      Last counted rising edge. The frequency is taken across the whole span
+      rather than one period, because the range covers more than a decade.
+    display: EdgeB
+    typical: 25
+  corner:
+    description: Process corner
+    display: Corner
+    typical: tt
+  temperature:
+    description: Ambient temperature
+    display: Temp
+    unit: °C
+    typical: 27
+
+parameters:
+
+  vco_tuning:
+    display: VCO tuning
+    description: >-
+      Oscillation frequency, output swing and current against the control
+      voltage. The frequency limits below are the range the loop needs to
+      cover the documented reference and DIV_RATIO combinations, all of which
+      land between 0.7 and 2.1 GHz; they are not a device limit.
+    spec:
+      f_vco:
+        display: Oscillation frequency
+        description: >-
+          Averaged across twenty cycles rather than taken from one period.
+          At VCTRL = 0.6 V the slow corner did not deliver even 30 cycles in
+          a 120 ns window, so the sweep starts at 0.7 V; what happens below
+          that is a startup question and wants its own bench, not this
+          steady-state measurement.
+        unit: Hz
+        minimum:
+          value: 3e8
+        typical:
+          value: any
+        maximum:
+          value: any
+      v_swing:
+        display: Output swing
+        description: >-
+          Peak to peak at VCO_OUT. A frequency measured on a small wiggle is
+          not a clock, so this is what says the oscillator is really running.
+        unit: V
+        minimum:
+          value: 1.0
+        typical:
+          value: any
+        maximum:
+          value: any
+      i_vco:
+        display: Supply current
+        description: Mean current out of the core supply while oscillating
+        unit: uA
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: vco_tuning.sch
+        format: ascii
+        suffix: .data
+        variables: [f_vco, v_swing, i_vco]
+    conditions:
+      vctrl:
+        enumerate: [0.7, 0.8, 0.9]
+      corner:
+        enumerate: [ss, tt, ff]
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+    plot:
+      tuning_curve:
+        type: xyplot
+        xaxis: vctrl
+        yaxis: f_vco
+        limits: auto
+      f_vs_temp:
+        type: xyplot
+        xaxis: temperature
+        yaxis: f_vco
+        limits: auto
+      f_vs_corner:
+        type: xyplot
+        xaxis: corner
+        yaxis: f_vco
+        limits: auto
+      current_vs_vctrl:
+        type: xyplot
+        xaxis: vctrl
+        yaxis: i_vco
+        limits: auto
