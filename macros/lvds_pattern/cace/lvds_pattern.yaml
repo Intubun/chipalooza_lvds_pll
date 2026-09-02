@@ -1,0 +1,225 @@
+name: lvds_pattern
+description: >-
+  PRBS-7 pattern generator and clock multiplexer for the Chipalooza 2026 LVDS
+  transmitter, built only from IHP standard cells. Selects between the
+  reference and the PLL clock, generates x^7 + x^6 + 1 or passes the clock
+  through, and hands the transmitter a complementary pair that is registered
+  after the inversion so both edges leave on the same clock.
+PDK: ihp-sg13cmos5l
+cace_format: 5.2
+
+authorship:
+  designer: Enno Schnackenberg
+  license: Apache 2.0
+
+paths:
+  root: ..
+  schematic: schematic/xschem
+  netlist: netlist
+  documentation: docs
+
+pins:
+  ref_clk:
+    description: Reference clock from the pad
+    type: signal
+    direction: input
+  pll_clk:
+    description: Bit clock from the PLL
+    type: signal
+    direction: input
+  clk_src:
+    description: Clock select. 0 takes ref_clk, 1 takes pll_clk.
+    type: signal
+    direction: input
+  en:
+    description: >-
+      Enables the pattern clock. Latch-based gate, so the clock stops low and
+      en may change at any point in the cycle without a runt pulse. It does
+      not reach the two output flops - those run on an ungated copy.
+    type: signal
+    direction: input
+  reset:
+    description: >-
+      Active high, asynchronous, seeds the PRBS shift register. Like en it
+      does not reach the output flops, whose RESET_B is tied high, so the
+      output pair is complementary from the first clock edge after power-up
+      rather than from the first enable.
+    type: signal
+    direction: input
+  mode:
+    description: 0 passes the gated clock to the pair, 1 generates PRBS-7
+    type: signal
+    direction: input
+  D_p:
+    description: Data output, true, into the transmitter's pre-driver
+    type: signal
+    direction: output
+  D_n:
+    description: Data output, complement
+    type: signal
+    direction: output
+  VDD:
+    description: Core supply, 1.2 V
+    type: power
+    direction: inout
+    Vmin: 1.08
+    Vmax: 1.32
+  VSS:
+    description: Core ground
+    type: ground
+    direction: inout
+
+default_conditions:
+  vdd:
+    description: Core supply voltage
+    display: Vdd
+    unit: V
+    typical: 1.2
+  vhalf:
+    description: >-
+      Threshold the edge measurements cross. Held at 0.6 V across the supply
+      sweep rather than tracking vdd/2, so a skew number at 1.08 V and one at
+      1.32 V are measured on the same threshold and can be compared.
+    display: Vmid
+    unit: V
+    typical: 0.6
+  period:
+    description: Reference clock period. One clock period carries one bit.
+    display: Period
+    unit: ns
+    typical: 2
+  tedge:
+    description: Edge rate of the stimulus
+    display: Tedge
+    unit: ps
+    typical: 50
+  cload:
+    description: >-
+      Load per output. The transmitter's pre-driver presents about 170 fF,
+      two 40u/0.45u HV gates, and the skew figure is meaningless without it.
+    display: Cload
+    unit: fF
+    typical: 170
+  t_rst:
+    description: When reset is released
+    display: Treset
+    unit: ns
+    typical: 2
+  t_en:
+    description: When the pattern is enabled
+    display: Ten
+    unit: ns
+    typical: 3
+  tstep:
+    description: Transient timestep
+    display: Tstep
+    unit: ps
+    typical: 2
+  tstop:
+    description: Length of the transient run
+    display: Tstop
+    unit: ns
+    typical: 200
+  tmeas:
+    description: Start of the measurement window, past the enable
+    display: Tmeas
+    unit: ns
+    typical: 20
+  edge:
+    description: >-
+      Index of the output edge the skew is measured on. With PRBS-7 the
+      output only has a rising edge on a 0-to-1 bit, so an index counts
+      transitions and not bits - the bit rate is an input condition here,
+      not something this block determines.
+    display: Edge
+    typical: 12
+  corner:
+    description: Process corner
+    display: Corner
+    typical: tt
+  temperature:
+    description: Ambient temperature
+    display: Temp
+    unit: °C
+    typical: 27
+
+parameters:
+
+  pattern_timing:
+    display: Output pair timing
+    description: >-
+      What the transmitter sees. The polynomial itself is checked separately by
+      scripts/check_timing.py, which re-runs the recurrence on an exported
+      waveform; these are the timing properties of the pair that a user of the
+      block needs before that.
+    spec:
+      dsum_dev:
+        display: Complementarity
+        description: >-
+          Worst deviation of D_p + D_n from the supply. A pair that ever sits
+          at the same level shows up here whatever the data is doing, and it
+          is what leaves the transmitter's common-mode loop without an
+          operating point.
+        unit: V
+        typical:
+          value: any
+        maximum:
+          value: 0.25
+      skew:
+        display: D_p / D_n skew
+        description: >-
+          D_p rising against D_n falling on the same bit, into the pre-driver
+          load. The pre-driver's budget is about 40 ps.
+
+          Declared in ps. The value goes in as seconds and CACE scales it
+          for display, but the limit is compared against the scaled value,
+          so the limit itself has to be written in the display unit: 40,
+          not 40e-12. With unit s and limit 40e-12 the column read 0.000
+          for every corner; with unit ps and the limit still in seconds
+          everything failed against 4e-23 s.
+        unit: ps
+        typical:
+          value: any
+        maximum:
+          value: 40
+      i_core:
+        display: Core supply current
+        description: Mean current out of the 1.2 V supply while running
+        unit: uA
+        typical:
+          value: any
+        maximum:
+          value: any
+    tool:
+      ngspice:
+        template: pattern_timing.sch
+        format: ascii
+        suffix: .data
+        variables: [dsum_dev, skew, i_core]
+    conditions:
+      corner:
+        enumerate: [ss, tt, ff]
+      temperature:
+        minimum: -40
+        typical: 27
+        maximum: 125
+      vdd:
+        minimum: 1.08
+        typical: 1.2
+        maximum: 1.32
+    plot:
+      skew_vs_temp:
+        type: xyplot
+        xaxis: temperature
+        yaxis: skew
+        limits: true
+      skew_vs_corner:
+        type: xyplot
+        xaxis: corner
+        yaxis: skew
+        limits: true
+      icore_vs_temp:
+        type: xyplot
+        xaxis: temperature
+        yaxis: i_core
+        limits: auto

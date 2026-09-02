@@ -399,6 +399,15 @@ magic-verify-all: ## Verify all main subcells with Magic (DRC, LVS, PEX)
 
 
 # Verify, Build and Simulate All Target
+cace: ## Characterise the block with CACE over the PVT grid and write docs/
+	cd cace && python3 gen_template.py
+	cd cace && cace $(CELL).yaml -s $(CACE_SOURCE)
+.PHONY: cace
+
+# schematic, layout, pex or rcx - or 'best', which takes the R-C extracted
+# netlist when a layout exists and the schematic otherwise.
+CACE_SOURCE ?= schematic
+
 all: ## Verify, build and simulate the TOP cell
 	$(MAKE) klayout-verify-all
 	$(MAKE) magic-verify-all
