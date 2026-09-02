@@ -244,11 +244,22 @@ Known gaps, all of them real:
   output divider is fixed the same way (`pll_out_div4`), which makes `TEST_CLK`
   always VCO/4 whatever `TEST_DIV` says. Only the RTL in `macros/pll_digital`
   (`fractional_divider.v`) decodes `DIV_RATIO`, and only the cosim flow
-  `scripts/pll/run_pll_cosim.sh` exercises it. Measured at the top level with
-  a 250 MHz reference and `DIV_RATIO` = 4.0: the loop asks for 20 x 250 MHz =
-  5 GHz, the ring oscillator stops at 4.05 GHz, so `vctrl` rails at 1.18 V and
-  `f_pll` comes out at 1.997 GHz instead of 500 MHz. The ten `dig_in` bits
-  routed to the PLL reach its boundary and stop there.
+  `scripts/pll/run_pll_cosim.sh` exercises it. Measured at the top level while
+  the top cell still carried `pll.sch`, with a 250 MHz reference and
+  `DIV_RATIO` = 4.0: the loop asks for 20 x 250 MHz = 5 GHz, the ring
+  oscillator stops at 4.05 GHz, so `vctrl` railed at 1.18 V and `f_pll` came
+  out at 1.997 GHz instead of 500 MHz. The ten `dig_in` bits routed to the PLL
+  reached its boundary and stopped there.
+
+  **The top level routes around this rather than fixing it.** `xpll` is
+  `pll_cosim`, not `pll`: the analog loop from `macros/pll_analog` with the PFD
+  and both dividers replaced by the RTL of `macros/pll_digital` through
+  ngspice's `d_cosim`. The two symbols carry the same ports at the same
+  coordinates, so the swap is a one-instance change. `DIV_RATIO` and
+  `TEST_DIV` are decoded from that point on, and the same 250 MHz / 4.0 bench
+  now locks at 500.0117 MHz, +23.3 ppm. The gap below is therefore no longer
+  on the path any top-level bench takes - but it is still in `pll.sch`, and
+  anyone instantiating that block directly still meets it.
 - The `.subckt` port order differs from the wrapper declaration because xschem
   groups outputs last. Instantiate by name, not by position.
 - No ESD structure on the output pads.
@@ -492,15 +503,13 @@ Every combination keeps the VCO between 0.7 and 2.1 GHz. The tuning curve in
 `pll_combo()` asserts the band, so a new row that falls outside it fails at
 generation time instead of producing a bench that quietly never locks.
 
-> [!WARNING]
-> Only `tb_pll_ref100_r20` can lock as things stand. The transistor-level PLL
-> ignores `DIV_RATIO` and divides by a hard-wired 20 (see Known gaps), so the
-> `DIV_RATIO` column below describes what the bench *asks for*, not what the
-> schematic does. The five combinations whose reference times 20 lands outside
-> the ring oscillator's 0.32 - 4.05 GHz range drive `vctrl` to a rail. The table
-> becomes true once the divider takes its factor from the pins, or when the same
-> combinations are run through `scripts/pll/run_pll_cosim.sh`, which couples the
-> RTL divider to the analog loop and does decode `DIV_RATIO`.
+> [!NOTE]
+> The `DIV_RATIO` column is what the benches actually divide by. That was not
+> always so: while the top cell carried `pll.sch` the divider ignored its pins
+> and divided by a hard-wired 20 (see Known gaps), so only `ref100_r20` could
+> lock and the other five drove `vctrl` to a rail. `xpll` is now `pll_cosim`,
+> whose RTL half decodes the ratio, and the column describes the hardware
+> again.
 
 Confirmed result, `tb_pll_ref100_r20`, tt at 27 C, 6 us run:
 
