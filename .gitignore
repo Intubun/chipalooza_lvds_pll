@@ -18,6 +18,12 @@ sim_build/
 /macros/inverter/verification/cace/_runs
 /macros/inverter/verification/cace/_docs
 /macros/inverter/verification/cace/netlist
+# CACE regenerates the DUT netlist from the schematic on every run, so it
+# is build output rather than source - and committing it would let a stale
+# copy outlive the schematic it came from.
+/macros/lvds_tx/netlist
+/macros/lvds_pattern/netlist
+/macros/pll_analog/netlist
 /macros/inverter/verification/cace/templates/simulations
 /macros/inverter/schematic/xschem/simulations
 /macros/inverter/testbenches/xschem/simulations
