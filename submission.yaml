@@ -148,10 +148,12 @@ long-description: |
       Vos p-p    117.8 mV    4.1.5 wants under 150 mV
       I(3.3 V)   5.737 mA    I(1.2 V)  341 uA
 
-    Vos sits on `analog_bus[1]`, which the benches drive at 1.2 V. The
-    clause centres on 1.25 V, so moving the reference there would buy
-    56 mV of margin on the low side for nothing - worth deciding before
-    tape-out rather than after.
+    Vos sits on `analog_bus[1]`, which the benches drive at 1.2 V while the
+    rest of the documentation calls that reference 1.25 V - which is where
+    clause 4.1.2 centres, and would split the margin evenly instead of
+    leaving 69 mV below and 181 mV above. Whether the harness bias generator
+    can deliver 1.25 V is unverified, so the figures above are the 1.2 V ones
+    and the discrepancy is open rather than decided.
 
     The 117.8 mV of Vos p-p is not settling, it is a 93 mV dip at every
     single data edge. It comes from the pre-driver pair, not the driver:
