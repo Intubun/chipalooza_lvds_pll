@@ -18,9 +18,15 @@ Idempotent: running it twice leaves one copy.
 
 Usage: inject_cosim_bridges.py <netlist.spice> [vdd]
 """
+import os
 import sys
 
-MARK = "auto_bridge_d_in"
+# Match the pre_set line itself, not the bare variable name: the control block
+# carries a guard that reads $?auto_bridge_d_in, and a looser marker would see
+# that and skip the insertion, leaving the very bridges the guard checks for.
+MARK = "pre_set auto_bridge_d_in"
+
+SO_REL = "simulation=./pll_digital_cosim.so"
 
 
 def lines(vdd):
@@ -34,9 +40,32 @@ def lines(vdd):
             "pre_set auto_bridge_d_out = ( %s %s )" % (dac, tout)]
 
 
+def check_so(text, path):
+    """Fail loudly if the compiled RTL is not sitting next to the netlist.
+
+    A missing shared object is silent: d_cosim loads nothing, the RTL half of the
+    PLL never runs, and every waveform comes out flat with no error to show for
+    it. The path in the model card has to stay relative - an absolute one makes
+    ngspice die on "Cannot compute substitute" - so the object has to sit beside
+    the netlist, which is where make pll-cosim-so puts it.
+    """
+    if SO_REL not in text:
+        return
+    so = os.path.join(os.path.dirname(os.path.abspath(path)),
+                      "pll_digital_cosim.so")
+    if not os.path.exists(so):
+        raise SystemExit(
+            "ERROR: " + so + " is missing.\n"
+            "       d_cosim loads nothing without it and every waveform comes\n"
+            "       out flat, with no error from ngspice. Build it with:\n"
+            "           make pll-cosim-so")
+
+
 def main(path, vdd="1.2"):
     with open(path, encoding="utf-8", errors="replace") as fh:
         text = fh.read()
+
+    check_so(text, path)
 
     if MARK in text:
         print("%s: auto-bridge setup already present" % path)
