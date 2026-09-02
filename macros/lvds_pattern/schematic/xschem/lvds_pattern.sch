@@ -9,7 +9,7 @@ T {lvds_pattern - data source for the LVDS transmitter, sg13cmos5l standard cell
 
   clk_src   0 = ref_clk, 1 = pll_clk
   en        1 = clock runs, 0 = clock stopped low (latch-based gate, no runt pulse)
-  reset     active high, asynchronous, seeds the PRBS
+  reset     active high, asynchronous, seeds the PRBS - shift register only
   mode      0 = gated clock straight to the pair, 1 = PRBS-7
 
 D_p / D_n drive the pre-driver of macros/lvds_tx.} 150 -1000 0 0 0.6 0.6 {}
@@ -36,7 +36,17 @@ buf_16 - two internal stages, so four inversions - against inv_16, three.
 That pairing measured the least D_p/D_n skew into that load: 23 ps, against
 the pre-driver's ~40 ps budget.  XOR/XNOR against VSS measured 48 ps.} 2800 -900 0 0 0.35 0.35 {}
 T {clock trunk} 1150 -232 0 0 0.3 0.3 {}
-T {reset trunk} 1150 48 0 0 0.3 0.3 {}
+T {reset trunk - shift register only} 1150 48 0 0 0.3 0.3 {}
+T {The output pair is free of both en and reset by construction.  Their clock is
+the ungated copy and their RESET_B is tied high, so from the first edge after
+power-up they hold s6 and s6_n, which are Q and Q_N of one cell and therefore
+opposite in every state - held in reset, stopped by en, or running.  The LVDS
+driver's common-mode loop always sees a valid differential pair and settles
+once, at t=0, instead of at every enable.
+
+The library has no reset-less flop, so this is dfrbp_2 with RESET_B on VDD.
+sg13cmos5l_sdfbbp_1 would do the same with SET_B and RESET_B both tied off, but
+it only comes in drive 1 and adds two scan pins to tie down as well.} 2400 40 0 0 0.35 0.35 {}
 N 200 -620 360 -620 {lab=ref_clk}
 N 200 -580 360 -580 {lab=pll_clk}
 N 200 -540 360 -540 {lab=clk_src}
@@ -56,14 +66,18 @@ N 1210 -220 1210 -120 {lab=gclk_b}
 N 1510 -220 1510 -120 {lab=gclk_b}
 N 1810 -220 1810 -120 {lab=gclk_b}
 N 2110 -220 2110 -120 {lab=gclk_b}
-N 2460 -220 2460 -120 {lab=gclk_b}
-N 2760 -220 2760 -120 {lab=gclk_b}
 N 1090 -610 2520 -610 {lab=gclk_b}
 N 2520 -610 2520 -620 {lab=gclk_b}
 N 2520 -620 2560 -620 {lab=gclk_b}
+N 620 -790 660 -790 {lab=clk_sel}
+N 600 -770 660 -770 {lab=VDD}
+N 840 -790 1010 -790 {lab=gclk_free}
+N 1090 -790 1150 -790 {lab=gclk_free_b}
+N 2460 -170 2460 -120 {lab=gclk_free_b}
+N 2760 -170 2760 -120 {lab=gclk_free_b}
 N 0 -450 110 -450 {lab=reset}
 N 190 -450 190 60 {lab=reset_b}
-N 190 60 2760 60 {lab=reset_b}
+N 190 60 2110 60 {lab=reset_b}
 N 310 60 310 -80 {lab=reset_b}
 N 610 60 610 -80 {lab=reset_b}
 N 910 60 910 -80 {lab=reset_b}
@@ -71,8 +85,8 @@ N 1210 60 1210 -80 {lab=reset_b}
 N 1510 60 1510 -80 {lab=reset_b}
 N 1810 60 1810 -80 {lab=reset_b}
 N 2110 60 2110 -80 {lab=reset_b}
-N 2460 60 2460 -80 {lab=reset_b}
-N 2760 60 2760 -80 {lab=reset_b}
+N 2460 -80 2460 20 {lab=VDD}
+N 2760 -80 2760 20 {lab=VDD}
 N 490 -120 550 -120 {lab=s0}
 N 550 -120 550 -100 {lab=s0}
 N 550 -100 610 -100 {lab=s0}
@@ -147,38 +161,46 @@ N 1200 400 1320 400 {lab=VSS}
 C {devices/lab_wire.sym} 530 -600 0 0 {name=lw0 sig_type=std_logic lab=clk_sel}
 C {devices/lab_wire.sym} 930 -610 0 0 {name=lw1 sig_type=std_logic lab=gclk}
 C {devices/lab_wire.sym} 1090 -400 0 0 {name=lw2 sig_type=std_logic lab=gclk_b}
-C {devices/lab_wire.sym} 190 -200 0 0 {name=lw3 sig_type=std_logic lab=reset_b}
-C {devices/lab_wire.sym} 550 -112 0 0 {name=lw4 sig_type=std_logic lab=s0}
-C {devices/lab_wire.sym} 850 -112 0 0 {name=lw5 sig_type=std_logic lab=s1}
-C {devices/lab_wire.sym} 1150 -112 0 0 {name=lw6 sig_type=std_logic lab=s2}
-C {devices/lab_wire.sym} 1450 -112 0 0 {name=lw7 sig_type=std_logic lab=s3}
-C {devices/lab_wire.sym} 1750 -112 0 0 {name=lw8 sig_type=std_logic lab=s4}
-C {devices/lab_wire.sym} 2050 -112 0 0 {name=lw9 sig_type=std_logic lab=s5}
-C {devices/lab_wire.sym} 2350 100 0 0 {name=lw10 sig_type=std_logic lab=s6}
-C {devices/lab_wire.sym} 2500 -40 0 0 {name=lw11 sig_type=std_logic lab=s6_n}
-C {devices/lab_wire.sym} 2640 -350 0 0 {name=lw12 sig_type=std_logic lab=fp}
-C {devices/lab_wire.sym} 2940 -200 0 0 {name=lw13 sig_type=std_logic lab=fn}
-C {devices/lab_wire.sym} 2680 -60 0 0 {name=lw14 sig_type=std_logic lab=fp_n}
-C {devices/lab_wire.sym} 2980 -60 0 0 {name=lw15 sig_type=std_logic lab=fn_n}
-C {devices/lab_wire.sym} 2340 250 0 0 {name=lw16 sig_type=std_logic lab=fb}
-C {devices/lab_wire.sym} 250 -100 0 0 {name=lw17 sig_type=std_logic lab=fb}
-C {devices/lab_wire.sym} 530 -60 0 0 {name=lw18 sig_type=std_logic lab=s0_n}
-C {devices/lab_wire.sym} 830 -60 0 0 {name=lw19 sig_type=std_logic lab=s1_n}
-C {devices/lab_wire.sym} 1130 -60 0 0 {name=lw20 sig_type=std_logic lab=s2_n}
-C {devices/lab_wire.sym} 1430 -60 0 0 {name=lw21 sig_type=std_logic lab=s3_n}
-C {devices/lab_wire.sym} 1730 -60 0 0 {name=lw22 sig_type=std_logic lab=s4_n}
-C {devices/lab_wire.sym} 2030 -60 0 0 {name=lw23 sig_type=std_logic lab=s5_n}
-C {devices/lab_wire.sym} 1600 -500 0 0 {name=lw24 sig_type=std_logic lab=gclk_bn}
-C {devices/lab_wire.sym} 1600 -320 0 0 {name=lw25 sig_type=std_logic lab=gclk_b}
-C {devices/lab_wire.sym} 3080 -420 0 0 {name=lw26 sig_type=std_logic lab=mode}
-C {devices/lab_wire.sym} 3270 -600 0 0 {name=lw27 sig_type=std_logic lab=dp0}
-C {devices/lab_wire.sym} 3520 -600 0 0 {name=lw28 sig_type=std_logic lab=dp1}
-C {devices/lab_wire.sym} 3770 -600 0 0 {name=lw29 sig_type=std_logic lab=dp2}
-C {devices/lab_wire.sym} 3270 -300 0 0 {name=lw30 sig_type=std_logic lab=dn0}
-C {devices/lab_wire.sym} 3520 -300 0 0 {name=lw31 sig_type=std_logic lab=dn1}
-C {devices/lab_wire.sym} 3770 -300 0 0 {name=lw32 sig_type=std_logic lab=dn2}
-C {devices/lab_wire.sym} 1320 -900 0 0 {name=lw33 sig_type=std_logic lab=VDD}
-C {devices/lab_wire.sym} 1320 400 0 0 {name=lw34 sig_type=std_logic lab=VSS}
+C {devices/lab_wire.sym} 620 -790 0 0 {name=lw3 sig_type=std_logic lab=clk_sel}
+C {devices/lab_wire.sym} 600 -770 0 0 {name=lw4 sig_type=std_logic lab=VDD}
+C {devices/lab_wire.sym} 930 -790 0 0 {name=lw5 sig_type=std_logic lab=gclk_free}
+C {devices/lab_wire.sym} 1150 -790 0 0 {name=lw6 sig_type=std_logic lab=gclk_free_b}
+C {devices/lab_wire.sym} 2460 -170 0 0 {name=lw7 sig_type=std_logic lab=gclk_free_b}
+C {devices/lab_wire.sym} 2760 -170 0 0 {name=lw8 sig_type=std_logic lab=gclk_free_b}
+C {devices/lab_wire.sym} 190 -200 0 0 {name=lw9 sig_type=std_logic lab=reset_b}
+C {devices/lab_wire.sym} 2460 20 0 0 {name=lw10 sig_type=std_logic lab=VDD}
+C {devices/lab_wire.sym} 2760 20 0 0 {name=lw11 sig_type=std_logic lab=VDD}
+C {devices/lab_wire.sym} 550 -112 0 0 {name=lw12 sig_type=std_logic lab=s0}
+C {devices/lab_wire.sym} 850 -112 0 0 {name=lw13 sig_type=std_logic lab=s1}
+C {devices/lab_wire.sym} 1150 -112 0 0 {name=lw14 sig_type=std_logic lab=s2}
+C {devices/lab_wire.sym} 1450 -112 0 0 {name=lw15 sig_type=std_logic lab=s3}
+C {devices/lab_wire.sym} 1750 -112 0 0 {name=lw16 sig_type=std_logic lab=s4}
+C {devices/lab_wire.sym} 2050 -112 0 0 {name=lw17 sig_type=std_logic lab=s5}
+C {devices/lab_wire.sym} 2350 100 0 0 {name=lw18 sig_type=std_logic lab=s6}
+C {devices/lab_wire.sym} 2500 -40 0 0 {name=lw19 sig_type=std_logic lab=s6_n}
+C {devices/lab_wire.sym} 2640 -350 0 0 {name=lw20 sig_type=std_logic lab=fp}
+C {devices/lab_wire.sym} 2940 -200 0 0 {name=lw21 sig_type=std_logic lab=fn}
+C {devices/lab_wire.sym} 2680 -60 0 0 {name=lw22 sig_type=std_logic lab=fp_n}
+C {devices/lab_wire.sym} 2980 -60 0 0 {name=lw23 sig_type=std_logic lab=fn_n}
+C {devices/lab_wire.sym} 2340 250 0 0 {name=lw24 sig_type=std_logic lab=fb}
+C {devices/lab_wire.sym} 250 -100 0 0 {name=lw25 sig_type=std_logic lab=fb}
+C {devices/lab_wire.sym} 530 -60 0 0 {name=lw26 sig_type=std_logic lab=s0_n}
+C {devices/lab_wire.sym} 830 -60 0 0 {name=lw27 sig_type=std_logic lab=s1_n}
+C {devices/lab_wire.sym} 1130 -60 0 0 {name=lw28 sig_type=std_logic lab=s2_n}
+C {devices/lab_wire.sym} 1430 -60 0 0 {name=lw29 sig_type=std_logic lab=s3_n}
+C {devices/lab_wire.sym} 1730 -60 0 0 {name=lw30 sig_type=std_logic lab=s4_n}
+C {devices/lab_wire.sym} 2030 -60 0 0 {name=lw31 sig_type=std_logic lab=s5_n}
+C {devices/lab_wire.sym} 1600 -500 0 0 {name=lw32 sig_type=std_logic lab=gclk_bn}
+C {devices/lab_wire.sym} 1600 -320 0 0 {name=lw33 sig_type=std_logic lab=gclk_b}
+C {devices/lab_wire.sym} 3080 -420 0 0 {name=lw34 sig_type=std_logic lab=mode}
+C {devices/lab_wire.sym} 3270 -600 0 0 {name=lw35 sig_type=std_logic lab=dp0}
+C {devices/lab_wire.sym} 3520 -600 0 0 {name=lw36 sig_type=std_logic lab=dp1}
+C {devices/lab_wire.sym} 3770 -600 0 0 {name=lw37 sig_type=std_logic lab=dp2}
+C {devices/lab_wire.sym} 3270 -300 0 0 {name=lw38 sig_type=std_logic lab=dn0}
+C {devices/lab_wire.sym} 3520 -300 0 0 {name=lw39 sig_type=std_logic lab=dn1}
+C {devices/lab_wire.sym} 3770 -300 0 0 {name=lw40 sig_type=std_logic lab=dn2}
+C {devices/lab_wire.sym} 1320 -900 0 0 {name=lw41 sig_type=std_logic lab=VDD}
+C {devices/lab_wire.sym} 1320 400 0 0 {name=lw42 sig_type=std_logic lab=VSS}
 C {devices/ipin.sym} 200 -620 2 1 {name=p_ref_clk lab=ref_clk}
 C {devices/ipin.sym} 200 -580 2 1 {name=p_pll_clk lab=pll_clk}
 C {devices/ipin.sym} 200 -540 2 1 {name=p_clk_src lab=clk_src}
@@ -192,6 +214,8 @@ C {devices/iopin.sym} 1200 400 2 0 {name=p_VSS lab=VSS}
 C {sg13cmos5l_stdcells/sg13cmos5l_mux2_2.sym} 400 -600 0 0 {name=xcsel}
 C {sg13cmos5l_stdcells/sg13cmos5l_lgcp_1.sym} 750 -600 0 0 {name=xicg}
 C {sg13cmos5l_stdcells/sg13cmos5l_buf_4.sym} 1050 -610 0 0 {name=xclkb}
+C {sg13cmos5l_stdcells/sg13cmos5l_lgcp_1.sym} 750 -780 0 0 {name=xicg2}
+C {sg13cmos5l_stdcells/sg13cmos5l_buf_4.sym} 1050 -790 0 0 {name=xclkb2}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_2.sym} 150 -450 0 0 {name=xrstb}
 C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_1.sym} 400 -100 0 0 {name=xs0}
 C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_1.sym} 700 -100 0 0 {name=xs1}

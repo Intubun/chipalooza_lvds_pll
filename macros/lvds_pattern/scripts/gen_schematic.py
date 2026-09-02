@@ -20,6 +20,11 @@ CELLS = [
     ("xcsel", "mux2_2", "mux2", 400, -600),     # clock source select
     ("xicg", "lgcp_1", "lgcp", 750, -600),      # latch-based clock gate
     ("xclkb", "buf_4", "buf", 1050, -610),      # clock buffer to the register
+    # the same gate and buffer again with the enable tied high: the output
+    # flops need edges even when en is low, and matching the cells keeps
+    # their insertion delay equal to the gated path
+    ("xicg2", "lgcp_1", "lgcp", 750, -780),
+    ("xclkb2", "buf_4", "buf", 1050, -790),
     ("xrstb", "inv_2", "inv", 150, -450),       # reset is active high on the port
     ("xs0", "dfrbp_1", "dfrbp", 400, -100),
     ("xs1", "dfrbp_1", "dfrbp", 700, -100),
@@ -81,19 +86,49 @@ lab("gclk", 930, -610)
 # --- the gated clock: down to the register trunk, and across to the mode mux ---
 w("gclk_b", (1090, -610), (1090, -220))               # drop onto the trunk
 w("gclk_b", (310, -220), (2760, -220))                # clock trunk
-for x in FLOP_X + [2550, 2850]:
+for x in FLOP_X:
     w("gclk_b", (x - 90, -220), (x - 90, -120))       # up to each CLK
 w("gclk_b", (1090, -610), (2520, -610), (2520, -620), (2560, -620))
 lab("gclk_b", 1090, -400)
+
+# --- the free-running copy: same cells, enable tied high ------------------------
+# Only the two output flops hang off this.  The shift register stays on the gated
+# clock, so en still stops the pattern; the output pair just keeps holding the
+# last complementary value instead of drifting to a common level.
+w("clk_sel", (620, -790), (660, -790))
+lab("clk_sel", 620, -790)
+w("VDD", (600, -770), (660, -770))
+lab("VDD", 600, -770)
+w("gclk_free", (840, -790), (1010, -790))
+lab("gclk_free", 930, -790)
+w("gclk_free_b", (1090, -790), (1150, -790))
+lab("gclk_free_b", 1150, -790)
+for x in [2550, 2850]:
+    w("gclk_free_b", (x - 90, -170), (x - 90, -120))  # up to each output flop CLK
+    lab("gclk_free_b", x - 90, -170)
 
 # --- reset ---------------------------------------------------------------------
 PORTS.append(("reset", "ipin", 0, -450, 1))
 w("reset", (0, -450), (110, -450))
 w("reset_b", (190, -450), (190, 60))                  # drop onto the trunk
-w("reset_b", (190, 60), (2760, 60))                   # reset trunk
-for x in FLOP_X + [2550, 2850]:
+w("reset_b", (190, 60), (2110, 60))                   # reset trunk
+for x in FLOP_X:
     w("reset_b", (x - 90, 60), (x - 90, -80))         # up to each RESET_B
 lab("reset_b", 190, -200)
+
+# The two output flops are deliberately NOT on that trunk.  dfrbp drives both Q
+# and Q_N to 0 on reset, so a reset output pair is not complementary - it leaves
+# the block as two equal levels and the driver's common-mode loop has no valid
+# operating point to sit at.  The library has no reset-less flop (dfrbp, dfrbpq,
+# sdfrbp and sdfbbp all carry RESET_B), so RESET_B is tied high instead, which is
+# the same cell with the reset removed.  Their state then comes only from the
+# free-running clock sampling s6 / s6_n, which are Q and Q_N of one cell and so
+# are opposite in every state the register can hold, reset included.
+# Downward, into the space the shortened trunk vacated: s6_n runs across at
+# y = -40 on its way to the N flop, so a stub upward would short it to VDD.
+for x in [2550, 2850]:
+    w("VDD", (x - 90, -80), (x - 90, 20))             # RESET_B tied high
+    lab("VDD", x - 90, 20)
 
 # --- the shift register --------------------------------------------------------
 for i in range(6):
@@ -182,7 +217,7 @@ NOTES = """T {lvds_pattern - data source for the LVDS transmitter, sg13cmos5l st
 
   clk_src   0 = ref_clk, 1 = pll_clk
   en        1 = clock runs, 0 = clock stopped low (latch-based gate, no runt pulse)
-  reset     active high, asynchronous, seeds the PRBS
+  reset     active high, asynchronous, seeds the PRBS - shift register only
   mode      0 = gated clock straight to the pair, 1 = PRBS-7
 
 D_p / D_n drive the pre-driver of macros/lvds_tx.} 150 -1000 0 0 0.6 0.6 {}
@@ -209,7 +244,17 @@ buf_16 - two internal stages, so four inversions - against inv_16, three.
 That pairing measured the least D_p/D_n skew into that load: 23 ps, against
 the pre-driver's ~40 ps budget.  XOR/XNOR against VSS measured 48 ps.} 2800 -900 0 0 0.35 0.35 {}
 T {clock trunk} 1150 -232 0 0 0.3 0.3 {}
-T {reset trunk} 1150 48 0 0 0.3 0.3 {}"""
+T {reset trunk - shift register only} 1150 48 0 0 0.3 0.3 {}
+T {The output pair is free of both en and reset by construction.  Their clock is
+the ungated copy and their RESET_B is tied high, so from the first edge after
+power-up they hold s6 and s6_n, which are Q and Q_N of one cell and therefore
+opposite in every state - held in reset, stopped by en, or running.  The LVDS
+driver's common-mode loop always sees a valid differential pair and settles
+once, at t=0, instead of at every enable.
+
+The library has no reset-less flop, so this is dfrbp_2 with RESET_B on VDD.
+sg13cmos5l_sdfbbp_1 would do the same with SET_B and RESET_B both tied off, but
+it only comes in drive 1 and adds two scan pins to tie down as well.} 2400 40 0 0 0.35 0.35 {}"""
 
 
 def gen_sch(path):
