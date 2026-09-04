@@ -56,11 +56,13 @@ T {LVDS out +} 2420 -1068 0 0 0.25 0.25 {}
 T {PLL clock out - the PLL's TEST_CLK} 2460 -388 0 0 0.25 0.25 {}
 T {Reference Clock Input 1-500 MHz} 370 -728 0 0 0.25 0.25 {}
 T {Decoupling Capacitors} 2860 -990 0 0 0.25 0.25 {}
-T {PLL - macros/pll_analog/schematic/xschem/pll.sch, the assembled top.
+T {PLL simulation assembly - macros/pll_analog/schematic/xschem/pll_cosim.sch.
 
-The whole loop is inside: PFD, charge pump, loop filter, ring oscillator,
-feedback divider and output divider.  Nothing of VCO_CLK, UP/DOWN or
-FB_CLK leaves the block.
+The top-level simulation uses the transistor-level charge pump, loop filter
+and ring oscillator from pll_analog together with the synthesizable PFD and
+dividers from macros/pll_digital, executed through ngspice d_cosim.  The
+DIV_RATIO and TEST_DIV pins are therefore functional in this top-level view.
+VCO_CLK, UP/DOWN and FB_CLK remain internal to the loop.
 
   REF_CLK   analog_pin[0]   same dedicated pad as the pattern generator
   PLL_CLK   -> pll_clk      this is what clocks lvds_pattern now
@@ -73,18 +75,11 @@ FB_CLK leaves the block.
 The Q7.3 ratio supports integer-N when bits [2:0] are zero and fractional-N
 in eighth steps. The complete PLL and LVDS controls use 18 of 24 dig_in bits.
 
-NOT tapeout-ready: PFD and both dividers are XSPICE behavioural models
-(d_dff, d_and2, d_fdiv with adc/dac bridges).  The synthesisable version
-is the RTL in macros/pll_digital.
-
-And the DIV_RATIO / TEST_DIV pins above do nothing here: inside pll.sch they
-are ipin declarations that connect to nothing, feedback_divider.sym carries
-only VCO_IN and FB_OUT, and the divide comes from a model card,
-.model pll_feedback_div d_fdiv(div_factor=20 ...).  TEST_CLK is likewise
-always VCO/4.  Measured 2026-09-01 at 250 MHz with DIV_RATIO = 4.0: the loop
-asks for 5 GHz, the ring stops at 4.05 GHz, VCTRL rails and pll_clk comes out
-at 1.997 GHz.  Only macros/pll_digital decodes DIV_RATIO, via
-scripts/pll/run_pll_cosim.sh.
+pll_cosim is a configurable simulation view, not the physical tapeout view.
+Physical integration uses pll_analog.sym beside the hardened pll_digital.sym,
+with VCO_CLK, UP and DOWN connected between them.  The legacy pll.sch is only
+a fixed-divide XSPICE characterization view; its DIV_RATIO and TEST_DIV pins
+are not functional and it must not replace pll_cosim in configurable benches.
 
 The loop filter is complete again: the container update of 2026-08-30 brought
 cap_cmomf, and the netlist now carries XR1 plus XC1A and XC2.} 800 -2740 0 0 0.4 0.4 {}

@@ -234,17 +234,18 @@ characterised with one, so that `Vos` is not the compliance number.
 
 Known gaps, all of them real:
 
-- **The transistor-level PLL ignores its own configuration pins.**
-  `DIV_RATIO[9:0]` and `TEST_DIV[1:0]` appear in
-  `macros/pll_analog/schematic/xschem/pll.sch` only as `ipin` declarations and
+- **The legacy fixed-ratio `pll.sch` simulation view ignores its configuration pins.**
+  This does not apply to the active top-level `pll_cosim` instance. In
+  `macros/pll_analog/schematic/xschem/pll.sch`, `DIV_RATIO[9:0]` and
+  `TEST_DIV[1:0]` appear only as `ipin` declarations and
   connect to nothing: `feedback_divider.sym` has just `VCO_IN` and `FB_OUT`,
   and the divide comes from a model card,
   `.model pll_feedback_div d_fdiv(div_factor=20 ...)`. `d_fdiv` is an XSPICE
   primitive whose factor is a model parameter, so no signal can reach it. The
   output divider is fixed the same way (`pll_out_div4`), which makes `TEST_CLK`
-  always VCO/4 whatever `TEST_DIV` says. Only the RTL in `macros/pll_digital`
-  (`fractional_divider.v`) decodes `DIV_RATIO`, and only the cosim flow
-  `scripts/pll/run_pll_cosim.sh` exercises it. Measured at the top level while
+  always VCO/4 whatever `TEST_DIV` says. The RTL in `macros/pll_digital`
+  (`fractional_divider.v`) decodes `DIV_RATIO`; it is exercised by both the
+  `pll_cosim` top-level benches and `scripts/pll/run_pll_cosim.sh`. Measured at the top level while
   the top cell still carried `pll.sch`, with a 250 MHz reference and
   `DIV_RATIO` = 4.0: the loop asks for 20 x 250 MHz = 5 GHz, the ring
   oscillator stops at 4.05 GHz, so `vctrl` railed at 1.18 V and `f_pll` came

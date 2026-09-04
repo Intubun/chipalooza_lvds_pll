@@ -864,15 +864,13 @@ def gen_tb(path):
 # info/pll_integer_characterization.csv measures lock at 2.75 us typical,
 # 2.25 us fast and 4.50 us slow.  A bench therefore has to run well past 1 us
 # before it asks what the output frequency is.
-# CAVEAT, measured 2026-09-01: the transistor-level PLL ignores DIV_RATIO.
-# In macros/pll_analog/schematic/xschem/pll.sch the DIV_RATIO[9:0] and
-# TEST_DIV[1:0] pins are ipin declarations that connect to nothing;
-# feedback_divider.sym carries only VCO_IN and FB_OUT and the divide comes from
-# a model card, .model pll_feedback_div d_fdiv(div_factor=20 ...).  The table
-# below therefore describes what each bench asks for, not what the schematic
-# does: only ref100_r20 matches the hard-wired 20 and can lock, and the rest
-# drive VCTRL to a rail.  DIV_RATIO is decoded only by the RTL in
-# macros/pll_digital, through scripts/pll/run_pll_cosim.sh.
+# Historical caveat, measured 2026-09-01: the legacy fixed-ratio pll.sch view
+# ignores DIV_RATIO.  Its DIV_RATIO[9:0] and TEST_DIV[1:0] pins connect to
+# nothing, and its XSPICE model divides by a hard-wired 20.  The generated top
+# benches do not use that view: the top instantiates pll_cosim, whose analog
+# loop is transistor-level and whose PFD and dividers are macros/pll_digital
+# RTL through d_cosim.  The combinations below are therefore genuinely
+# programmable and exercise the requested ratio and test-divider setting.
 PLL_TSTOP = 6.0e-6
 PLL_VCO_MIN, PLL_VCO_MAX = 0.7e9, 2.1e9
 
