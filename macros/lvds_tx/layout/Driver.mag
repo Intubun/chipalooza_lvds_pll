@@ -1,0 +1,93 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_p_w8p1_l0p5_ng12  M2
+timestamp 0
+transform 1 0 1712 0 1 1482
+box 0 0 1 1
+use dev_p_w2_l0p4_ng40  M5
+timestamp 0
+transform 1 0 6800 0 1 872
+box 0 0 1 1
+use dev_p_w2_l0p4_ng40  M4
+timestamp 0
+transform 1 0 13952 0 1 872
+box 0 0 1 1
+use dev_n_w2_l0p45_ng15  M1
+timestamp 0
+transform 1 0 1839 0 1 3374
+box 0 0 1 1
+use dev_n_w2_l0p45_ng15  M3
+timestamp 0
+transform 1 0 5117 0 1 3374
+box 0 0 1 1
+use dev_n_w0p8_l0p5_ng31  M6_0
+timestamp 0
+transform 1 0 9878 0 1 3254
+box 0 0 1 1
+use dev_n_w0p8_l0p5_ng31  M6_1
+timestamp 0
+transform 1 0 3322 0 1 4474
+box 0 0 1 1
+use dev_n_w0p8_l0p5_ng31  M6_2
+timestamp 0
+transform 1 0 9566 0 1 4474
+box 0 0 1 1
+use dev_n_w0p8_l0p5_ng31  M6_3
+timestamp 0
+transform 1 0 3322 0 1 5454
+box 0 0 1 1
+use dev_n_w0p8_l0p5_ng1  M9
+timestamp 0
+transform 1 0 6926 0 1 5454
+box 0 0 1 1
+use dev_p_w5_l1_ng1  M13
+timestamp 0
+transform 1 0 8002 0 1 5936
+box 0 0 1 1
+use dev_p_w5_l1_ng1  M14
+timestamp 0
+transform 1 0 9190 0 1 5936
+box 0 0 1 1
+use dev_n_w2_l1_ng20  M11
+timestamp 0
+transform 1 0 12938 0 1 5574
+box 0 0 1 1
+use dev_n_w2_l1_ng20  M12
+timestamp 0
+transform 1 0 3354 0 1 7518
+box 0 0 1 1
+use dev_n_w0p8_l0p5_ng1  M10
+timestamp 0
+transform 1 0 6990 0 1 7398
+box 0 0 1 1
+use dev_p_w5_l5_ng8  Cc
+timestamp 0
+transform 1 0 12232 0 1 7880
+box 0 0 1 1
+use dev_rhigh_w1_l7p35  Rp
+timestamp 0
+transform 1 0 704 0 1 10077
+box 0 0 1 1
+use dev_rhigh_w1_l7p35  Rn
+timestamp 0
+transform 1 0 1712 0 1 10077
+box 0 0 1 1
+use dev_cap_cmomf_w5p913_l5p913  Cxp
+timestamp 0
+transform 1 0 2416 0 1 9052
+box 0 0 1 1
+use dev_cap_cmomf_w5p913_l5p913  Cxn
+timestamp 0
+transform 1 0 3999 0 1 9052
+box 0 0 1 1
+use dev_n_w10_l10_ng1  Cop
+timestamp 0
+transform 1 0 6814 0 1 10262
+box 0 0 1 1
+use dev_n_w10_l10_ng1  Con
+timestamp 0
+transform 1 0 9678 0 1 10262
+box 0 0 1 1
+<< end >>

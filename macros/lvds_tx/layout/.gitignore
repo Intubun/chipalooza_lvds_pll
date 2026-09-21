@@ -1,0 +1,8 @@
+# Generated leaf device cells and verification scratch: rebuilt by run_all.sh.
+cells/
+klayout_drc/
+# the generator's own GDS - lvds_tx.gds belongs to the user
+lvds_tx_gen.gds
+.untouched.state
+# DRC-Reportdatenbanken sind Build-Ausgabe
+*.lyrdb

@@ -1,0 +1,21 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_n_w3p2_l2_ng1  Mn1
+timestamp 0
+transform 1 0 832 0 1 930
+box 0 0 1 1
+use dev_n_w8_l2_ng6  Mn2
+timestamp 0
+transform 1 0 2022 0 1 2870
+box 0 0 1 1
+use dev_p_w8_l2_ng6_openn_botc0  Mp1
+timestamp 0
+transform 1 0 2084 0 1 5352
+box 0 0 1 1
+use dev_p_w8_l2_ng6_openn_botc0  Mp2
+timestamp 0
+transform 1 0 2084 0 1 7896
+box 0 0 1 1
+<< end >>

@@ -1,0 +1,21 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_n_w2_l0p5_ng1  Mref
+timestamp 0
+transform 1 0 682 0 1 810
+box 0 0 1 1
+use predriver_comp  kpm
+timestamp 0
+transform 1 0 400 0 1 1620
+box 0 0 1 1
+use predriver_comp  knm
+timestamp 0
+transform 1 0 400 0 1 5764
+box 0 0 1 1
+use predriver_stage  stm
+timestamp 0
+transform 1 0 400 0 1 9908
+box 0 0 1 1
+<< end >>
