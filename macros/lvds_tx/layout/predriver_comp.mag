@@ -1,0 +1,25 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_p_w12_l0p4_ng1  Mld
+timestamp 0
+transform 1 0 734 0 1 1872
+box 0 0 1 1
+use dev_p_w12_l0p4_ng1  Mlo
+timestamp 0
+transform 1 0 1802 0 1 1872
+box 0 0 1 1
+use dev_n_w12_l0p45_ng2  Mid
+timestamp 0
+transform 1 0 2896 0 1 1810
+box 0 0 1 1
+use dev_n_w12_l0p45_ng2  Mio
+timestamp 0
+transform 1 0 4016 0 1 1810
+box 0 0 1 1
+use dev_n_w10_l0p5_ng14  Mt
+timestamp 0
+transform 1 0 6202 0 1 1610
+box 0 0 1 1
+<< end >>

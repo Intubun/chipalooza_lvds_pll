@@ -54,8 +54,8 @@ C {iopin.sym} -100 -700 0 0 {name=p_Va lab=Va}
 C {iopin.sym} -100 640 0 0 {name=p_Vss lab=Vss}
 C {sg13cmos5l_pr/sg13_hv_pmos.sym} 100 -400 0 0 {name=Mld
 l=0.4u
-w=20u
- ng=2
+w=12u
+ ng=1
  m=1
   mm_ok=1
  model=sg13_hv_pmos
@@ -63,8 +63,8 @@ spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_pmos.sym} 300 -400 0 0 {name=Mlo
 l=0.4u
-w=20u
- ng=2
+w=12u
+ ng=1
  m=1
   mm_ok=1
  model=sg13_hv_pmos
@@ -72,8 +72,8 @@ spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} 200 0 0 0 {name=Mid
 l=0.45u
-w=40u
- ng=4
+w=24u
+ ng=2
  m=1
   mm_ok=1
  model=sg13_hv_nmos
@@ -81,8 +81,8 @@ spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} 400 0 0 0 {name=Mio
 l=0.45u
-w=40u
- ng=4
+w=24u
+ ng=2
  m=1
   mm_ok=1
  model=sg13_hv_nmos
@@ -90,8 +90,8 @@ spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} 300 360 0 0 {name=Mt
 l=0.5u
-w=560u
- ng=56
+w=140u
+ ng=14
  m=1
   mm_ok=1
  model=sg13_hv_nmos

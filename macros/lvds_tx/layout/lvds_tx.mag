@@ -1,0 +1,21 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use iref_x15  m_pd
+timestamp 0
+transform 1 0 400 0 1 400
+box 0 0 1 1
+use iref_x15  m_drv
+timestamp 0
+transform 1 0 4968 0 1 400
+box 0 0 1 1
+use predriver  pd
+timestamp 0
+transform 1 0 9536 0 1 400
+box 0 0 1 1
+use Driver  drv
+timestamp 0
+transform 1 0 400 0 1 23604
+box 0 0 1 1
+<< end >>

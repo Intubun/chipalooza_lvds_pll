@@ -153,6 +153,26 @@ sim-all: ## Run the analog benches that need no co-simulation
 # ================================================================================================
 
 
+# Layout Target
+layout: ## Regenerate the placement layout from the schematic (devices and hierarchy, no routing)
+	bash $(LAY_DIR)/run_all.sh
+.PHONY: layout
+
+layout-cells: ## Regenerate only the leaf device cells, leaving the placement and the GDS untouched
+	bash $(LAY_DIR)/build_cells.sh
+.PHONY: layout-cells
+
+layout-view: ## Open the generator's GDS in a new KLayout window (never touches lvds_tx.gds or a running KLayout)
+	cd $(LAY_DIR) && setsid nohup env DISPLAY=$${DISPLAY:-:0} klayout -e -n sg13cmos5l lvds_tx_gen.gds < /dev/null > /dev/null 2>&1 &
+.PHONY: layout-view
+
+layout-replace: ## Throw the stored floorplan away and pack every block from scratch
+	python3 $(LAY_DIR)/build_placement.py --replace
+	bash $(LAY_DIR)/run_all.sh
+.PHONY: layout-replace
+# ================================================================================================
+
+
 # Build Target
 build-top: ## Build TOP cell (Verilog, LEF, LIB, copy GDS, and render image)
 	$(MAKE) lef
