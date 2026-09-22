@@ -40,13 +40,28 @@ target.each_cell do |c|
   fingerprint[c.name] = [n, c.bbox.to_s, c.each_inst.count { true }]
 end
 
+# Same size, different origin: the cell was re-centred at some point and
+# the target file predates that.  A pure translation puts the geometry
+# back where the instances above expect it, so nothing moves.  Only ever
+# a shift, never a resize -- the size check below still has to pass.
+shift = RBA::Trans::new(0, 0)
+if $align == "true" && sc.bbox.width == tc.bbox.width && sc.bbox.height == tc.bbox.height
+  dx = tc.bbox.left - sc.bbox.left
+  dy = tc.bbox.bottom - sc.bbox.bottom
+  if dx != 0 || dy != 0
+    shift = RBA::Trans::new(RBA::Vector::new(dx, dy))
+    puts "  Ursprung angeglichen: #{dx*target.dbu} / #{dy*target.dbu} um"
+    after_bbox = sc.bbox.transformed(shift).to_s
+  end
+end
+
 tc.clear
 after_n = 0
 source.layer_indexes.each do |sli|
   info = source.get_info(sli)
   tli = target.layer(info)
   sc.shapes(sli).each do |sh|
-    tc.shapes(tli).insert(sh)
+    tc.shapes(tli).insert(sh.polygon ? sh.polygon.transformed(shift) : sh)
     after_n += 1
   end
 end

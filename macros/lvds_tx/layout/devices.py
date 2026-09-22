@@ -40,7 +40,12 @@ MOS_MODELS = {"sg13_hv_nmos", "sg13_hv_pmos", "sg13_lv_nmos", "sg13_lv_pmos"}
 #
 #   _open <side>   cut the guard ring open on that side ("n" or "s"), so the
 #                  gate can leave the cell without crossing a tap ring.
-#   _keepname      apply the other keys but leave the cell name alone.  The
+#   _keepname      apply the other keys without letting them into the cell
+#                  name.  True means the bare geometric name; a string
+#                  pins that exact name, which is what a cell already
+#                  carrying a suffix needs -- otherwise adding an option
+#                  would strip the suffix too and the hierarchy above
+#                  would point at a name that no longer exists.  The
 #                  suffix exists to keep two different geometries apart, so
 #                  it is unnecessary when a geometry has a single user -- and
 #                  leaving the name alone is what lets one device change
@@ -50,8 +55,18 @@ MOS_MODELS = {"sg13_hv_nmos", "sg13_hv_pmos", "sg13_lv_nmos", "sg13_lv_pmos"}
 # Mp1 and Mp2 are the two halves of one mirror, so they are built from the
 # same cell: matching wants identical geometry, down to the gate contacts.
 GENCELL_OVERRIDES = {
-    ("iref_x15", "Mp1"): {"botc": 0, "_open": "n"},
-    ("iref_x15", "Mp2"): {"botc": 0, "_open": "n"},
+    # polycov 85 instead of the 50 the long-channel rule applies: it
+    # widens the gate contact bar and takes the cuts per finger from 3 to
+    # 5, at no area cost.  The count steps rather than scales -- 60 gives
+    # 3, 65..80 give 4, 85..95 give 5, 100 gives 6 -- so 85 is the
+    # cheapest way to five.  What it costs is the corridor between the
+    # gate pads, which is why the value is here and not in the global
+    # rule.  _keepname holds the cell name so the placement above and the
+    # cell swap into lvds_tx.gds still work.
+    ("iref_x15", "Mp1"): {"botc": 0, "_open": "n", "polycov": 85,
+                          "_keepname": "dev_p_w8_l2_ng6_openn_botc0"},
+    ("iref_x15", "Mp2"): {"botc": 0, "_open": "n", "polycov": 85,
+                          "_keepname": "dev_p_w8_l2_ng6_openn_botc0"},
     # gate contacted from the top only, like the two pmos; the cell is used
     # by Mn2 alone, so the name can stay and the placement above holds
     # viagate 50, not 100: the via landing pad on metal1 is what sets the
@@ -128,7 +143,10 @@ class Device:
 
     @property
     def cellname(self):
-        if self.opts.get("_keepname"):
+        keep = self.opts.get("_keepname")
+        if isinstance(keep, str):
+            return keep
+        if keep:
             suffix = ""
         else:
             suffix = "".join("_%s%s" % (k.lstrip("_"), v)
