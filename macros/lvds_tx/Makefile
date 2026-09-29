@@ -137,6 +137,10 @@ sim-predriver: ## Pre-driver + driver transient bench
 	$(MAKE) sim-xschem TB=predriver.tb
 .PHONY: sim-predriver
 
+sim-cmfb: ## Common-mode loop stability: Vref step and closed-loop ac at the worst corner
+	$(MAKE) sim-xschem TB=tb_cmfb
+.PHONY: sim-cmfb
+
 sim-link-word: ## Mixed-signal link bench, single word pattern (needs serdes/serdes_dig.so)
 	$(MAKE) sim-xschem TB=tb_word
 .PHONY: sim-link-word
@@ -149,27 +153,31 @@ sim-all: ## Run the analog benches that need no co-simulation
 	$(MAKE) sim-dc
 	$(MAKE) sim-driver
 	$(MAKE) sim-predriver
+	$(MAKE) sim-cmfb
 .PHONY: sim-all
 # ================================================================================================
 
 
-# Layout Target
-layout: ## Regenerate the placement layout from the schematic (devices and hierarchy, no routing)
-	bash $(LAY_DIR)/run_all.sh
-.PHONY: layout
+# Layout Targets
+# layout/$(TOP).gds is edited by hand in KLayout. The device cells in it (dev_*) are the only
+# generated part: from the schematic, by the PDK's magic gencells (scripts/pcells/, docs/layout.md).
+layout-pcells: ## Regenerate the device cells (dev_*) in layout/lvds_tx.gds from the schematic; nothing else in the file changes
+	bash $(SCRIPTS_DIR)/pcells/update_pcells.sh
+.PHONY: layout-pcells
 
-layout-cells: ## Regenerate only the leaf device cells, leaving the placement and the GDS untouched
-	bash $(LAY_DIR)/build_cells.sh
-.PHONY: layout-cells
+layout-pcells-check: ## Show what layout-pcells would change in layout/lvds_tx.gds, without writing it
+	bash $(SCRIPTS_DIR)/pcells/update_pcells.sh --dry-run
+.PHONY: layout-pcells-check
 
-layout-view: ## Open the generator's GDS in a new KLayout window (never touches lvds_tx.gds or a running KLayout)
-	cd $(LAY_DIR) && setsid nohup env DISPLAY=$${DISPLAY:-:0} klayout -e -n sg13cmos5l lvds_tx_gen.gds < /dev/null > /dev/null 2>&1 &
+layout-view: ## Open layout/lvds_tx.gds in a new KLayout window, in edit mode, with both standard cell libraries
+#	The PDK script first: the container defaults to ihp-sg13g2, and KLayout
+#	started from there has no sg13cmos5l technology (no layers, no colours).
+#	The repository's klayout/ goes on KLAYOUT_PATH as well: the PDK registers
+#	only its HV standard cells as a library, klayout/pymacros/ adds the core ones.
+	cd $(LAY_DIR) && bash -c 'source /foss/tools/sak/sak-pdk-script.sh ihp-sg13cmos5l >/dev/null 2>&1; \
+		setsid nohup env DISPLAY=$${DISPLAY:-:0} KLAYOUT_PATH=$$KLAYOUT_PATH:$(abspath $(MAKEFILE_DIR)/../../klayout) \
+		klayout -e -n sg13cmos5l $(TOP).gds < /dev/null > /tmp/klayout_$(TOP).log 2>&1 &'
 .PHONY: layout-view
-
-layout-replace: ## Throw the stored floorplan away and pack every block from scratch
-	python3 $(LAY_DIR)/build_placement.py --replace
-	bash $(LAY_DIR)/run_all.sh
-.PHONY: layout-replace
 # ================================================================================================
 
 

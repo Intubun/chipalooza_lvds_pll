@@ -1,0 +1,304 @@
+====================================================================================================
+1. lvds_tx -- Verbindungen zwischen den Bloecken (Plan, ROUTING.md Abschnitt 2)
+====================================================================================================
+
+         Pins Nord (M3)          alle fünf nebeneinander über der Achse, 30 µA auf Iref_*
+                                         D_n   Iref_pd  Iref_drv
+                                          |  D_p  |   Vref |
+                                          |   |   |     |  |
+                                          |   |   |     |  |
+         C1 M4          +-----------------o---|---|-----|--|-----------+          D_n
+                        |      +--------------o---|-----|--|-----------|------+   D_p
+                        |      |      Iref_pd  -> |     |  |           |      |
+                 +------o------o---------+        |     |  | +---------o------o------+
+                 |    Mid    Mio         |     +--o--+  |  | |       Mio    Mid      |
++-----+          |    D_n    D_p         |     |Mref |  |  | |       D_n    D_p      |         +-----+
+|     |          |  G=Iref         Out   o-----o     o--|--|-o  Out       G=Iref     |         |     |
+| Cop |          | kpm                   |     |D=G  |  |  | |           knm (m90)   |         | Con |
+|     |          |                       |     +-----+  |  | |                       |         |     |
+|G=Out|          +--------------------o--+              |  | +--o--------------------+         |G=Out|
+|  _p |  C2 Vss                       |                 |  |    |                              |  _n |
+|     |                               |                 |  |    |                              |     |
+|S/D/B|                         In_p  |                 |  |    | In_n                         |S/D/B|
+|=Vss |                               |                 |  |    |                              |=Vss |
+|     |          +--------------------o-------------------------o--------------------+         |     |
+|     |          | Out_p        predriver_stage         |  |                Out_n    |         |     |
++--o--+          +---o-----------------------------------------------------------o---+         +--o--+
+   |                 |                                  |  |                     |                |
+   |     C3 M4       |                                  |  |                     |                |
+   |                 +---------+                        |  |           +---------+                |
+   |Out_p                      | In_p                   |  |      In_n |                    Out_n |
+   |                           |                   Vref |  |           |                          |
+   |                           |                        |  |           |                          |
+   |           +---------------o------------------------o--o-----------o---------------+          |
+   +-----------o                               Driver                                  o----------+
+               |                                                                       |
+               +---------o---------------------------------------------------o---------+
+                         |                                                   |
+                         |                                                   |
+                       Out_p           Pins Sued (zu den Pads)             Out_n
+
+o = Anschluss, + = Abzweig/Ecke; Linien, die sich nur kreuzen, liegen auf
+verschiedenen Lagen.  Nichts davon ist gezeichnet.
+
+
+====================================================================================================
+2. predriver -- Verdrahtung (route_predriver.py)
+====================================================================================================
+
+Die Verdrahtung, die route_predriver.py zeichnet (zur Zeit nicht im Flow; hier im
+Speicher gerechnet).  Aus der Geometrie extrahiert (Metal1-TopMetal1 und Poly, keine
+Diffusion) und ueber die Transistor-Anschluesse nach dem Schaltplan benannt.  Ein
+Buchstabe je Netz (Liste unten), ':' '.' = Umriss eines Transistors.  Va/Vss sind nicht
+eingezeichnet.  Koordinaten im predriver-Rahmen; in lvds_tx x + 9.36, y + 33.02.
+
+Karte 1: Metal3 (senkrecht) und Metal4 (waagerecht) -- die Verbindungen zwischen den
+Transistoren und zu den Pins.  '+' = zwei Netze kreuzen sich (Metal3 unter Metal4).
+
+predriver, Metal3/Metal4   (38.8 x 28.0 um; 1 Zeichen = 0.30 um, 1 Zeile = 0.5 um)
+      0                5               10               15               20              25               30               35  x/um
+                                                              NNPP RR
+                                                              NNPP RR
+                          :.........................:         NNPP RR                    :........................:
+                          :                         :         NNPP RR                    :                        :
+                          :                         :         NNPP RR                    :                        :
+                          :                         :         NNPP RR                    :                        :
+   25                     :          Mldo           :         NNPP RR                    :         Mldo           :
+                          :                  II     :         NNPP RR                    :    JJ                  :
+                          :                  II     :         NNPP RR                    :    JJ                  :
+                          :    AA            II     :         NNPP RR                    :    JJ            CC    :
+                          :    AA            II     :         NNPP RR                    :    JJ            CC    :
+                          :....AA........PPPP++PPPPPPPPPPPPPPP++PPP++PPPPPPPPPPPPPPPPPPPPPPPPP++PPPPPPPPPPPP++PPPPPPPPPP
+                     NNN       AA        PPPP++PPPPPPPPPPPPPPP++PPP++PPPPPPPPPPPPPPPPPPPPPPPPP++PP++PPPPPPPP++PPPPPPPPPP
+                     NNNNNNNNNN++NNNNNNNN+++N++NNNNNNNNNNNNNNNNNNNN++NNNNNNNNNNNNNNNNNNNNNNNNN++NNNN        CC        PP
+                   :.NNN.......AA.....::.PPP.II...........:        RR             :...........JJ..NN.::.....CC........PP.:
+                   : NNN       AA     :: PPP II           :        RR             :           JJ  NN ::     CC        PP :
+   20              :           AA     ::     II           :        RR             :           JJ     ::     CC           :
+                   :           AA     ::     II           :        RR             :           JJ     ::     CC           :
+                   :       Mid AA     ::     IIMio        :        RR             :       Mio JJ     ::     CCMid        :
+                   :           AA     ::     II           II       RR            JJ           JJ     ::     CC           :
+                   :                  ::                  II       RR            JJ                  ::                  :
+                   :                  ::                  II       RR            JJ                  ::                  :
+                   :                  ::                  II       RR            JJ                  ::                  :
+                   :..................::..................II       RR            JJ..................::..................:
+                   :..................::..................II       RR            JJ..................::..................:
+                   :                  ::                  II     :.RR......:     JJ                  ::                  :
+   15              :                  ::                  II     : RR      :     JJ                  ::                  :
+                   :      Mt_0        ::      Mt_1        II     :         :     JJ      Mt_1        ::      Mt_0        :
+                   :                  ::                  II     :  Mref   :     JJ                  ::                  :
+                   :                  ::                  II     :         :     JJ                  ::                  :
+                   :                  ::                  II     :         :     JJ                  ::                  :
+                   :..................::..................II     :.........:     JJ..................::..................:
+                                                          II                     JJ
+                                                          II                     JJ
+                                                          II                     JJ
+                :........................:  :.......:   :.II.:  :.....::....:  :.JJ..:  :.......:  :........................:
+   10           :                        :  :       :   : II :  :     ::    :  : JJ  :  :       :  :                        :
+                :         Mnp2           :  :       :   : II :  :Mnxn ::Mnxp:  : JJ  :  :       :  :         Mnn2           :
+                : OO            OO       :  : Mnp1  :   EEII :  :FF   ::  HH:  : JJGG:  : Mnn1  :  :       QQ            QQQ:
+                : OO            OO       :  :FF     :   EEII :  :FF   ::  HH:  : JJGG:  :     HH:  :       QQ            QQQ:
+                :.OO............OO.......:  :FF     :   EEII.:  :FF...::..HH:  :.JJGG:  :     HH:  :.......QQ............QQQ:
+                  OO            OO          :FF.....:   EEII     FF       HH     JJGG   :.....HH:          QQ            QQQ
+                  OO            OO           FF  EEEEEEEEE    HHH++HHHHHHHHHH++HHHH++HHHHHHHHHHHHHHHHHHHHHH++HHHHHH      QQQ
+                  OO      FFFFFF++FFFFFFFFFFFFFFFFFFFFFF++FFFFFFFFFFFFFFFF++FFF    GGGGGGGGG  HH           QQ            QQQ
+       :..........OO......FFFFFF++FFFFFFFFFFFFFFFFFFFFFF++FFFFFFFFFFFFFFFF++FFF    GGGGGGGGG  HH      :....QQ............QQQ.........:
+       :          OO            OO    :      FF         EE     : FF  : :  HH :     GG         HH      :    QQ            QQQ         :
+    5  :          OO            OO    ::.....FF.......: EE     : FF  : :  HH :     GG :.......HH.....::    QQ            QQQ         :
+       :          OO            OO    ::     FF       ::EE.....: FF  : :  HH ::....GG::       HH     ::    QQ            QQQ         :
+       :          OO            OO    ::     FF       ::EE     : FF  : :  HH ::    GG::       HH     ::    QQ            QQQ         :
+       :            Mpp2        OO    ::     FF       ::EE     : Mpxn: :Mpxp ::    GG::       HH     ::    QQ      Mpn2              :
+       :                        OO    :: Mpp1FF       ::EE     :     : :     ::    GG::   Mpn1HH     ::    QQ                        :
+       :                        OO    ::              :: Mpp0  :     : :     ::Mpn0  ::              ::    QQ                        :
+       :                        OO    ::              ::       :     : :     ::      ::              ::    QQ                        :
+       :                        OO    ::              ::       :     : :     ::      ::              ::    QQ                        :
+       :                        OO    ::              ::       :     : :     ::      ::              ::    QQ                        :
+       :........................OO....::..............::.......:.......:.....::......::..............::....QQ........................:
+    0                           OO                                                                         QQ
+
+
+Karte 2: Metal2 -- Straps ueber den Fingern (Drain/Source), Gate-Schienen und
+Gate-Balken; dort landen die Leitungen aus Karte 1.
+
+predriver, Metal2   (38.8 x 28.0 um; 1 Zeichen = 0.30 um, 1 Zeile = 0.5 um)
+      0                5               10               15               20              25               30               35  x/um
+      
+      
+                          :.aaaaaaaaaaaaaaaaaaaaaa..:                                    :.cccccccccccccccccccccc.:
+                          : aaaaaaaaaaaaaaaaaaaaaa  :                                    : cccccccccccccccccccccc :
+                          :                         :                                    :                        :
+                          :                         :                                    :                        :
+   25                     :     Mldoiiiiiiiiiii     :                                    :    jjjjjjjjjjjjMldo    :
+                          :         iiiiiiiiiii     :                                    :    jjjjjjjjjjjj        :
+                          :         iiiiiiiiiii     :                                    :    jjjjjjjjjjjj        :
+                          : aaaaaaaaiiiiiiiiiiiaaa  :                                    : cccjjjjjjjjjjjjccccccc :
+                          : aaaaaaaaaaaaaaaaaaaaaa  :                                    : cccccccccccccccccccccc :
+                          :.........................:                                    :........................:
+      
+      
+                   :nnnnnnnnnnnnnnnnnn::pppppppppppppppppp:                       :nnnnnnnnnnnnnnnnnn::pppppppppppppppppp:
+                   :nnnnnnnnnnnnnnnnnna:ppppppppppppppppppii                     jjnnnnnnnnnnnnnnnnnn::pppppppppppppppppp:
+   20              :aaaaaaaaaaaaaaaaaaa:iiiiiiiiiiiiiiiiiiii                     jjjjjjjjjjjjjjjjjjjj::cccccccccccccccccc:
+                   :aaaaaaaaaaaaaaaaaaa:iiiiiiiiiiiiiiiiiiii                     jjjjjjjjjjjjjjjjjjjj::cccccccccccccccccc:
+                   :aaaaaaaaaaaaaaaaaaa:iiiiiiiiiiiiiiiiiiii                     jjjjjjjjjjjjjjjjjjjj::cccccccccccccccccc:
+                   :aaaaaaaaaaaaaaaaaaa:iiiiiiiiiiiiiiiiiiii                     jjjjjjjjjjjjjjjjjjjj::cccccccccccccccccc:
+                   :aaaaaaaaaaaaaaaaaaa:iiiiiiiiiiiiiiiiiiii                     jjjjjjjjjjjjjjjjjjjj::cccccccccccccccccc:
+                   :aaaaaaaaaaaaaaaaaaa:iiiiiiiiiiiiiiiiiiii                     jjjjjjjjjjjjjjjjjjjj::cccccccccccccccccc:
+                   :aaaaaaaaaaaaaaaaaaa:iiiiiiiiiiiiiiiiiiii                     jjjjjjjjjjjjjjjjjjjj::cccccccccccccccccc:
+                   :aaaaaaaaaaaaaaaaaaabiiiiiiiiiiiiiiiiiiii                     jjjjjjjjjjjjjjjjjjjjddcccccccccccccccccc:
+                   :..............bbbbbbbbbbb.............:                       :..............ddddddddddd.............:
+                   :                  ::                  :      :rrrrrrrrr:      :                  ::                  :
+   15              :                  ::                  :      :rrrrrrrrr:      :                  ::                  :
+                   :      Mt_0        ::      Mt_1        :      :         :      :      Mt_1        ::      Mt_0        :
+                   :                  ::                  :      :  Mref   :      :                  ::                  :
+                   :                  ::                  :      :rr       :      :                  ::                  :
+                   :rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr:
+                   :rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr:
+      
+      
+      
+                :.fffffffffffffffffffffff:  :.eeeeee:   :iiii:  :.hhh.::ffff:  :.jjj.:  :ggggggg:  :.hhhhhhhhhhhhhhhhhhhhhhh:
+   10           : fffffffffffffffffffffff:  : eeeeee:   :iiii:  : hhh ::ffff:  : jjj :  :ggggggg:  : hhhhhhhhhhhhhhhhhhhhhhh:
+                :         Mnp2           :  : Mnp1  :   :Mnp0:  :Mnxn ::Mnxp:  :Mnn0 :  : Mnn1  :  :         Mnn2           :
+                :oooooooooooooooooooooooo:  :ffffffff   eee  :  :ff   ::  hh:  :   gg:  :hhhhhhh:  :qqqqqqqqqqqqqqqqqqqqqqqq:
+                :oooooooooooooooooooooooo:  :ffffffff   eiiii:  :ffhh ::ffff:  : jjjg:  :hhhhhhh:  :qqqqqqqqqqqqqqqqqqqqqqqq:
+                :.fffffffffffffffffffffff:  :ffffffff   :iiii:  :.hhh.::ffff:  :.jjj.:  :hhhhhhh:  :.hhhhhhhhhhhhhhhhhhhhhhh:
+                          ff                :.eeeeee:     ii       h     ff      jj     :ggggggg:                hh
+                          ff                      e       ii  hhhhhh     ffffff  jj       gg                     hh
+                          ff                      e       ii       h     ff      jj       gg                     hh
+       :..................ff..........:           e       ii   :..hhh..:fff..:   jj       gg          :..........hh..................:
+       :  fffffffffffffffffffffffffff :           e       ii   : ffhh: :fffh :   jj       gg          :  hhhhhhhhhhhhhhhhhhhhhhhhhhh :
+    5  : oooooooooooooooooooooooooooo ::..........e...:   ii   : ff  : :  hh :   jj   :...gg.........:: qqqqqqqqqqqqqqqqqqqqqqqqqqqq :
+       : oooooooooooooooooooooooooooo :: eeeeeeeeeeee ::..ii...: ff  : :  hh ::..jj..:: gggggggggggg :: qqqqqqqqqqqqqqqqqqqqqqqqqqqq :
+       : oooooooooooooooooooooooooooo :: ffffffffffff ::  iii  : ff  : :  hh :: jjjj :: hhhhhhhhhhhh :: qqqqqqqqqqqqqqqqqqqqqqqqqqqq :
+       : oooooooooooooooooooooooooooo :: ffffffffffff ::eee    : ff  : :  hh ::   ggg:: hhhhhhhhhhhh :: qqqqqqqqqqqqqqqqqqqqqqqqqqqq :
+       : oooooooooooooooooooooooooooo :: ffffffffffff ::eee    : Mpxn: :Mpxp ::   ggg:: hhhhhhhhhhhh :: qqqqqqqqqqqqqqqqqqqqqqqqqqqq :
+       :            Mpp2              ::    Mpp1      ::eeeMpp0:     : :     ::   ggg::    Mpn1      ::            Mpn2              :
+       :                              ::              ::       :     : :     ::Mpn0  ::              ::                              :
+       :                              ::              ::       :     : :     ::      ::              ::                              :
+       :  fffffffffffffffffffffffffff :: eeeeeeeeeeee ::  iii  :  hhh: :fff  :: jjjj :: gggggggggggg ::  hhhhhhhhhhhhhhhhhhhhhhhhhhh :
+       :..fffffffffffffffffffffffffff.::.eeeeeeeeeeee.::..iii..:..hhh..:fff..::.jjjj.::.gggggggggggg.::..hhhhhhhhhhhhhhhhhhhhhhhhhhh.:
+    0 
+
+Netze:
+  n/N  D_n       Pin D_n                                       M2+M3+M4
+             an: knm.Mio G, kpm.Mid G
+  p/P  D_p       Pin D_p                                       M2+M3+M4
+             an: knm.Mid G, kpm.Mio G
+  r/R  Iref      Pin Iref (Iref_pd)                            M2+M3
+             an: Mref D, Mref G, knm.Mt_0 G, knm.Mt_1 G, kpm.Mt_0 G, kpm.Mt_1 G
+  i/I  net1      kpm.Out = Eingang In_p der Stage              M2+M3
+             an: kpm.Mio D, kpm.Mlo D, stm.Mnp0 G, stm.Mpp0 G
+  j/J  net2      knm.Out = Eingang In_n der Stage              M2+M3
+             an: knm.Mio D, knm.Mlo D, stm.Mnn0 G, stm.Mpn0 G
+  o/O  In_p      Stage Out_p = Pin In_p (zum Driver)           M2+M3
+             an: stm.Mnp2 D, stm.Mpp2 D
+  q/Q  In_n      Stage Out_n = Pin In_n (zum Driver)           M2+M3
+             an: stm.Mnn2 D, stm.Mpn2 D
+  a/A  kpm.net1  kpm intern: Last-Diode / Mid Drain            M2+M3
+             an: kpm.Mid D, kpm.Mld D, kpm.Mld/Mlo G
+  b/B  kpm.net2  kpm intern: Tail-Drain / Paar-Sources         M2
+             an: kpm.Mid S, kpm.Mio S, kpm.Mt_0 D, kpm.Mt_1 D
+  c/C  knm.net1  knm intern: Last-Diode / Mid Drain            M2+M3
+             an: knm.Mid D, knm.Mld D, knm.Mld/Mlo G
+  d/D  knm.net2  knm intern: Tail-Drain / Paar-Sources         M2
+             an: knm.Mid S, knm.Mio S, knm.Mt_0 D, knm.Mt_1 D
+  e/E  stm.net1  Stage: Spalte 3 D -> Spalte 2 G               M2+M3+M4
+             an: stm.Mnp0 D, stm.Mnp1 G, stm.Mpp0 D, stm.Mpp1 G
+  f/F  stm.net2  Stage: Spalte 2 D, Spalte 4 D -> Spalte 1 G, Spalte 5 G  M2+M3+M4
+             an: stm.Mnp1 D, stm.Mnp2 G, stm.Mnxn D, stm.Mnxp G, stm.Mpp1 D, stm.Mpp2 G, stm.Mpxn D, stm.Mpxp G
+  g/G  stm.net3  Stage: Spalte 6 D -> Spalte 7 G               M2+M3+M4
+             an: stm.Mnn0 D, stm.Mnn1 G, stm.Mpn0 D, stm.Mpn1 G
+  h/H  stm.net4  Stage: Spalte 7 D, Spalte 5 D -> Spalte 8 G, Spalte 4 G  M2+M3+M4
+             an: stm.Mnn1 D, stm.Mnn2 G, stm.Mnxn G, stm.Mnxp D, stm.Mpn1 D, stm.Mpn2 G, stm.Mpxn G, stm.Mpxp D
+
+Versorgung (nicht eingezeichnet):
+  Va   TopMetal1 y 25.1-28.0, y 0.0-3.0, 14 TopVia1-Posts  (zwei Schienen, erst der Kamm in lvds_tx verbindet sie)
+  Vss  TopMetal1 y 9.1-15.6, 20 TopVia1-Posts
+
+Pins: D_n (17.13, 27.78), D_p (17.83, 27.78), Iref (18.53, 27.78), In_p (8.14, 0.25), In_n (30.66, 0.25), Va (1.50, 26.56), Vss (1.50, 12.32), Va (1.50, 1.50)
+
+Pruefung: jedes Netz genau einmal, keine zwei Namen auf einem Netz.
+
+
+====================================================================================================
+3. Driver -- geplante Verdrahtung (ROUTING.md Abschnitt 3), noch nicht gezeichnet
+====================================================================================================
+
+Von Hand eingetragen, nicht extrahiert.  '+' = zwei Netze kreuzen sich auf
+verschiedenen Lagen.  Va/Vss nicht eingezeichnet.
+
+Driver   (57.5 x 57.6 um; 1 Zeichen = 0.50 um, 1 Zeile = 1.0 um)
+      0         5         10        15        20        25        30        35        40        45        50        55  x/um
+                                                               RV
+       :...........:                                           RV                                          :...........:
+   55  :           :                                           RV                                          :           :
+       :           :                                           RV                                          :           :
+       :           :                                           RV                                          :           :
+       :           :                                           RV                                          :           :
+       :   Cop1    :                                           RV                                          :   Con1    :
+   50  :           :                                           RV                                          :           :
+       :           :                                           RV                                          :           :
+       :           :                                           RV                                          :           :
+       :           :                                           RV                                          :           :
+       :....######.:                                           RV                                          :..@@@@@@...:
+   45  :....#......:                                           RV                                          :.......@...:
+       :    #      :                                           RV                                          :       @   :
+       :    #      :                                           RV                                          :       @   :
+       :    #      :                                           RV                                          :       @   :
+       :    #      :                                           RV                                          :       @   :
+   40  :    #Cop0  :                                           RV                                          :   Con0@   :
+       :    #      :                                           RV                                          :       @   :
+       :    #      :                                           RV                                          :       @   :
+       :    #      :                                           RV                                          :       @   :
+       :    #      :                                           RV                                          :       @   :
+   35  :....######.:                                           RV                                          :..@@@@@@...:
+            #                            I                     RV                     J                            @
+        :...#............................I.....................RV.....................J............................@..:
+        :   #                            I                     RV                     J                            @  :
+        :   #                            I                     RV                     J                            @  :
+   30   :   #                            I                   CcRV                     J                            @  :
+        :   #                            I                     RV                     J                            @  :
+        :   #                            I                     RV                     J                            @  :
+        :   #                            I                     RV                     J                           G+GGGG
+       ::...#............................I.....................RV.............FFFFFF..J............................@..:G
+   25  :    #                   :     :  I ::                  RV                 ::  J :   :                      @   G
+       :    #                   :     :  I ::                M2RV                 :FFF+FFFFFFFFFFFFFFFFFFFFCtn2    @   G
+       :    #    Ctn1           :     :  +DDDDDDDDDDDDDDDDDDDDD++DDDDDDDDDDDDDDDDDD+DD+ :   :             F        @   G
+       :    #                   :     :  I :D                  RV                 :F  J :   :NNNNNN.......F........@...G
+       :    #                   :     :  I :DPPPPPPPPPPPPPPPPPP++PPPPPPPPPPPPPPPPPPF  J :    N            F        @   G
+   20  :    #                   :     :..I.:D.......P....P.....RV.....P....P......:F..J.:    N          :.F........@...G
+       :....#...............NNNNNNN :....I..D.......P....P.....RV.....P....P.......F..J...:  N          :..........@...:
+            #                     N PPPPPPPP+PPPPPPPPPPPPPPPPPP++PPPPPPPPPPPPPPPPPP+PPPPPPPP N                     @
+       :.######################   N :       D                  RV                  F      :  N    @@@@@@@@@@@@@@@@@@@@@:
+       :  :                   #   N :       D   M5             RV          M4      F      :  N    @                 :  :
+   15  :  :       JJJJJJJJJJJJ+JJJ+JJJJJJJJJ+JJJJJJJJJJJJJJJJJJ++JJJJJJJJJJJJJJJJJJ+JJJJJJ:  N    @                 :  :
+       :  :                   #   N : IIIIII+IIIIIIIIIIIIIIIIII++IIIIIIIIIIIIIIIIII+IIIII+III+IIII+IIIIIIIIIII      :  :
+       :Rp:  :........:       ####+###+#####+##################RV@@@@@@@@@@@@@@@@@@+@@@@@+@@@+@@@@@     :........:  :Rn:
+       :  :  :        :       #   N   I     D     #      #     RV     @      @     F     J   N    @     :        :  :  :
+       :  :  :  Cxp   : ##########+###+#####+##################RV@@@@@@@@@@@@@@@@@@+@@@@@+@@@+@@@@@@@@@@:  Cxn   :  :  :
+   10  :  :  :        :       #   N :       D   M1             RV          M3      F      :  N    @     :        :  :  :
+       : C:  :        :       #   N :NNNNNNN+NNNNNNNNNNNNNNNNNN++NNNNNNNNNNNNNNNNNN+NNNNNNN  N    @     :        :  : C:
+       :.CCCCCCCCCCCCCCCCCCCCC+CCCCCCCCCCC+C+CCCCCCCCCCCCCCCCCC++CCCCCCCCCCCCCCCCCC+C+CCCCCCCCCCCC+CCCCCCCCCCCCCCCCCCCC:
+       :N+NNNNNNNNNNNNNNNNNNNN+NNNNNNNNNNNNN+NNNNNNNNNNNNNNNNNN++NNNNNNNNNNNNNNNNNN+NNNNNNNNNNNNNN+NNNNNNNNNNNNNNNNNNNNN
+       : C                    #  M60        D                  RV                  F     M61      @                    :
+    5  :.C....................#.............D...............RRRRV..................F..............@....................:
+         CCCCCC               #             D                  RVVVVVVV            F              @
+            :.DDDDDDDDDDDDDDDD+DDDDDDDDDDDDDDDDDDDDDDDDDDD::RRRRRRR::.FFFFFFFFFFFFFFFFFFFFFFFFFFFF+FFFFFFFFFFFFFFF:
+            :                 #  M11                      ::...:...::                    M12      @               :
+            TTTTTTTTTTTTTTTTTT+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT+TTTTTTTTTTTTTTTT
+    0       :.................#...........................:         :.............................@...............:
+
+Netze:
+  #  Out_p   Stamm x ~12 bis zur Suedkante, Straps von M5/M1, Rp, Cxp, hinauf zu Cop
+  @  Out_n   Spiegelbild, hinauf zu Con
+  P  tail_p  M2-Drain auf die Sources von M5/M4
+  N  tail_n  Sources von M1/M3 auf die Drains von M6, Aeste zu Ctn1/Ctn2
+  I  In_p    vom Predriver auf die Gates von M5/M1, weiter zu Cxn
+  J  In_n    Spiegelbild, zu Cxp
+  C  cm      Rp/Rn -> Gate M11, unter Cxp/Cxn durch
+  D  pd      M11 D -> M13 D+G -> M14 G
+  F  cmfb    M12 D -> M14 D -> M2 G, Rc R1
+  G  cc_g    Rc R2 -> Gate-Schiene von Cc
+  R  Iref    Iref_drv auf der Achse hinunter zu M9 (Gates M6, M10)
+  V  Vref    auf der Achse hinunter zum Gate von M12
+  T  otail   M10 D -> Sources von M11/M12

@@ -22,11 +22,11 @@
   + Type: signal
   + Direction: input
 - Iref_pd
-  + Description: Pre-driver bias reference. Mirrored 1:15 inside the block, so the pin takes 2 uA and the pre-driver sees the 30 uA it was characterised at. The 1:15 step exists because the harness current DACs stop at 10 uA.
+  + Description: Pre-driver bias reference, 30 uA straight into the pre-driver. The harness current DACs stop at 10 uA, so at the top level this pin is fed by macros/iref_x15, a 1:15 mirror from a 2 uA ibias pin.
   + Type: signal
   + Direction: input
 - Iref_drv
-  + Description: Output driver bias reference, 2 uA, mirrored 1:15 as above.
+  + Description: Output driver bias reference, 30 uA, fed through iref_x15 at the top level as above.
   + Type: signal
   + Direction: input
 - Vref
@@ -70,10 +70,10 @@
   + Unit: V
   + Typical: 1.2
 - iref
-  + Description: Bias reference current per pin, mirrored 1:15 inside
+  + Description: Bias reference current per pin
   + Display: Iref
   + Unit: uA
-  + Typical: 2
+  + Typical: 30
 - period
   + Description: One PULSE period carries two bits, so this is twice the bit period. 2 ns is the 1 Gb/s design target; the bench ran at 4 ns, 500 Mb/s, until the timing figures were added.
   + Display: Period

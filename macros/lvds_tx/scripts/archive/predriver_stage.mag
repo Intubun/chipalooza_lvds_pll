@@ -1,0 +1,69 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_p_w2p64_l0p4_ng1  Mpp0
+timestamp 0
+transform 1 0 3202 0 1 536
+box 0 0 1 1
+use dev_n_w1p6_l0p45_ng1  Mnp0
+timestamp 0
+transform 1 0 3176 0 1 1920
+box 0 0 1 1
+use dev_p_w3p13_l0p4_ng4  Mpp1
+timestamp 0
+transform 1 0 2470 0 1 585
+box 0 0 1 1
+use dev_n_w2p5_l0p45_ng2  Mnp1
+timestamp 0
+transform 1 0 2574 0 1 1830
+box 0 0 1 1
+use dev_p_w4_l0p4_ng10  Mpp2
+timestamp 0
+transform 1 0 1036 0 1 672
+box 0 0 1 1
+use dev_n_w2_l0p45_ng8  Mnp2
+timestamp 0
+transform 1 0 1391 0 1 1880
+box 0 0 1 1
+use dev_p_w2p64_l0p4_ng1  Mpn0
+timestamp 0
+transform -1 0 4558 0 1 536
+box 0 0 1 1
+use dev_n_w1p6_l0p45_ng1  Mnn0
+timestamp 0
+transform -1 0 4584 0 1 1920
+box 0 0 1 1
+use dev_p_w3p13_l0p4_ng4  Mpn1
+timestamp 0
+transform -1 0 5290 0 1 585
+box 0 0 1 1
+use dev_n_w2p5_l0p45_ng2  Mnn1
+timestamp 0
+transform -1 0 5186 0 1 1830
+box 0 0 1 1
+use dev_p_w4_l0p4_ng10  Mpn2
+timestamp 0
+transform -1 0 6724 0 1 672
+box 0 0 1 1
+use dev_n_w2_l0p45_ng8  Mnn2
+timestamp 0
+transform -1 0 6369 0 1 1880
+box 0 0 1 1
+use dev_p_w4p38_l0p4_ng1  Mpxp
+timestamp 0
+transform -1 0 4060 0 1 710
+box 0 0 1 1
+use dev_n_w1p75_l0p45_ng1  Mnxp
+timestamp 0
+transform -1 0 4065 0 1 1905
+box 0 0 1 1
+use dev_p_w4p38_l0p4_ng1  Mpxn
+timestamp 0
+transform 1 0 3700 0 1 710
+box 0 0 1 1
+use dev_n_w1p75_l0p45_ng1  Mnxn
+timestamp 0
+transform 1 0 3695 0 1 1905
+box 0 0 1 1
+<< end >>

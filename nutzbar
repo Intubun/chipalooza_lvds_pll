@@ -1,0 +1,11 @@
+[INFO] Final PATH variable: /headless/.local/bin:/foss/tools/bin:/foss/tools/sak:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/foss/tools/kactus2:/foss/tools/klayout:/foss/tools/osic-multitool
+[INFO] Final PYTHONPATH variable: /headless/.local/lib/python3.12/site-packages:/usr/lib/python312.zip:/usr/lib/python3.12:/usr/lib/python3.12/lib-dynload:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages:/foss/tools/ngspyce/local/lib/python3.12/dist-packages:/foss/tools/openems/local/lib/python3.12/dist-packages:/foss/tools/pyopus/local/lib/python3.12/dist-packages:/foss/tools/yosys/share/yosys/python3:/foss/tools/klayout/pymod:/foss/tools/vacask/lib/vacask/python
+bash layout/build_cells.sh
+wrote cells/gen_devices.tcl (26 leaf cells)
+leaf cells generated: 26
+patched dev_p_w8_l2_ng6_openn_botc0: guard ring pushed s by 0.19 um (7 shapes)
+patched dev_p_w8_l2_ng6_openn_botc0: guard ring opened to the n (7 shapes removed)
+DRC style is now "drc(full)"
+Die Zellen oberhalb passen unveraendert - 6 Zellen geprueft, kein Neubau noetig.
+  lvds_tx_gen.gds neu geschrieben: 421126 bytes
+Kontaktbalken: -c: line 2: unexpected EOF while looking for matching `"'

@@ -1,0 +1,25 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_p_w3_l0p4_ng8_topc0  Mldo
+timestamp 0
+transform 1 0 1292 0 1 2584
+box 0 0 1 1
+use dev_n_w4_l0p45_ng6_opens_botc0  Mid
+timestamp 0
+transform 1 0 692 0 1 1302
+box 0 0 1 1
+use dev_n_w4_l0p45_ng6_opens_botc0  Mio
+timestamp 0
+transform -1 0 1892 0 1 1302
+box 0 0 1 1
+use dev_n_w2p92_l0p45_ng6_openn_topc0  Mt_0
+timestamp 0
+transform 1 0 692 0 1 502
+box 0 0 1 1
+use dev_n_w2p92_l0p45_ng6_openn_topc0  Mt_1
+timestamp 0
+transform -1 0 1892 0 1 502
+box 0 0 1 1
+<< end >>

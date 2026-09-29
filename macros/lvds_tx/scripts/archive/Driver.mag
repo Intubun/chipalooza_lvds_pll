@@ -1,0 +1,105 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_p_w5p9_l5p25_ng2  Ctn1
+timestamp 0
+transform 1 0 1382 0 1 4537
+box 0 0 1 1
+use dev_p_w2p85_l5p8_ng2  Ctn2
+timestamp 0
+transform 1 0 10012 0 1 4840
+box 0 0 1 1
+use dev_p_w4p86_l0p5_ng20  M2
+timestamp 0
+transform 1 0 5752 0 1 4642
+box 0 0 1 1
+use dev_p_w5_l0p4_ng16  M5
+timestamp 0
+transform 1 0 4402 0 1 3282
+box 0 0 1 1
+use dev_p_w5_l0p4_ng16  M4
+timestamp 0
+transform -1 0 7102 0 1 3282
+box 0 0 1 1
+use dev_n_w2_l0p45_ng15  M1
+timestamp 0
+transform 1 0 4405 0 1 2000
+box 0 0 1 1
+use dev_n_w2_l0p45_ng15  M3
+timestamp 0
+transform -1 0 7099 0 1 2000
+box 0 0 1 1
+use dev_n_w1p6_l0p5_ng31  M6_0
+timestamp 0
+transform 1 0 2922 0 1 1255
+box 0 0 1 1
+use dev_n_w1p6_l0p5_ng31  M6_1
+timestamp 0
+transform -1 0 8582 0 1 1255
+box 0 0 1 1
+use dev_n_w0p8_l0p5_ng1  M9
+timestamp 0
+transform 1 0 5562 0 1 630
+box 0 0 1 1
+use dev_p_w5_l1_ng1  M13
+timestamp 0
+transform 1 0 3512 0 1 4642
+box 0 0 1 1
+use dev_p_w5_l1_ng1  M14
+timestamp 0
+transform -1 0 7992 0 1 4642
+box 0 0 1 1
+use dev_n_w2p5_l1_ng16  M11
+timestamp 0
+transform 1 0 2913 0 1 460
+box 0 0 1 1
+use dev_n_w2p5_l1_ng16  M12
+timestamp 0
+transform -1 0 8591 0 1 460
+box 0 0 1 1
+use dev_n_w0p8_l0p5_ng1  M10
+timestamp 0
+transform 1 0 5942 0 1 630
+box 0 0 1 1
+use dev_p_w5_l5_ng10  Cc
+timestamp 0
+transform 1 0 5752 0 1 6002
+box 0 0 1 1
+use dev_rppd_w1_l6  Rc
+timestamp 0
+transform 0 -1 10614 1 0 3979
+box 0 0 1 1
+use dev_rhigh_w1_l7p35  Rp
+timestamp 0
+transform 1 0 304 0 1 2650
+box 0 0 1 1
+use dev_rhigh_w1_l7p35  Rn
+timestamp 0
+transform -1 0 11200 0 1 2650
+box 0 0 1 1
+use dev_cap_cmomf_w5p913_l5p913  Cxp
+timestamp 0
+transform -1 0 1791 0 1 1625
+box 0 0 1 1
+use dev_cap_cmomf_w5p913_l5p913  Cxn
+timestamp 0
+transform 1 0 9713 0 1 1625
+box 0 0 1 1
+use dev_n_w10_l5_ng1  Cop_0
+timestamp 0
+transform 1 0 732 0 1 8084
+box 0 0 1 1
+use dev_n_w10_l5_ng1  Cop_1
+timestamp 0
+transform 1 0 732 0 1 10320
+box 0 0 1 1
+use dev_n_w10_l5_ng1  Con_0
+timestamp 0
+transform -1 0 10772 0 1 8084
+box 0 0 1 1
+use dev_n_w10_l5_ng1  Con_1
+timestamp 0
+transform -1 0 10772 0 1 10320
+box 0 0 1 1
+<< end >>

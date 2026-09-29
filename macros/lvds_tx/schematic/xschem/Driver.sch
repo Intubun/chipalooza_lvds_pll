@@ -5,6 +5,9 @@ V {}
 S {}
 F {}
 E {}
+T {Ctn1/Ctn2 hold tail_n through the switching edge: without them the
+bottom switches pull harder than the top ones while the gates pass mid-rail,
+the common mode dips and Out_p/Out_n cross ~14 % below the middle.} 200 20 0 0 0.2 0.2 {}
 N 60 -800 1400 -800 {lab=Va}
 N 1300 100 1400 100 {lab=Vss}
 N -1180 -800 -1180 -600 {lab=Va}
@@ -56,8 +59,12 @@ N -1260 -440 -1220 -440 {lab=cm}
 N -980 -500 -980 -470 {lab=cmfb}
 N -980 -500 -940 -500 {lab=cmfb}
 N -940 -680 -940 -500 {lab=cmfb}
-N -900 -680 -120 -680 {lab=cmfb}
-N -900 -680 -900 -600 {lab=cmfb}
+N -900 -680 -700 -680 {lab=cmfb}
+N -700 -680 -120 -680 {lab=cmfb}
+N -900 -600 -900 -540 {lab=cc_g}
+N -900 -540 -700 -540 {lab=cc_g}
+N -700 -570 -700 -540 {lab=cc_g}
+N -700 -680 -700 -630 {lab=cmfb}
 N -120 -680 -120 -600 {lab=cmfb}
 N -1180 -560 -1180 -470 {lab=pd}
 N -1140 -560 -1020 -560 {lab=pd}
@@ -111,10 +118,36 @@ N -1500 200 -220 200 {lab=In_p}
 N -1500 260 -20 260 {lab=In_n}
 N -1140 -600 -1140 -560 {lab=pd}
 N -1180 -560 -1140 -560 {lab=pd}
+N 320 -90 320 -30 {lab=Va}
+N 240 -60 280 -60 {lab=tail_n}
+N 480 -90 480 -30 {lab=Va}
+N 400 -60 440 -60 {lab=tail_n}
+C {sg13cmos5l_pr/sg13_hv_pmos.sym} 300 -60 0 0 {name=Ctn1
+l=5.25u
+w=11.8u
+ ng=2
+ m=1
+  mm_ok=1
+ model=sg13_hv_pmos
+spiceprefix=X
+}
+C {sg13cmos5l_pr/sg13_hv_pmos.sym} 460 -60 0 0 {name=Ctn2
+l=5.8u
+w=5.7u
+ ng=2
+ m=1
+  mm_ok=1
+ model=sg13_hv_pmos
+spiceprefix=X
+}
+C {lab_pin.sym} 240 -60 0 0 {name=n10 sig_type=std_logic lab=tail_n}
+C {lab_pin.sym} 320 -90 0 1 {name=n11 sig_type=std_logic lab=Va}
+C {lab_pin.sym} 400 -60 0 0 {name=n12 sig_type=std_logic lab=tail_n}
+C {lab_pin.sym} 480 -90 0 1 {name=n13 sig_type=std_logic lab=Va}
 C {sg13cmos5l_pr/sg13_hv_pmos.sym} -100 -600 0 0 {name=M2
 l=0.5u
 w=97.2u
- ng=12
+ ng=20
  m=1
   mm_ok=1
  model=sg13_hv_pmos
@@ -123,7 +156,7 @@ spiceprefix=X
 C {sg13cmos5l_pr/sg13_hv_pmos.sym} -200 -440 0 0 {name=M5
 l=0.4u
 w=80u
- ng=40
+ ng=16
  m=1
   mm_ok=1
  model=sg13_hv_pmos
@@ -132,7 +165,7 @@ spiceprefix=X
 C {sg13cmos5l_pr/sg13_hv_pmos.sym} 0 -440 0 0 {name=M4
 l=0.4u
 w=80u
- ng=40
+ ng=16
  m=1
   mm_ok=1
  model=sg13_hv_pmos
@@ -158,9 +191,9 @@ spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} -100 -40 0 0 {name=M6
 l=0.5u
-w=24.8u
+w=49.6u
  ng=31
- m=4
+ m=2
   mm_ok=1
  model=sg13_hv_nmos
 spiceprefix=X
@@ -195,7 +228,7 @@ spiceprefix=X
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} -1200 -440 0 0 {name=M11
 l=1u
 w=40u
- ng=20
+ ng=16
  m=1
   mm_ok=1
  model=sg13_hv_nmos
@@ -204,7 +237,7 @@ spiceprefix=X
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} -1000 -440 0 0 {name=M12
 l=1u
 w=40u
- ng=20
+ ng=16
  m=1
   mm_ok=1
  model=sg13_hv_nmos
@@ -221,13 +254,24 @@ spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_pmos.sym} -880 -600 0 0 {name=Cc
 l=5u
-w=40u
- ng=8
+w=50u
+ ng=10
  m=1
   mm_ok=1
  model=sg13_hv_pmos
 spiceprefix=X
 }
+C {sg13cmos5l_pr/rppd.sym} -700 -600 0 0 {name=Rc
+w=1u
+l=6u
+model=rppd
+body=Vss
+spiceprefix=X
+b=0
+ m=1
+  mm_ok=1
+}
+C {lab_pin.sym} -800 -540 0 0 {name=n9 sig_type=std_logic lab=cc_g}
 C {sg13cmos5l_pr/rhigh.sym} 900 -260 0 0 {name=Rp
 w=1u
 l=7.35u
@@ -265,19 +309,19 @@ mmax=4
 spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} 1280 -150 0 0 {name=Cop
-l=10.0u
-w=10.0u
+l=5u
+w=10u
  ng=1
- m=1
+ m=2
   mm_ok=1
  model=sg13_hv_nmos
 spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} 1380 -150 0 0 {name=Con
-l=10.0u
-w=10.0u
+l=5u
+w=10u
  ng=1
- m=1
+ m=2
   mm_ok=1
  model=sg13_hv_nmos
 spiceprefix=X

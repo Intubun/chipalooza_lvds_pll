@@ -193,9 +193,15 @@ build-lvds-pattern: ## Simulate and check the LVDS pattern generator macro (sche
 	@$(MAKE) -C $(MACROS_DIR)/lvds_pattern sim-all
 .PHONY: build-lvds-pattern
 
+build-iref-x15: ## DRC and simulate the 1:15 bias pre-mirror macro of the LVDS transmitter
+	@$(MAKE) -C $(MACROS_DIR)/iref_x15 klayout-drc
+	@$(MAKE) -C $(MACROS_DIR)/iref_x15 sim-all
+.PHONY: build-iref-x15
+
 build-macros: ## Verify, build and simulate all macros
 	$(MAKE) build-lvds-tx
 	$(MAKE) build-lvds-pattern
+	$(MAKE) build-iref-x15
 #	ToDo: the two PLL macros are Rahul's and are built from their own Makefiles
 .PHONY: build-macros
 
@@ -499,9 +505,14 @@ clean-lvds-pattern: ## Delete generated files from the LVDS pattern generator ma
 	@$(MAKE) -C $(MACROS_DIR)/lvds_pattern clean
 .PHONY: clean-lvds-pattern
 
+clean-iref-x15: ## Delete generated files from the bias pre-mirror macro
+	@$(MAKE) -C $(MACROS_DIR)/iref_x15 clean
+.PHONY: clean-iref-x15
+
 clean-macros: ## Delete all generated files and folders of all macros
 	$(MAKE) clean-lvds-tx
 	$(MAKE) clean-lvds-pattern
+	$(MAKE) clean-iref-x15
 #	ToDo: the two PLL macros are Rahul's and are cleaned from their own Makefiles
 .PHONY: clean-macros
 
