@@ -24,6 +24,11 @@ sim_build/
 /macros/lvds_tx/netlist
 /macros/lvds_pattern/netlist
 /macros/pll_analog/netlist
+/macros/iref_x15/netlist
+/macros/iref_x15/verification
+/macros/lvds_tx/verification
+/macros/lvds_tx/build
+/macros/lvds_tx/layout/*.lyrdb
 /macros/inverter/verification/cace/templates/simulations
 /macros/inverter/schematic/xschem/simulations
 /macros/inverter/testbenches/xschem/simulations
@@ -37,6 +42,8 @@ sim_build/
 /macros/lvds_tx/testbenches/xschem/simulations
 /macros/lvds_pattern/schematic/xschem/simulations
 /macros/lvds_pattern/testbenches/xschem/simulations
+/macros/iref_x15/schematic/xschem/simulations
+/macros/iref_x15/testbenches/xschem/simulations
 /macros/pll_digital/flow/final
 /macros/pll_digital/flow/librelane/runs
 /macros/counter/flow/final

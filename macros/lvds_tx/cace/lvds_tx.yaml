@@ -28,13 +28,13 @@ pins:
     direction: input
   Iref_pd:
     description: >-
-      Pre-driver bias reference. Mirrored 1:15 inside the block, so the pin
-      takes 2 uA and the pre-driver sees the 30 uA it was characterised at.
-      The 1:15 step exists because the harness current DACs stop at 10 uA.
+      Pre-driver bias reference, 30 uA straight into the pre-driver. The
+      harness current DACs stop at 10 uA, so at the top level this pin is fed
+      by macros/iref_x15, a 1:15 mirror from a 2 uA ibias pin.
     type: signal
     direction: input
   Iref_drv:
-    description: Output driver bias reference, 2 uA, mirrored 1:15 as above.
+    description: Output driver bias reference, 30 uA, fed through iref_x15 at the top level as above.
     type: signal
     direction: input
   Vref:
@@ -79,10 +79,10 @@ default_conditions:
     unit: V
     typical: 1.2
   iref:
-    description: Bias reference current per pin, mirrored 1:15 inside
+    description: Bias reference current per pin
     display: Iref
     unit: uA
-    typical: 2
+    typical: 30
   period:
     description: >-
       One PULSE period carries two bits, so this is twice the bit period.

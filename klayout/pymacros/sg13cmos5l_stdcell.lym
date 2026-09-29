@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Register sg13cmos5l_stdcell as a KLayout cell library</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text># Register the core (1.2 V) standard cells as a KLayout cell library.
+#
+# The PDK registers only its thick-oxide cells (tech/pymacros/
+# sg13cmos5l_stdcell_hv.lym, library "sg13cmos5l_stdcell_hv"); the core
+# library's GDS is in libs.ref/sg13cmos5l_stdcell/gds/ but nothing tells
+# KLayout about it, so its cells never show up in the Instance dialog.  This
+# is the same macro for them.
+#
+# It runs when this directory's parent is on KLAYOUT_PATH, which `make
+# layout-view` (macros/lvds_tx) arranges; by hand:
+#
+#   export KLAYOUT_PATH=$KLAYOUT_PATH:/foss/designs/chipalooza_lvds_pll/klayout
+#
+# A layout that places these cells stores them as references to the library
+# (plus their geometry): open it again with the library registered, or the
+# cells come up as plain, unlinked copies.
+#
+# The GDS is found through PDK_ROOT (default /foss/pdks).  Should a PDK
+# release register the library itself, this macro steps aside.
+
+import os
+import pya
+
+LIB_NAME = "sg13cmos5l_stdcell"
+
+
+def _find_gds():
+    root = os.environ.get("PDK_ROOT") or "/foss/pdks"
+    path = os.path.join(root, "ihp-sg13cmos5l", "libs.ref", LIB_NAME, "gds",
+                        LIB_NAME + ".gds")
+    return path if os.path.isfile(path) else None
+
+
+if pya.Library.library_by_name(LIB_NAME) is not None:
+    print("sg13cmos5l_stdcell.lym: '%s' is registered already" % LIB_NAME)
+else:
+    _gds = _find_gds()
+    if _gds is None:
+        print("sg13cmos5l_stdcell.lym: library GDS not found "
+              "(is PDK_ROOT set?)")
+    else:
+        _lib = pya.Library()
+        _lib.description = ("IHP SG13CMOS5L core (1.2 V) standard cells, "
+                            "%s" % os.path.basename(_gds))
+        _lib.layout().read(_gds)
+        _lib.register(LIB_NAME)
+        print("registered KLayout library '%s' (%d cells) from %s" %
+              (LIB_NAME, _lib.layout().cells(), _gds))
+</text>
+</klayout-macro>

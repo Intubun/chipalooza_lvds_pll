@@ -127,8 +127,8 @@ T {dig_out[3]  not connected} -180 -528 0 1 0.25 0.25 {}
 T {dig_out[2]  not connected} -180 -508 0 1 0.25 0.25 {}
 T {dig_out[1]  not connected} -180 -488 0 1 0.25 0.25 {}
 T {dig_out[0]  not connected} -180 -468 0 1 0.25 0.25 {}
-T {ibias[1]  ->  xlvds.Iref_drv - 2 uA, mirrored 1:15 to the driver's 30 uA} -180 -448 0 1 0.25 0.25 {}
-T {ibias[0]  ->  xlvds.Iref_pd - 2 uA, mirrored 1:15 to the pre-driver's 30 uA} -180 -428 0 1 0.25 0.25 {}
+T {ibias[1]  ->  xiref_drv (macros/iref_x15, 1:15)  ->  xlvds.Iref_drv - 2 uA in, 30 uA to the driver} -180 -448 0 1 0.25 0.25 {}
+T {ibias[0]  ->  xiref_pd (macros/iref_x15, 1:15)  ->  xlvds.Iref_pd - 2 uA in, 30 uA to the pre-driver} -180 -428 0 1 0.25 0.25 {}
 T {vbias  not connected} -180 -408 0 1 0.25 0.25 {}
 T {analog_bus[3]  not connected} -180 -388 0 1 0.25 0.25 {}
 T {analog_bus[2]  not connected} -180 -368 0 1 0.25 0.25 {}
@@ -140,8 +140,8 @@ N 1460 -1040 1500 -1040 {lab=dig_in[0]}
 N 1460 -1020 1500 -1020 {lab=dig_in[1]}
 N 1460 -980 1500 -980 {lab=dig_in[3]}
 N 1460 -1000 1500 -1000 {lab=dig_in[2]}
-N 1850 -1020 1890 -1020 {lab=ibias[1]}
-N 1850 -1040 1890 -1040 {lab=ibias[0]}
+N 1850 -1020 1890 -1020 {lab=iref_drv_30u}
+N 1850 -1040 1890 -1040 {lab=iref_pd_30u}
 N 2190 -1040 2270 -1040 {lab=analog_pin[3]}
 N 2190 -1060 2270 -1060 {lab=analog_pin[2]}
 N 2190 -970 2230 -970 {lab=vdd_3v3}
@@ -222,6 +222,14 @@ N 1340 -1060 1500 -1060 {lab=pll_clk}
 N 1340 -1060 1340 -680 {lab=pll_clk}
 N 1320 -680 1340 -680 {lab=pll_clk}
 N 740 -720 1000 -720 {lab=analog_pin[0]}
+N 1780 -800 1820 -800 {lab=ibias[0]}
+N 1980 -800 2020 -800 {lab=iref_pd_30u}
+N 1880 -900 1880 -880 {lab=vdd_3v3}
+N 1920 -720 1920 -700 {lab=vss_3v3}
+N 2130 -800 2170 -800 {lab=ibias[1]}
+N 2330 -800 2370 -800 {lab=iref_drv_30u}
+N 2230 -900 2230 -880 {lab=vdd_3v3}
+N 2270 -720 2270 -700 {lab=vss_3v3}
 C {lab_pin.sym} 1800 -900 0 1 {name=l_xpat_vdd sig_type=std_logic lab=vdd_1v2}
 C {lab_pin.sym} 1800 -880 0 1 {name=l_xpat_vss sig_type=std_logic lab=vss_1v2}
 C {lab_pin.sym} 1460 -1040 0 0 {name=l_xpat_clk_src sig_type=std_logic lab=dig_in[0]}
@@ -230,12 +238,22 @@ C {lab_pin.sym} 1460 -980 0 0 {name=l_xpat_mode sig_type=std_logic lab=dig_in[3]
 C {lab_pin.sym} 1460 -1000 0 0 {name=l_xpat_reset sig_type=std_logic lab=dig_in[2]}
 C {lab_wire.sym} 1420 -1060 0 0 {name=p_pll_clk sig_type=std_logic lab=pll_clk}
 C {lvds_pattern.sym} 1630 -980 0 0 {name=xpat}
-C {lab_pin.sym} 1850 -1020 0 0 {name=l_xlvds_iref_drv sig_type=std_logic lab=ibias[1]}
-C {lab_pin.sym} 1850 -1040 0 0 {name=l_xlvds_iref_pd sig_type=std_logic lab=ibias[0]}
+C {lab_pin.sym} 1850 -1020 0 0 {name=l_xlvds_iref_drv sig_type=std_logic lab=iref_drv_30u}
+C {lab_pin.sym} 1850 -1040 0 0 {name=l_xlvds_iref_pd sig_type=std_logic lab=iref_pd_30u}
 C {lab_pin.sym} 2230 -970 0 1 {name=l_xlvds_va sig_type=std_logic lab=vdd_3v3}
 C {lab_pin.sym} 1850 -1000 0 0 {name=l_xlvds_vref sig_type=std_logic lab=analog_bus[1]}
 C {lab_pin.sym} 2230 -950 0 1 {name=l_xlvds_vss sig_type=std_logic lab=vss_3v3}
 C {lvds_tx.sym} 2040 -1030 0 0 {name=xlvds}
+C {iref_x15.sym} 1900 -800 0 0 {name=xiref_pd}
+C {lab_pin.sym} 1780 -800 0 0 {name=l_xiref_pd_in sig_type=std_logic lab=ibias[0]}
+C {lab_pin.sym} 2020 -800 0 1 {name=l_xiref_pd_out sig_type=std_logic lab=iref_pd_30u}
+C {lab_pin.sym} 1880 -900 3 0 {name=l_xiref_pd_va sig_type=std_logic lab=vdd_3v3}
+C {lab_pin.sym} 1920 -700 1 0 {name=l_xiref_pd_vss sig_type=std_logic lab=vss_3v3}
+C {iref_x15.sym} 2250 -800 0 0 {name=xiref_drv}
+C {lab_pin.sym} 2130 -800 0 0 {name=l_xiref_drv_in sig_type=std_logic lab=ibias[1]}
+C {lab_pin.sym} 2370 -800 0 1 {name=l_xiref_drv_out sig_type=std_logic lab=iref_drv_30u}
+C {lab_pin.sym} 2230 -900 3 0 {name=l_xiref_drv_va sig_type=std_logic lab=vdd_3v3}
+C {lab_pin.sym} 2270 -700 1 0 {name=l_xiref_drv_vss sig_type=std_logic lab=vss_3v3}
 C {lab_pin.sym} 2960 -840 0 1 {name=l_Cd12_b sig_type=std_logic lab=vss_1v2}
 C {lab_pin.sym} 2960 -810 0 1 {name=l_Cd12_d sig_type=std_logic lab=vss_1v2}
 C {lab_pin.sym} 2840 -840 0 0 {name=l_Cd12_g sig_type=std_logic lab=vdd_1v2}

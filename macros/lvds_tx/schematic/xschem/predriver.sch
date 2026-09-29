@@ -32,7 +32,15 @@ SIZING: pn[0] is 1.65, not the 1.2 it was.  In_p and In_n run ANTIPHASE
 through the same chain, so each stage rise/fall asymmetry adds up as
 differential delay.  Balancing the first stage took skew from 31..64 ps to
 1.6..16 ps over PVT and Vos p-p from 137..197 mV to 42..70 mV, at the same
-current.  docs/predriver-findings.md 5c.} -170 -1780 0 0 0.4 0.4 {}
+current.  docs/predriver-findings.md 5c.
+
+MRef is 2u x 2u and each comparator tail Mt 2 x 17.52u at l=0.45u.  The
+tail node sits only 50-100 mV up (the inputs are 1.2 V logic), so Mt is a
+switch in its linear region, not a current source: the tail current is
+0.5-0.8 mA, set by the pair and the loads, not what the mirror ratio
+suggests.  The long MRef raises Mt's gate to ~1.37 V, where a quarter of the
+old 140u conducts as well.  Mt has the pair's l and finger count so that
+in the layout it stands finger on finger under Mid/Mio (macro README).} -170 -1780 0 0 0.4 0.4 {}
 N 1400 -1000 3000 -1000 {lab=Va}
 N 200 340 3000 340 {lab=Vss}
 N -20 440 500 440 {lab=Iref}
@@ -95,7 +103,7 @@ N 200 -1000 1400 -1000 {lab=Va}
 N 200 2040 1400 2040 {lab=Vss}
 C {predriver_comp.sym} 200 0 0 0 {name=Xkpm}
 C {sg13cmos5l_pr/sg13_hv_nmos.sym} -100 60 0 0 {name=Mref
-l=0.5u
+l=2u
 w=2u
  ng=1
  m=1

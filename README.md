@@ -144,6 +144,7 @@ This project embeds two sub-macros in `macros/`, and each level has its own Make
 - **Analog sub-macro ([`macros/inverter/`](macros/inverter/README.md))** — the complete flow reference for the unit `inverter` cell (`TOP = inverter`), including sizing notebooks and CACE characterization.
 - **LVDS transmitter ([`macros/lvds_tx/`](macros/lvds_tx/README.md))** — pre-driver and current-steering output stage (`TOP = lvds_tx`), imported from the LVDS-PLL design repository. Schematics and testbenches only; no layout here yet.
 - **LVDS pattern generator ([`macros/lvds_pattern/`](macros/lvds_pattern/README.md))** — nineteen `sg13cmos5l` standard cells (`TOP = lvds_pattern`): clock source select, latch-based clock gate, PRBS-7 generator and a matched complementary output pair. Feeds `lvds_tx`. Schematic and bench are generated from a cell table, `make gen`.
+- **Bias pre-mirror ([`macros/iref_x15/`](macros/iref_x15/README.md))** — four HV transistors (`TOP = iref_x15`) turning a 2 uA `ibias` pin into the 30 uA `lvds_tx` needs; instantiated twice at the top level. Layout routed by hand.
 - **Digital sub-macro ([`macros/counter/`](macros/counter/README.md))** — the digital counterpart for **mixed-signal (AMS)** designs (`TOP = counter_top`). Its RTL is linted (Verilator), simulated (Icarus Verilog and cocotb), emulated on an FPGA and hardened into a placeable macro with LibreLane, which runs the Magic and KLayout DRC and the Netgen LVS as part of the flow. [`generate-xspice`](macros/counter/README.md#generate-xspice-file) turns the hardened netlist into an XSPICE model, so the digital block can be simulated together with analog circuitry in an Xschem testbench.
 
 Every macro follows the same principle, and the simulations always run last, so they use the artifacts the same invocation has just produced:
@@ -198,9 +199,11 @@ a different pad type changes that (an `InOut` pad becomes five core signals).
 | `analog_pin[3]` | `d_n` | LVDS out - |
 
 Bias comes straight off the harness: `ibias[0]`/`ibias[1]` are the transmitter's
-two 2 uA references -- each mirrored 1:15 inside `lvds_tx` (`iref_x15.sch`) so
-the driver and the pre-driver still see the 30 uA they were characterised at,
-because the harness current DACs only reach 10 uA. The 1.25 V common-mode
+two 2 uA references. Each goes through its own instance of
+[`iref_x15`](macros/iref_x15/README.md), a 1:15 pre-mirror macro at the top
+level (`xiref_pd`, `xiref_drv`), so the pre-driver and the driver still see the
+30 uA they were characterised at -- the harness current DACs only reach 10 uA.
+`lvds_tx` itself takes the 30 uA on its `Iref_pd` / `Iref_drv` pins. The 1.25 V common-mode
 reference comes in on `analog_bus[1]`; the dedicated `vbias` pin is unused.
 
 `dig_in` map -- the housekeeping SPI routes every bit individually to a pin, a
@@ -328,6 +331,8 @@ Xschem reads exactly one `xschemrc` at start-up, and that file decides which sym
 | [`macros/lvds_tx/testbenches/xschem/xschemrc`](macros/lvds_tx/testbenches/xschem/xschemrc) | LVDS transmitter testbenches |
 | [`macros/lvds_pattern/schematic/xschem/xschemrc`](macros/lvds_pattern/schematic/xschem/xschemrc) | LVDS pattern generator schematics |
 | [`macros/lvds_pattern/testbenches/xschem/xschemrc`](macros/lvds_pattern/testbenches/xschem/xschemrc) | LVDS pattern generator testbenches |
+| [`macros/iref_x15/schematic/xschem/xschemrc`](macros/iref_x15/schematic/xschem/xschemrc) | bias pre-mirror schematic |
+| [`macros/iref_x15/testbenches/xschem/xschemrc`](macros/iref_x15/testbenches/xschem/xschemrc) | bias pre-mirror testbench |
 
 ### What Every File Does
 
