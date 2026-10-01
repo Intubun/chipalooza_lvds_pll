@@ -49,3 +49,4 @@ sim_build/
 /macros/pll_digital/flow/librelane/runs
 /macros/counter/flow/final
 /macros/counter/fpga/*/build/
+tmp_pics/

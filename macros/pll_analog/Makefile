@@ -302,6 +302,9 @@ magic-lvs-netlist: ## Export SPICE schematic netlist from Xschem for Magic + Net
 		xschem set netlist_name [file tail [file rootname [xschem get current_name]]]_magic.spice; \
 		xschem netlist \
 	' $(XSCHEM_SCH_DIR)/$(CELL).sch
+	# mm_ok suppresses model geometry warnings in simulation; it is not a
+	# physical device property and therefore is absent from Magic extraction.
+	sed -i 's/ mm_ok=[^ ]*//g' $(NET_SCH_DIR)/$(CELL)_magic.spice
 .PHONY: magic-lvs-netlist
 
 magic-lvs: ## Run Magic + Netgen LVS of the CELL cell (usage: make magic-lvs [CELL=<cellname>])

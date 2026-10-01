@@ -2,20 +2,114 @@ magic
 tech ihp-sg13cmos5l
 magscale 1 2
 timestamp 0
-use dev_p_w0p15_l0p13_ng1  M1
+use dev_p_w0p15_l0p13_ng1_noguard_sdvia  M1
 timestamp 0
-transform 1 0 251 0 1 240
+transform 1 0 250 0 1 400
 box 0 0 1 1
-use dev_p_w0p15_l0p13_ng1  M2
+use dev_p_w0p15_l0p13_ng1_noguard_sdvia  M2
 timestamp 0
-transform 1 0 251 0 1 1120
+transform 1 0 750 0 1 400
 box 0 0 1 1
-use dev_n_w0p15_l0p13_ng1  M3
+use dev_n_w0p15_l0p13_ng1_noguard_sdvia  M3
 timestamp 0
-transform 1 0 251 0 1 2000
+transform 1 0 750 0 1 1000
 box 0 0 1 1
-use dev_n_w0p15_l0p13_ng1  M4
+use dev_n_w0p15_l0p13_ng1_noguard_sdvia  M4
 timestamp 0
-transform 1 0 251 0 1 2880
+transform 1 0 250 0 1 1000
 box 0 0 1 1
+<< nwell >>
+rect 0 0 1000 600
+<< nsubdiff >>
+rect 0 100 1000 160
+<< nsubdiffcont >>
+rect 14 114 46 146
+rect 86 114 118 146
+rect 158 114 190 146
+rect 230 114 262 146
+rect 302 114 334 146
+rect 374 114 406 146
+rect 446 114 478 146
+rect 518 114 550 146
+rect 590 114 622 146
+rect 662 114 694 146
+rect 734 114 766 146
+rect 806 114 838 146
+rect 878 114 910 146
+rect 950 114 982 146
+<< psubdiff >>
+rect 0 760 1000 820
+<< psubdiffcont >>
+rect 14 774 46 806
+rect 86 774 118 806
+rect 158 774 190 806
+rect 230 774 262 806
+rect 302 774 334 806
+rect 374 774 406 806
+rect 446 774 478 806
+rect 518 774 550 806
+rect 590 774 622 806
+rect 662 774 694 806
+rect 734 774 766 806
+rect 806 774 838 806
+rect 878 774 910 806
+rect 950 774 982 806
+<< metal1 >>
+rect -100 100 1000 160
+rect 226 458 274 564
+rect 730 458 874 564
+rect -100 760 1000 820
+rect 226 1058 274 1164
+rect 730 1058 874 1164
+<< via1 >>
+rect 430 110 470 150
+rect 230 520 270 560
+rect 830 520 870 560
+rect 430 770 470 810
+rect 230 1120 270 1160
+rect 830 1120 870 1160
+<< metal2 >>
+rect 287 106 474 154
+rect 287 106 327 420
+rect 170 370 218 430
+rect 673 370 713 1030
+rect 783 370 831 430
+rect 226 516 274 564
+rect -100 516 274 564
+rect 826 516 874 564
+rect 826 516 960 564
+rect 916 516 960 1164
+rect -100 640 711 688
+rect 287 766 474 814
+rect 287 766 327 1020
+rect 170 970 218 1030
+rect 783 970 831 1030
+rect 226 1116 274 1164
+rect -100 1116 274 1164
+rect 826 1116 960 1164
+<< via2 >>
+rect 174 380 214 420
+rect 787 380 827 420
+rect 174 980 214 1020
+rect 787 980 827 1020
+<< metal3 >>
+rect 170 376 218 424
+rect 782 376 830 424
+rect 170 376 830 424
+rect 170 976 218 1024
+rect 782 976 830 1024
+rect 170 976 830 1024
+<< labels >>
+rlabel metal2 916 516 960 564 0 VIN
+port 1 nsew
+rlabel metal2 -100 640 -60 688 0 VOUT
+port 2 nsew
+rlabel metal2 -100 516 -60 564 0 VBP
+port 3 nsew
+rlabel metal1 -100 100 -60 160 0 VDD
+port 4 nsew
+rlabel metal2 -100 1116 -60 1164 0 VBN
+port 5 nsew
+rlabel metal1 -100 760 -60 820 0 VSS
+port 6 nsew
 << end >>
