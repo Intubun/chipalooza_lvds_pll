@@ -2,24 +2,86 @@ magic
 tech ihp-sg13cmos5l
 magscale 1 2
 timestamp 0
-use inverter  1
+use vco_bias  _bias
+timestamp 0
+transform 1 0 -1000 0 1 0
+box 0 0 1 1
+use inverter  3
 timestamp 0
 transform 1 0 0 0 1 0
 box 0 0 1 1
 use inverter  2
 timestamp 0
-transform 1 0 902 0 1 0
+transform 1 0 1200 0 1 0
 box 0 0 1 1
-use inverter  3
+use inverter  1
 timestamp 0
-transform 1 0 1804 0 1 0
-box 0 0 1 1
-use vco_bias  _bias
-timestamp 0
-transform 1 0 2706 0 1 0
+transform 1 0 2400 0 1 0
 box 0 0 1 1
 use vco_buffer  _buffer
 timestamp 0
-transform 1 0 0 0 1 3520
+transform 1 0 3600 0 1 0
 box 0 0 1 1
+<< nwell >>
+rect -48 0 5648 700
+<< metal1 >>
+rect -1100 100 5700 160
+rect -1100 760 3560 820
+rect 3390 760 3560 1300
+<< via2 >>
+rect -340 644 -300 684
+rect -100 520 -60 560
+rect 1100 520 1140 560
+rect 2300 520 2340 560
+rect -1080 1120 -1040 1160
+rect -100 1120 -60 1160
+rect 1100 1120 1140 1160
+rect 2300 1120 2340 1160
+rect -100 644 -60 684
+rect 3316 516 3356 556
+rect 3500 760 3540 800
+<< metal2 >>
+rect -349 635 -291 693
+rect -109 511 -51 569
+rect 1091 511 1149 569
+rect 2291 511 2349 569
+rect -1089 1111 -1031 1169
+rect -109 1111 -51 1169
+rect 1091 1111 1149 1169
+rect 2291 1111 2349 1169
+rect 2116 516 2248 564
+rect 2202 516 2248 688
+rect 2202 640 2340 688
+rect 916 516 1048 564
+rect 1002 516 1048 688
+rect 1002 640 1140 688
+rect -151 635 -51 693
+rect 3269 507 3369 573
+rect 3449 751 3549 827
+rect 5660 640 5800 698
+<< metal3 >>
+rect -349 511 -291 693
+rect -349 511 2349 569
+rect -1089 1111 -1031 1169
+rect -1200 1111 2349 1169
+rect -151 635 -51 693
+rect 3269 507 3369 573
+rect 3449 751 3549 827
+<< via3 >>
+rect -100 644 -60 684
+rect 3316 516 3356 556
+rect 3500 760 3540 800
+<< metal4 >>
+rect -109 635 3549 693
+rect 3307 507 3369 693
+rect 3491 635 3549 827
+<< labels >>
+rlabel metal3 -1200 1111 -1160 1169 0 VCTRL
+port 1 nsew
+rlabel metal2 5760 640 5800 698 0 VCO_OUT
+port 2 nsew
+rlabel metal1 -1100 100 -1060 160 0 VDD
+port 3 nsew
+rlabel metal1 -1100 760 -1060 820 0 VSS
+port 4 nsew
 << end >>
