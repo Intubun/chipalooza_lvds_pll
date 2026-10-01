@@ -27,11 +27,9 @@ make klayout-drc       # sign-off DRC of the exported GDS
 
 The initial SPICE import is an unrouted placement: seven subcircuits and 13
 distinct PDK-generated device cells in a 138.51 x 134.65 um bounding box. The
-large loop-filter capacitor dominates the area. Its schematic dimensions are
-103.2266 x 103.2266 um, but the PDK `cap_cmomf` generator accepts at most 100
-um per dimension. The imported device is therefore only a floorplanning
-placeholder. Split that capacitor into parallel legal devices in the schematic
-and layout before routing or LVS.
+large loop-filter capacitor dominates the area. It is a legal 100 x 100 um
+Metal2-Metal4 `cap_cmomf`, giving 9.15 pF in the PDK's nominal low-frequency
+model.
 
 KLayout macro-level DRC is clean on the unrouted placement. Magic `drc(full)`
 reports minimum-area markers in the PDK-generated short-channel MOS device

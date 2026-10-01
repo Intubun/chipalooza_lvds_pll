@@ -1,46 +1,21 @@
 magic
 tech ihp-sg13cmos5l
 magscale 1 2
-timestamp 1790827429
-<< error_s >>
-rect 168 2864 178 2896
-rect 282 2864 292 2896
-rect 396 2864 406 2896
-rect 510 2864 520 2896
-rect 168 1984 178 2016
-rect 270 1984 280 2016
-rect 372 1984 382 2016
-rect 474 1984 484 2016
-rect 231 1214 271 1223
-rect 194 1174 231 1214
-rect 231 1165 271 1174
-rect 168 1104 178 1136
-rect 282 1104 292 1136
-rect 231 1066 271 1075
-rect 194 1026 231 1066
-rect 231 1017 271 1026
-rect 225 334 265 343
-rect 194 294 225 334
-rect 225 285 265 294
-rect 168 224 178 256
-rect 270 224 280 256
-rect 225 186 265 195
-rect 194 146 225 186
-rect 225 137 265 146
+timestamp 0
 use dev_p_w0p3_l0p13_ng1  M1
-timestamp 1790826525
+timestamp 0
 transform 1 0 245 0 1 240
-box -245 -240 245 240
+box 0 0 1 1
 use dev_n_w0p15_l0p13_ng1  M2
-timestamp 1790826525
+timestamp 0
 transform 1 0 251 0 1 1120
-box -251 -240 251 240
+box 0 0 1 1
 use dev_p_w0p3_l0p13_ng3  M3
-timestamp 1790826525
+timestamp 0
 transform 1 0 347 0 1 2000
-box -347 -240 347 240
+box 0 0 1 1
 use dev_n_w0p15_l0p13_ng3  M4
-timestamp 1790826525
+timestamp 0
 transform 1 0 365 0 1 2880
-box -365 -240 365 240
+box 0 0 1 1
 << end >>

@@ -1,70 +1,41 @@
 magic
 tech ihp-sg13cmos5l
 magscale 1 2
-timestamp 1790827429
-<< error_s >>
-rect 225 5534 265 5543
-rect 194 5494 225 5534
-rect 225 5485 265 5494
-rect 225 5146 265 5155
-rect 194 5106 225 5146
-rect 225 5097 265 5106
-rect 2421 4414 2461 4423
-rect 2390 4374 2421 4414
-rect 2421 4365 2461 4374
-rect 2421 4126 2461 4135
-rect 2390 4086 2421 4126
-rect 2421 4077 2461 4086
-rect 225 334 265 343
-rect 1121 334 1161 343
-rect 194 294 225 334
-rect 1084 294 1121 334
-rect 225 285 265 294
-rect 1121 285 1161 294
-rect 168 224 178 256
-rect 270 224 280 256
-rect 1058 224 1068 256
-rect 1172 224 1182 256
-rect 225 186 265 195
-rect 1121 186 1161 195
-rect 194 146 225 186
-rect 1084 146 1121 186
-rect 225 137 265 146
-rect 1121 137 1161 146
-use dev_n_w1_l0p5_ng4  M_DOWN_SINK
-timestamp 1790826525
-transform 1 0 1436 0 1 5270
-box -546 -310 546 310
-use dev_n_w1p5_l0p13_ng1  M_DOWN_SWITCH
-timestamp 1790826525
-transform 1 0 245 0 1 5320
-box -245 -360 245 360
-use dev_n_w1_l0p5_ng4  M_IREF
-timestamp 1790826525
-transform 1 0 546 0 1 1190
-box -546 -310 546 310
-use dev_n_w1_l0p5_ng4  M_PBIAS_SINK
-timestamp 1790826525
-transform 1 0 546 0 1 3230
-box -546 -310 546 310
-use dev_p_w1_l0p5_ng8  M_PBIAS
-timestamp 1790826525
-transform 1 0 898 0 1 2210
-box -898 -310 898 310
-use dev_n_w0p15_l0p13_ng1  M_UP_INV_N
-timestamp 1790826525
-transform 1 0 1141 0 1 240
-box -251 -240 251 240
+timestamp 0
 use dev_p_w0p3_l0p13_ng1  M_UP_INV_P
-timestamp 1790826525
+timestamp 0
 transform 1 0 245 0 1 240
-box -245 -240 245 240
+box 0 0 1 1
+use dev_n_w0p15_l0p13_ng1  M_UP_INV_N
+timestamp 0
+transform 1 0 1141 0 1 240
+box 0 0 1 1
+use dev_n_w1_l0p5_ng4  M_IREF
+timestamp 0
+transform 1 0 546 0 1 1190
+box 0 0 1 1
+use dev_p_w1_l0p5_ng8  M_PBIAS
+timestamp 0
+transform 1 0 898 0 1 2210
+box 0 0 1 1
+use dev_n_w1_l0p5_ng4  M_PBIAS_SINK
+timestamp 0
+transform 1 0 546 0 1 3230
+box 0 0 1 1
 use dev_p_w0p875_l0p5_ng8  M_UP_SOURCE
-timestamp 1790826525
+timestamp 0
 transform 1 0 898 0 1 4238
-box -898 -298 898 298
+box 0 0 1 1
 use dev_p_w1_l0p13_ng1  M_UP_SWITCH
-timestamp 1790826525
+timestamp 0
 transform 1 0 2441 0 1 4250
-box -245 -310 245 310
+box 0 0 1 1
+use dev_n_w1p5_l0p13_ng1  M_DOWN_SWITCH
+timestamp 0
+transform 1 0 245 0 1 5320
+box 0 0 1 1
+use dev_n_w1_l0p5_ng4  M_DOWN_SINK
+timestamp 0
+transform 1 0 1436 0 1 5270
+box 0 0 1 1
 << end >>
