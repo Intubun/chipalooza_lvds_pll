@@ -13,8 +13,30 @@ fractional feedback divider, and output dividers.
 | `VCO_CLK` | output | VCO clock to `pll_digital` |
 | `VDD`, `VSS` | power | 1.2 V supply and ground |
 
-The layout source of truth will be `layout/pll_analog.klay.gds`; export it to
-`layout/pll_analog.gds` before running DRC, LVS, or PEX.
+## Layout
+
+The editable layout source is the Magic hierarchy in `layout/mag/`, with one
+cell per schematic subcircuit. `layout/pll_analog.gds` is its exported view for
+KLayout sign-off and integration.
+
+```bash
+make layout-view       # open layout/mag/pll_analog.mag in Magic
+make layout-export     # write layout/pll_analog.gds from the Magic hierarchy
+make klayout-drc       # sign-off DRC of the exported GDS
+```
+
+The initial SPICE import is an unrouted placement: seven subcircuits and 13
+distinct PDK-generated device cells in a 138.51 x 134.65 um bounding box. The
+large loop-filter capacitor dominates the area. Its schematic dimensions are
+103.2266 x 103.2266 um, but the PDK `cap_cmomf` generator accepts at most 100
+um per dimension. The imported device is therefore only a floorplanning
+placeholder. Split that capacitor into parallel legal devices in the schematic
+and layout before routing or LVS.
+
+KLayout macro-level DRC is clean on the unrouted placement. Magic `drc(full)`
+reports minimum-area markers in the PDK-generated short-channel MOS device
+cells, so the Magic result is not clean even though the sign-off deck accepts
+the same geometry.
 
 ## Views
 

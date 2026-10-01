@@ -1,0 +1,21 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 1790827429
+use dev_p_w0p15_l0p13_ng1  M1
+timestamp 1790826525
+transform 1 0 251 0 1 240
+box -251 -240 251 240
+use dev_p_w0p15_l0p13_ng1  M2
+timestamp 1790826525
+transform 1 0 251 0 1 1120
+box -251 -240 251 240
+use dev_n_w0p15_l0p13_ng1  M3
+timestamp 1790826525
+transform 1 0 251 0 1 2000
+box -251 -240 251 240
+use dev_n_w0p15_l0p13_ng1  M4
+timestamp 1790826525
+transform 1 0 251 0 1 2880
+box -251 -240 251 240
+<< end >>

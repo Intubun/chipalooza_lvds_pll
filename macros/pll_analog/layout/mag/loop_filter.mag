@@ -1,0 +1,17 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 1790827429
+use dev_cap_cmomf_w103p227_l103p227  C1A
+timestamp 1790826525
+transform 1 0 1008 0 1 0
+box 0 0 20000 20000
+use dev_cap_cmomf_w32p6431_l32p6431  C2
+timestamp 1790826525
+transform 1 0 0 0 1 20400
+box 0 0 6529 6529
+use dev_rhigh_w1_l22p08  R1
+timestamp 1790827429
+transform 1 0 304 0 1 2498
+box -304 -2498 304 2498
+<< end >>

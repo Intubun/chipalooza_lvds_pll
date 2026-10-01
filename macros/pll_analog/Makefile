@@ -134,6 +134,22 @@ sim-all: ## Run focused analog smoke tests and configurable PLL co-simulation
 # ================================================================================================
 
 
+# Layout Targets
+layout-view: ## Open the hierarchical pll_analog Magic layout in the running desktop container
+	cd $(LAY_DIR)/mag && bash -c 'source /foss/tools/sak/sak-pdk-script.sh ihp-sg13cmos5l >/dev/null 2>&1; \
+		setsid nohup magic -rcfile $$PDK_ROOT/$$PDK/libs.tech/magic/ihp-sg13cmos5l.magicrc \
+		$(TOP) < /dev/null > /tmp/magic_$(TOP).log 2>&1 &'
+.PHONY: layout-view
+
+layout-export: ## Export the hierarchical Magic source to layout/pll_analog.gds
+	cd $(LAY_DIR)/mag && bash -c 'source /foss/tools/sak/sak-pdk-script.sh ihp-sg13cmos5l >/dev/null 2>&1; \
+		printf "%s\\n" "addpath ." "drc off" "load $(TOP) -silent" \
+		"select top cell" "gds write ../$(TOP).gds" "quit -noprompt" | \
+		magic -dnull -noconsole -rcfile $$PDK_ROOT/$$PDK/libs.tech/magic/ihp-sg13cmos5l.magicrc'
+.PHONY: layout-export
+# ================================================================================================
+
+
 # Build Target
 build-top: ## Build TOP cell (Verilog, LEF, LIB, copy GDS, and render image)
 	$(MAKE) lef
