@@ -37,14 +37,8 @@ rect -16 -90 16 -58
 << metal1 >>
 rect -57 58 -16 90
 rect 16 58 57 90
-rect -87 20 -27 21
-rect -87 -20 -77 20
-rect -37 -20 -27 20
-rect -87 -21 -27 -20
-rect 27 20 87 21
-rect 27 -20 37 20
-rect 77 -20 87 20
-rect 27 -21 87 -20
+rect -109 -22 -27 22
+rect 27 -22 109 22
 rect -57 -90 -16 -58
 rect 16 -90 57 -58
 << via1 >>
@@ -59,10 +53,8 @@ rect 41 -16 73 16
 rect 73 -16 77 16
 rect 37 -20 77 -16
 << metal2 >>
-rect -77 20 -37 29
-rect -77 -29 -37 -20
-rect 37 20 77 29
-rect 37 -29 77 -20
+rect -87 -48 -27 48
+rect 27 -48 87 48
 << labels >>
 rlabel ndiffc -57 0 -57 0 0 D
 port 1 nsew

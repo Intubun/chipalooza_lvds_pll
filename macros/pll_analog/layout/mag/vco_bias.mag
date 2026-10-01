@@ -11,7 +11,7 @@ timestamp 0
 transform 1 0 300 0 1 1000
 box 0 0 1 1
 << nwell >>
-rect 0 0 600 600
+rect -48 0 648 600
 << nsubdiff >>
 rect 0 100 600 160
 << nsubdiffcont >>
@@ -36,23 +36,23 @@ rect 446 774 478 806
 rect 518 774 550 806
 << metal1 >>
 rect -100 100 600 160
-rect 243 458 524 564
+rect 243 458 529 569
 rect -100 760 600 820
-rect 76 1058 357 1164
+rect 71 1058 357 1169
 << via1 >>
 rect 430 110 470 150
 rect 480 520 520 560
 rect 430 770 470 810
 rect 80 1120 120 1160
 << metal2 >>
-rect 337 106 474 154
+rect 337 101 479 159
 rect 337 106 377 430
 rect 220 370 268 1030
-rect 220 516 524 564
+rect 220 511 529 569
 rect 220 640 700 688
-rect 337 766 474 814
+rect 337 761 479 819
 rect 337 766 377 1030
-rect -100 1116 124 1164
+rect -100 1111 129 1169
 << labels >>
 rlabel metal2 -100 1116 -60 1164 0 VCTRL
 port 1 nsew
