@@ -141,6 +141,12 @@ layout-view: ## Open the hierarchical pll_analog Magic layout in the running des
 		$(TOP) < /dev/null > /tmp/magic_$(TOP).log 2>&1 &'
 .PHONY: layout-view
 
+layout-signoff: ## Editable-MAG DRC, LVS, antenna and full-RC PEX of CELL (usage: make layout-signoff [CELL=<cellname>] [NO_PEX=1])
+	$(MAKE) magic-lvs-netlist CELL=$(CELL)
+	NO_PEX=$(NO_PEX) ../../scripts/layout/signoff_cell.sh $(LAY_DIR)/mag $(CELL) \
+		$(NET_SCH_DIR)/$(CELL)_magic.spice verification/signoff/$(CELL)
+.PHONY: layout-signoff
+
 layout-export: ## Export the hierarchical Magic source to layout/pll_analog.gds
 	cd $(LAY_DIR)/mag && bash -c 'source /foss/tools/sak/sak-pdk-script.sh ihp-sg13cmos5l >/dev/null 2>&1; \
 		printf "%s\\n" "addpath ." "drc off" "load $(TOP) -silent" \

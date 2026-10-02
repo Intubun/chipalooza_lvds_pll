@@ -2,42 +2,48 @@ magic
 tech ihp-sg13cmos5l
 magscale 1 2
 timestamp 0
-use dev_p_w0p3_l0p13_ng1 M0
+use dev_p_w0p3_l0p13_ng1_noguard_sdvia M0
 timestamp 0
 transform 1 0 0 0 1 0
 box 0 0 1 1
+<< nwell >>
+rect -143 -242 364 92
+<< nsubdiff >>
+rect 224 -194 316 -102
+<< nsubdiffcont >>
+rect 254 -164 286 -132
 << metal1 >>
-rect -80 -29 -22 29
-rect 22 -29 80 29
-rect -29 45 29 103
-rect -29 -164 299 -132
+rect -60 58 60 90
+rect -60 -90 60 -58
+rect -29 58 29 150
+rect 235 -180 305 -116
 << via1 >>
-rect -71 -20 -31 20
-rect 31 -20 71 20
-rect -20 54 20 94
+rect -20 100 20 140
 rect 250 -168 290 -128
 << metal2 >>
-rect -80 -29 -22 29
-rect 22 -29 80 29
-rect -29 45 29 103
-rect 241 -177 299 -119
+rect -80 -50 -22 50
+rect 22 -50 80 50
+rect -30 92 30 192
+rect 240 -219 300 -119
 << via2 >>
 rect -71 -20 -31 20
 rect 31 -20 71 20
 << metal3 >>
-rect -80 -479 -22 29
-rect 22 -29 80 29
+rect -80 -450 -22 29
+rect -80 -479 -22 -421
+rect 22 -50 80 50
 << via3 >>
 rect 31 -20 71 20
 << metal4 >>
 rect 22 -29 80 479
+rect 22 421 80 479
 << labels >>
-rlabel metal2 241 -177 299 -119 0 B
-port 1 nsew
 rlabel metal3 -80 -479 -22 -421 0 D
 port 2 nsew
-rlabel metal2 -29 45 29 103 0 G
-port 3 nsew
 rlabel metal4 22 421 80 479 0 S
 port 4 nsew
+rlabel metal2 -29 134 29 192 0 G
+port 3 nsew
+rlabel metal2 241 -177 299 -119 0 B
+port 1 nsew
 << end >>

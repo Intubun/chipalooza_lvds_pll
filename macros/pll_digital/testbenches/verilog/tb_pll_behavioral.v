@@ -6,8 +6,8 @@ module tb_pll_behavioral;
     parameter real REF_PERIOD_NS = 10.0;
 
     reg ref_clk = 1'b0;
-    reg reset_n = 1'b0;
-    reg enable = 1'b0;
+    reg reset_n = 1'b1;
+    reg enable = 1'b1;
     wire pll_clk;
     wire test_clk;
 
@@ -51,7 +51,9 @@ module tb_pll_behavioral;
     end
 
     initial begin
-        #2.0;
+        #0.1;
+        reset_n = 1'b0;
+        #1.9;
         reset_n = 1'b1;
         enable = 1'b1;
         #9998.0;
