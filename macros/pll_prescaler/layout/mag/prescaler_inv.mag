@@ -1,0 +1,137 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_p_w0p6_l0p13_ng2_noguard_m1  XP
+timestamp 0
+transform 1 0 0 0 1 600
+box 0 0 1 1
+use dev_n_w0p6_l0p13_ng1_noguard_m1  XN
+timestamp 0
+transform 1 0 0 0 1 0
+box 0 0 1 1
+<< nwell >>
+rect -350 400 350 1358
+<< nsubdiff >>
+rect -302 1250 302 1310
+<< nsubdiffcont >>
+rect -258 1264 -226 1296
+rect -186 1264 -154 1296
+rect -114 1264 -82 1296
+rect -42 1264 -10 1296
+rect 30 1264 62 1296
+rect 102 1264 134 1296
+rect 174 1264 206 1296
+rect 246 1264 278 1296
+<< psubdiff >>
+rect -350 -710 350 -650
+<< psubdiffcont >>
+rect -258 -696 -226 -664
+rect -186 -696 -154 -664
+rect -114 -696 -82 -664
+rect -42 -696 -10 -664
+rect 30 -696 62 -664
+rect 102 -696 134 -664
+rect 174 -696 206 -664
+rect 246 -696 278 -664
+<< metal1 >>
+rect -131 591 -73 649
+rect 73 591 131 649
+rect -29 551 29 609
+rect -80 -9 -22 49
+rect 22 -49 80 9
+rect -60 -150 60 -118
+rect -102 714 329 756
+rect 271 705 329 763
+rect -279 114 51 156
+rect -279 105 -221 163
+rect 226 1251 284 1309
+rect 226 -709 284 -651
+rect -450 1250 450 1310
+rect -450 -710 450 -650
+<< via1 >>
+rect -122 600 -82 640
+rect 82 600 122 640
+rect -20 560 20 600
+rect -71 0 -31 40
+rect 31 -40 71 0
+rect 280 714 320 754
+rect -270 114 -230 154
+rect 235 1260 275 1300
+rect 235 -700 275 -660
+<< metal2 >>
+rect -131 591 -73 709
+rect 73 591 131 709
+rect -131 651 131 709
+rect -29 501 29 609
+rect -29 501 29 559
+rect -29 470 29 530
+rect -80 -9 -22 99
+rect -80 41 -22 99
+rect -80 70 -22 130
+rect 22 -109 80 9
+rect 22 -109 80 -51
+rect 22 -140 80 -80
+rect 271 684 329 784
+rect -279 84 -221 184
+rect 271 684 329 784
+rect -279 84 -221 184
+rect -29 480 29 580
+rect -80 20 -22 120
+rect 73 630 131 730
+rect 22 -130 80 -30
+rect 226 1209 284 1309
+rect 226 -709 284 -609
+rect 226 -709 284 -651
+<< via2 >>
+rect 280 714 320 754
+rect -270 114 -230 154
+rect -20 510 20 550
+rect -71 50 -31 90
+rect 82 660 122 700
+rect 31 -100 71 -60
+rect 235 1239 275 1279
+rect 235 -679 275 -639
+rect 235 -700 275 -660
+<< metal3 >>
+rect 271 684 329 784
+rect -279 84 -221 184
+rect 271 684 329 784
+rect -279 84 -221 184
+rect -29 480 29 580
+rect -80 20 -22 120
+rect -80 70 80 530
+rect -29 480 29 580
+rect -80 20 -22 120
+rect 73 630 131 730
+rect 22 -130 80 -30
+rect 226 1209 284 1309
+rect 226 -709 284 -609
+rect 226 680 284 1280
+rect 226 -80 284 -680
+rect 73 651 284 709
+rect 22 -109 284 -51
+rect -22 41 450 99
+rect -279 84 -221 184
+<< via3 >>
+rect 280 714 320 754
+rect -270 114 -230 154
+rect -270 114 -230 154
+<< metal4 >>
+rect 271 705 329 763
+rect -279 105 -221 163
+rect -279 105 329 163
+rect 271 134 329 763
+rect -450 105 -279 163
+rect -279 105 -221 163
+rect -450 105 -221 163
+<< labels >>
+rlabel metal1 -450 1250 -410 1310 0 VDD
+port 2 nsew
+rlabel metal1 -450 -710 -410 -650 0 VSS
+port 3 nsew
+rlabel metal4 -450 105 -410 163 0 A
+port 0 nsew
+rlabel metal3 410 41 450 99 0 Y
+port 1 nsew
+<< end >>

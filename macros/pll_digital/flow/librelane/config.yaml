@@ -47,6 +47,8 @@ ERROR_ON_SYNTH_CHECKS: false
 # DELAY 4 = fastest, but largest area
 # AREA 3 = slowest, but smallest area
 SYNTH_STRATEGY: DELAY 4
+# The prescaler instance carries (* keep *) so Yosys does not flatten it.
+# The SDC builds prescaler_clk from feedback_divider_i.prescaler_q2.
 SYNTH_HIERARCHY_MODE: deferred_flatten
 SYNTH_EXTRA_MAPPING_FILE: dir::ihp_toggle_ff_map.v
 # MAX_FANOUT_CONSTRAINT: 6

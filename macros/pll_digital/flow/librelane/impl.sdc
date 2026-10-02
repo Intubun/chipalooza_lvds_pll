@@ -4,7 +4,9 @@ create_clock -name vco_clk -period 0.5 [get_ports vco_clk]
 
 # The /2-/3 prescaler is constrained at its fastest (/2) mode. The program
 # counter and accumulator are clocked by this node instead of by the 2 GHz VCO.
-set prescaler_q2_nets [get_nets -hierarchical *feedback_divider_i.prescaler_q2*]
+# Yosys emits the hierarchical net with an escaped dot, so a glob containing
+# a literal dot does not match it.
+set prescaler_q2_nets [get_nets -hierarchical *prescaler_i.q2*]
 set prescaler_q2_pin [get_pins -of_objects $prescaler_q2_nets \
     -filter "direction == output"]
 create_generated_clock -name prescaler_clk -source [get_ports vco_clk] \
@@ -39,7 +41,8 @@ set accumulator_regs [get_cells -of_objects \
     [get_pins -of_objects $accumulator_nets -filter "direction == output"]]
 set interval_nets [get_nets -hierarchical \
     {*feedback_divider_i.pulse_phase* *feedback_divider_i.pulse_remainder* \
-     *feedback_divider_i.group_counter* *feedback_divider_i.modulus_2* \
+     *feedback_divider_i.group_counter* *feedback_divider_i.group_is_one_q* \
+     *feedback_divider_i.group_nonzero_q* *feedback_divider_i.next_is_odd* \
      *feedback_divider_i.terminal_pending*}]
 set interval_regs [get_cells -of_objects \
     [get_pins -of_objects $interval_nets -filter "direction == output"]]

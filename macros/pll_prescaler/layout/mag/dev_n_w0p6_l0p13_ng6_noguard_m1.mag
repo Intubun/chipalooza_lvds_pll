@@ -1,0 +1,181 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 1790970481
+<< nmos >>
+rect -268 -60 -242 60
+rect -166 -60 -140 60
+rect -64 -60 -38 60
+rect 38 -60 64 60
+rect 140 -60 166 60
+rect 242 -60 268 60
+<< ndiff >>
+rect -336 46 -268 60
+rect -336 -46 -322 46
+rect -290 -46 -268 46
+rect -336 -60 -268 -46
+rect -242 46 -166 60
+rect -242 -46 -220 46
+rect -188 -46 -166 46
+rect -242 -60 -166 -46
+rect -140 46 -64 60
+rect -140 -46 -118 46
+rect -86 -46 -64 46
+rect -140 -60 -64 -46
+rect -38 46 38 60
+rect -38 -46 -16 46
+rect 16 -46 38 46
+rect -38 -60 38 -46
+rect 64 46 140 60
+rect 64 -46 86 46
+rect 118 -46 140 46
+rect 64 -60 140 -46
+rect 166 46 242 60
+rect 166 -46 188 46
+rect 220 -46 242 46
+rect 166 -60 242 -46
+rect 268 46 336 60
+rect 268 -46 290 46
+rect 322 -46 336 46
+rect 268 -60 336 -46
+<< ndiffc >>
+rect -322 -46 -290 46
+rect -220 -46 -188 46
+rect -118 -46 -86 46
+rect -16 -46 16 46
+rect 86 -46 118 46
+rect 188 -46 220 46
+rect 290 -46 322 46
+<< poly >>
+rect -285 120 -225 134
+rect -285 88 -271 120
+rect -239 88 -225 120
+rect -285 74 -225 88
+rect -183 120 -123 134
+rect -183 88 -169 120
+rect -137 88 -123 120
+rect -183 74 -123 88
+rect -81 120 -21 134
+rect -81 88 -67 120
+rect -35 88 -21 120
+rect -81 74 -21 88
+rect 21 120 81 134
+rect 21 88 35 120
+rect 67 88 81 120
+rect 21 74 81 88
+rect 123 120 183 134
+rect 123 88 137 120
+rect 169 88 183 120
+rect 123 74 183 88
+rect 225 120 285 134
+rect 225 88 239 120
+rect 271 88 285 120
+rect 225 74 285 88
+rect -268 60 -242 74
+rect -166 60 -140 74
+rect -64 60 -38 74
+rect 38 60 64 74
+rect 140 60 166 74
+rect 242 60 268 74
+rect -268 -74 -242 -60
+rect -166 -74 -140 -60
+rect -64 -74 -38 -60
+rect 38 -74 64 -60
+rect 140 -74 166 -60
+rect 242 -74 268 -60
+rect -285 -88 -225 -74
+rect -285 -120 -271 -88
+rect -239 -120 -225 -88
+rect -285 -134 -225 -120
+rect -183 -88 -123 -74
+rect -183 -120 -169 -88
+rect -137 -120 -123 -88
+rect -183 -134 -123 -120
+rect -81 -88 -21 -74
+rect -81 -120 -67 -88
+rect -35 -120 -21 -88
+rect -81 -134 -21 -120
+rect 21 -88 81 -74
+rect 21 -120 35 -88
+rect 67 -120 81 -88
+rect 21 -134 81 -120
+rect 123 -88 183 -74
+rect 123 -120 137 -88
+rect 169 -120 183 -88
+rect 123 -134 183 -120
+rect 225 -88 285 -74
+rect 225 -120 239 -88
+rect 271 -120 285 -88
+rect 225 -134 285 -120
+<< polycont >>
+rect -271 88 -239 120
+rect -169 88 -137 120
+rect -67 88 -35 120
+rect 35 88 67 120
+rect 137 88 169 120
+rect 239 88 271 120
+rect -271 -120 -239 -88
+rect -169 -120 -137 -88
+rect -67 -120 -35 -88
+rect 35 -120 67 -88
+rect 137 -120 169 -88
+rect 239 -120 271 -88
+<< metal1 >>
+rect -306 88 -271 120
+rect -239 88 -169 120
+rect -137 88 -67 120
+rect -35 88 35 120
+rect 67 88 137 120
+rect 169 88 239 120
+rect 271 88 306 120
+rect -332 -46 -322 46
+rect -290 -46 -280 46
+rect -230 -46 -220 46
+rect -188 -46 -178 46
+rect -128 -46 -118 46
+rect -86 -46 -76 46
+rect -26 -46 -16 46
+rect 16 -46 26 46
+rect 76 -46 86 46
+rect 118 -46 128 46
+rect 178 -46 188 46
+rect 220 -46 230 46
+rect 280 -46 290 46
+rect 322 -46 332 46
+rect -306 -120 -271 -88
+rect -239 -120 -169 -88
+rect -137 -120 -67 -88
+rect -35 -120 35 -88
+rect 67 -120 137 -88
+rect 169 -120 239 -88
+rect 271 -120 306 -88
+<< labels >>
+rlabel ndiffc -306 0 -306 0 0 D0
+port 1 nsew
+rlabel polycont -255 104 -255 104 0 G
+port 2 nsew
+rlabel ndiffc -204 0 -204 0 0 S1
+port 3 nsew
+rlabel polycont -153 104 -153 104 0 G
+port 2 nsew
+rlabel ndiffc -102 0 -102 0 0 D2
+port 4 nsew
+rlabel polycont -51 104 -51 104 0 G
+port 2 nsew
+rlabel ndiffc 0 0 0 0 0 S3
+port 5 nsew
+rlabel polycont 51 104 51 104 0 G
+port 2 nsew
+rlabel ndiffc 102 0 102 0 0 D4
+port 6 nsew
+rlabel polycont 153 104 153 104 0 G
+port 2 nsew
+rlabel ndiffc 204 0 204 0 0 S5
+port 7 nsew
+rlabel polycont 255 104 255 104 0 G
+port 2 nsew
+<< properties >>
+string gencell sg13_lv_nmos
+string library sg13cmos5l
+string parameters w 0.6 l 0.13 m 1 ng 6 diffcov 100 polycov 100 guard 0 glc 1 grc 1 gtc 1 gbc 1 tbcov 100 rlcov 100 topc 1 botc 1 poverlap 0 doverlap 1 lmin 0.13 wmin 0.15 class mosfet compatible {sg13_lv_nmos sg13_hv_nmos} full_metal 1 conn_gates 1 gate_ring 0 doports 1 viasrc 0 viadrn 0 viagate 0 ccols 1 viagb 0 viagr 0 viagl 0 viagt 0
+<< end >>
