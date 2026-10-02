@@ -1,0 +1,1160 @@
+* lvds_tx, magic extraction with coupling C (scripts/sim/extract_lvds.sh)
+* CMFB node -> xdrv.cmfb, pre-driver pair -> In_p / In_n
+.option rshunt=1e12
+* NGSPICE file created from lvds_tx.ext - technology: ihp-sg13cmos5l
+
+.subckt dev_n_w2_l2_ng1 G D B S
+X0 S G D B sg13_hv_nmos ad=0.68p pd=4.68u as=0.68p ps=4.68u w=2u l=2u
+C0 D S 0.02007f
+C1 S G 0.11364f
+C2 D G 0.11364f
+C3 S B 0.97625f
+C4 D B 0.97625f
+.ends
+
+.subckt dev_n_w1p75_l0p45_ng1_guard0_topc0 G D sub S
+X0 S G D sub sg13_hv_nmos ad=0.595p pd=4.18u as=0.595p ps=4.18u w=1.75u l=0.45u
+C0 D S 0.06573f
+C1 G S 0.05152f
+C2 G D 0.05152f
+C3 S sub 0.2327f
+C4 D sub 0.2327f
+.ends
+
+.subckt dev_p_w2p64_l0p4_ng1_botc0_guard0 G D w_n232_n407# sub S
+X0 S G D w_n232_n407# sg13_hv_pmos ad=0.8976p pd=5.96u as=0.8976p ps=5.96u w=2.64u l=0.4u
+C0 G D 0.06486f
+C1 w_n232_n407# D 0.02979f
+C2 S D 0.11157f
+C3 w_n232_n407# G 0.17632f
+C4 S G 0.06486f
+C5 S w_n232_n407# 0.02979f
+C6 S sub 0.15239f
+C7 D sub 0.15239f
+.ends
+
+.subckt dev_p_w3p13_l0p4_ng4_botc0_guard0 G w_n466_n456# sub D2 D0 a_274_n332# S3
++ S1
+X0 a_274_n332# G S3 w_n466_n456# sg13_hv_pmos ad=1.0642p pd=6.94u as=0.5947p ps=3.51u w=3.13u l=0.4u
+X1 S1 G D0 w_n466_n456# sg13_hv_pmos ad=0.5947p pd=3.51u as=1.0642p ps=6.94u w=3.13u l=0.4u
+X2 D2 G S1 w_n466_n456# sg13_hv_pmos ad=0.5947p pd=3.51u as=0.5947p ps=3.51u w=3.13u l=0.4u
+X3 S3 G D2 w_n466_n456# sg13_hv_pmos ad=0.5947p pd=3.51u as=0.5947p ps=3.51u w=3.13u l=0.4u
+C0 D2 G 0.14677f
+C1 S3 a_274_n332# 0.13343f
+C2 S1 D2 0.13343f
+C3 D2 S3 0.13343f
+C4 G D0 0.07339f
+C5 w_n466_n456# D0 0.03481f
+C6 S1 D0 0.13343f
+C7 w_n466_n456# G 0.70509f
+C8 S1 G 0.14677f
+C9 G a_274_n332# 0.07339f
+C10 G S3 0.14677f
+C11 w_n466_n456# a_274_n332# 0.03481f
+C12 a_274_n332# sub 0.3033f
+C13 S3 sub 0.21324f
+C14 D0 sub 0.09739f
+.ends
+
+.subckt dev_p_w3p2_l0p4_ng10_botc0_guard0 G D8 D6 w_n934_n463# sub D4 D2 D0 a_742_n339#
++ S9 S7 S5 S3 S1
+X0 D4 G S3 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.4u
+X1 S5 G D4 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.4u
+X2 D6 G S5 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.4u
+X3 S1 G D0 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=1.088p ps=7.08u w=3.2u l=0.4u
+X4 D8 G S7 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.4u
+X5 D2 G S1 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.4u
+X6 S3 G D2 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.4u
+X7 S7 G D6 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.4u
+X8 S9 G D8 w_n934_n463# sg13_hv_pmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.4u
+X9 a_742_n339# G S9 w_n934_n463# sg13_hv_pmos ad=1.088p pd=7.08u as=0.608p ps=3.58u w=3.2u l=0.4u
+C0 S3 D4 0.13656f
+C1 w_n934_n463# a_742_n339# 0.03553f
+C2 S7 D8 0.13656f
+C3 D2 S3 0.13656f
+C4 G S9 0.1492f
+C5 D0 S1 0.13656f
+C6 S1 D2 0.13656f
+C7 G D6 0.1492f
+C8 D8 S9 0.13656f
+C9 w_n934_n463# G 1.75317f
+C10 G S5 0.1492f
+C11 G D8 0.1492f
+C12 D0 G 0.0746f
+C13 S5 D6 0.13656f
+C14 G S3 0.1492f
+C15 G D4 0.1492f
+C16 D0 w_n934_n463# 0.03553f
+C17 G D2 0.1492f
+C18 S9 a_742_n339# 0.13656f
+C19 G S7 0.1492f
+C20 S5 D4 0.13656f
+C21 S1 G 0.1492f
+C22 G a_742_n339# 0.0746f
+C23 D6 S7 0.13656f
+C24 a_742_n339# sub 0.09941f
+C25 D4 sub 0.48737f
+C26 S3 sub 0.48737f
+C27 D0 sub 0.09941f
+.ends
+
+.subckt dev_n_w1p6_l0p45_ng1_guard0_topc0 G D sub S
+X0 S G D sub sg13_hv_nmos ad=0.544p pd=3.88u as=0.544p ps=3.88u w=1.6u l=0.45u
+C0 G S 0.04854f
+C1 G D 0.04854f
+C2 D S 0.05961f
+C3 S sub 0.2245f
+C4 D sub 0.2245f
+.ends
+
+.subckt dev_n_w1p25_l0p45_ng4_guard0_topc0 G sub D2 a_294_n106# D0 S3 S1
+X0 S1 G D0 sub sg13_hv_nmos ad=0.2375p pd=1.63u as=0.425p ps=3.18u w=1.25u l=0.45u
+X1 D2 G S1 sub sg13_hv_nmos ad=0.2375p pd=1.63u as=0.2375p ps=1.63u w=1.25u l=0.45u
+X2 a_294_n106# G S3 sub sg13_hv_nmos ad=0.425p pd=3.18u as=0.2375p ps=1.63u w=1.25u l=0.45u
+X3 S3 G D2 sub sg13_hv_nmos ad=0.2375p pd=1.63u as=0.2375p ps=1.63u w=1.25u l=0.45u
+C0 G S1 0.08288f
+C1 S1 D2 0.04532f
+C2 G a_294_n106# 0.04144f
+C3 G S3 0.08288f
+C4 D2 S3 0.04532f
+C5 G D0 0.04144f
+C6 G D2 0.08288f
+C7 S3 a_294_n106# 0.04532f
+C8 D0 S1 0.04532f
+C9 a_294_n106# sub 0.05862f
+C10 S3 sub 0.01047f
+C11 D2 sub 0.01047f
+C12 S1 sub 0.49728f
+C13 D0 sub 0.54544f
+.ends
+
+.subckt dev_n_w1p6_l0p45_ng10_guard0_topc0 G D8 D6 sub D4 D2 D0 S9 S7 a_792_n141#
++ S5 S3 S1
+X0 a_792_n141# G S9 sub sg13_hv_nmos ad=0.544p pd=3.88u as=0.304p ps=1.98u w=1.6u l=0.45u
+X1 D4 G S3 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.304p ps=1.98u w=1.6u l=0.45u
+X2 S3 G D2 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.304p ps=1.98u w=1.6u l=0.45u
+X3 D8 G S7 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.304p ps=1.98u w=1.6u l=0.45u
+X4 S1 G D0 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.544p ps=3.88u w=1.6u l=0.45u
+X5 S5 G D4 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.304p ps=1.98u w=1.6u l=0.45u
+X6 S9 G D8 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.304p ps=1.98u w=1.6u l=0.45u
+X7 S7 G D6 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.304p ps=1.98u w=1.6u l=0.45u
+X8 D2 G S1 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.304p ps=1.98u w=1.6u l=0.45u
+X9 D6 G S5 sub sg13_hv_nmos ad=0.304p pd=1.98u as=0.304p ps=1.98u w=1.6u l=0.45u
+C0 S7 D6 0.05961f
+C1 G S1 0.09708f
+C2 S1 D2 0.05961f
+C3 G S5 0.09708f
+C4 G D4 0.09708f
+C5 S5 D6 0.05961f
+C6 G S3 0.09708f
+C7 D2 S3 0.05961f
+C8 S9 G 0.09708f
+C9 D8 S9 0.05961f
+C10 D4 S5 0.05961f
+C11 G D0 0.04854f
+C12 S9 a_792_n141# 0.05961f
+C13 G D2 0.09708f
+C14 D8 G 0.09708f
+C15 S3 D4 0.05961f
+C16 G D6 0.09708f
+C17 D0 S1 0.05961f
+C18 S7 G 0.09708f
+C19 D8 S7 0.05961f
+C20 G a_792_n141# 0.04854f
+C21 a_792_n141# sub 1.29156f
+C22 S9 sub 1.22971f
+C23 D8 sub 0.01047f
+C24 S7 sub 0.01047f
+C25 D6 sub 0.01047f
+C26 S5 sub 0.01047f
+C27 D4 sub 0.01047f
+C28 S3 sub 0.01047f
+C29 D2 sub 0.01047f
+C30 S1 sub 0.01047f
+C31 D0 sub 0.07232f
+.ends
+
+.subckt dev_p_w4p38_l0p4_ng1_botc0_guard0 G D w_n232_n581# sub S
+X0 S G D w_n232_n581# sg13_hv_pmos ad=1.4892p pd=9.44u as=1.4892p ps=9.44u w=4.38u l=0.4u
+C0 D G 0.09484f
+C1 S w_n232_n581# 0.048f
+C2 w_n232_n581# G 0.23611f
+C3 D w_n232_n581# 0.048f
+C4 S G 0.09484f
+C5 S D 0.18921f
+C6 S sub 0.20015f
+C7 D sub 0.20015f
+.ends
+
+.subckt predriver_stage In_p In_n Vss Mpp1/G Mpxp/G Mpn1/G Mpxp/D Out_p Va Out_n
+XMnxn Mpxp/D Mpxp/G Vss Vss dev_n_w1p75_l0p45_ng1_guard0_topc0
+XMnxp Mpxp/G Mpxp/D Vss Vss dev_n_w1p75_l0p45_ng1_guard0_topc0
+XMpp0 In_p Mpp1/G Va Vss Va dev_p_w2p64_l0p4_ng1_botc0_guard0
+XMpp1 Mpp1/G Va Vss Va Va Va Mpxp/D Mpxp/D dev_p_w3p13_l0p4_ng4_botc0_guard0
+XMpn0 In_n Mpn1/G Va Vss Va dev_p_w2p64_l0p4_ng1_botc0_guard0
+XMpp2 Mpxp/D Va Va Va Vss Va Va Va Va Out_p Out_p Out_p Out_p Out_p dev_p_w3p2_l0p4_ng10_botc0_guard0
+XMpn1 Mpn1/G Va Vss Va Va Va Mpxp/G Mpxp/G dev_p_w3p13_l0p4_ng4_botc0_guard0
+XMnp0 In_p Mpp1/G Vss Vss dev_n_w1p6_l0p45_ng1_guard0_topc0
+XMpn2 Mpxp/G Va Va Va Vss Va Va Va Va Out_n Out_n Out_n Out_n Out_n dev_p_w3p2_l0p4_ng10_botc0_guard0
+XMnp1 Mpp1/G Vss Vss Vss Vss Mpxp/D Mpxp/D dev_n_w1p25_l0p45_ng4_guard0_topc0
+XMnn0 In_n Mpn1/G Vss Vss dev_n_w1p6_l0p45_ng1_guard0_topc0
+XMnp2 Mpxp/D Vss Vss Vss Vss Vss Vss Out_p Out_p Vss Out_p Out_p Out_p dev_n_w1p6_l0p45_ng10_guard0_topc0
+XMnn2 Mpxp/G Vss Vss Vss Vss Vss Vss Out_n Out_n Vss Out_n Out_n Out_n dev_n_w1p6_l0p45_ng10_guard0_topc0
+XMnn1 Mpn1/G Vss Vss Vss Vss Mpxp/G Mpxp/G dev_n_w1p25_l0p45_ng4_guard0_topc0
+XMpxn Mpxp/D Mpxp/G Va Vss Va dev_p_w4p38_l0p4_ng1_botc0_guard0
+XMpxp Mpxp/G Mpxp/D Va Vss Va dev_p_w4p38_l0p4_ng1_botc0_guard0
+C0 Mpxp/D Mpp1/G 1.52133f
+C1 Va Out_n 2.62275f
+C2 Mpxp/D In_p 0.25532f
+C3 Mpxp/D In_n 0.12941f
+C4 Mpxp/G Mpn1/G 1.5235f
+C5 Mpxp/G Va 1.92461f
+C6 Va Mpn1/G 0.74616f
+C7 Mpxp/G Mpp1/G 0.04221f
+C8 Mpxp/G In_p 0.12428f
+C9 Mpn1/G Mpp1/G 0.01041f
+C10 Va Out_p 2.62275f
+C11 Mpxp/G In_n 0.25523f
+C12 Mpxp/D Mpxp/G 0.68859f
+C13 In_n Mpn1/G 0.4737f
+C14 Va Mpp1/G 0.74567f
+C15 Mpxp/D Mpn1/G 0.03907f
+C16 Va In_p 0.14581f
+C17 Mpxp/G Out_n 2.36296f
+C18 Va In_n 0.15003f
+C19 Mpxp/D Out_p 2.3631f
+C20 In_p Mpp1/G 0.4737f
+C21 Mpxp/D Va 1.66102f
+C22 Mpxp/D Vss -0.65902f
+C23 Mpxp/G Vss -0.95924f
+C24 Mpp1/G Vss -0.51821f
+C25 Out_n Vss 1.41606f
+C26 Out_p Vss 1.41606f
+C27 Mpn1/G Vss -0.51821f
+C28 In_n Vss -0.05192f
+C29 Va Vss -1.26493f
+C30 In_p Vss -0.04693f
+.ends
+
+.subckt dev_n_w4_l0p45_ng6_opens_botc0 G B a_460_n400# D4 D2 D0 a_n630_n488# S5 S3
++ S1
+X0 D2 G S1 a_n630_n488# sg13_hv_nmos ad=0.76p pd=4.38u as=0.76p ps=4.38u w=4u l=0.45u
+X1 S1 G D0 a_n630_n488# sg13_hv_nmos ad=0.76p pd=4.38u as=1.36p ps=8.68u w=4u l=0.45u
+X2 a_460_n400# G S5 a_n630_n488# sg13_hv_nmos ad=1.36p pd=8.68u as=0.76p ps=4.38u w=4u l=0.45u
+X3 S3 G D2 a_n630_n488# sg13_hv_nmos ad=0.76p pd=4.38u as=0.76p ps=4.38u w=4u l=0.45u
+X4 S5 G D4 a_n630_n488# sg13_hv_nmos ad=0.76p pd=4.38u as=0.76p ps=4.38u w=4u l=0.45u
+X5 D4 G S3 a_n630_n488# sg13_hv_nmos ad=0.76p pd=4.38u as=0.76p ps=4.38u w=4u l=0.45u
+C0 S1 D0 0.15759f
+C1 a_460_n400# S5 0.15759f
+C2 S5 D4 0.15759f
+C3 S3 D4 0.15759f
+C4 S3 D2 0.15759f
+C5 a_460_n400# G 0.09438f
+C6 G D4 0.18876f
+C7 D2 G 0.18876f
+C8 S1 D2 0.15759f
+C9 S5 G 0.18876f
+C10 S3 G 0.18876f
+C11 S1 G 0.18876f
+C12 D0 G 0.09438f
+C13 a_460_n400# a_n630_n488# 0.31824f
+C14 S5 a_n630_n488# 0.0111f
+C15 D4 a_n630_n488# 0.01082f
+C16 S3 a_n630_n488# 0.01076f
+C17 D2 a_n630_n488# 1.23562f
+C18 S1 a_n630_n488# 1.23591f
+C19 D0 a_n630_n488# 0.31824f
+.ends
+
+.subckt dev_p_w3_l0p4_ng8_topc0 G B D6 sub D4 D2 D0 a_586_n300# S7 S5 S3 S1
+X0 S3 G D2 B sg13_hv_pmos ad=0.57p pd=3.38u as=0.57p ps=3.38u w=3u l=0.4u
+X1 D4 G S3 B sg13_hv_pmos ad=0.57p pd=3.38u as=0.57p ps=3.38u w=3u l=0.4u
+X2 S5 G D4 B sg13_hv_pmos ad=0.57p pd=3.38u as=0.57p ps=3.38u w=3u l=0.4u
+X3 S7 G D6 B sg13_hv_pmos ad=0.57p pd=3.38u as=0.57p ps=3.38u w=3u l=0.4u
+X4 S1 G D0 B sg13_hv_pmos ad=0.57p pd=3.38u as=1.02p ps=6.68u w=3u l=0.4u
+X5 D2 G S1 B sg13_hv_pmos ad=0.57p pd=3.38u as=0.57p ps=3.38u w=3u l=0.4u
+X6 D6 G S5 B sg13_hv_pmos ad=0.57p pd=3.38u as=0.57p ps=3.38u w=3u l=0.4u
+X7 a_586_n300# G S7 B sg13_hv_pmos ad=1.02p pd=6.68u as=0.57p ps=3.38u w=3u l=0.4u
+C0 G D4 0.14227f
+C1 S5 D4 0.12763f
+C2 G D2 0.14227f
+C3 B S3 0.01599f
+C4 B D6 0.0161f
+C5 S1 D2 0.12763f
+C6 B D0 0.24707f
+C7 G S5 0.14227f
+C8 B a_586_n300# 0.24707f
+C9 G S7 0.14227f
+C10 G S1 0.14227f
+C11 D4 S3 0.12763f
+C12 B D4 0.01596f
+C13 D2 S3 0.12763f
+C14 B D2 0.0161f
+C15 G S3 0.14227f
+C16 G D6 0.14227f
+C17 B G 2.44158f
+C18 S5 D6 0.12763f
+C19 B S5 0.01599f
+C20 D6 S7 0.12763f
+C21 B S7 0.0164f
+C22 B S1 0.0164f
+C23 G D0 0.07113f
+C24 G a_586_n300# 0.07113f
+C25 D0 S1 0.12763f
+C26 a_586_n300# S7 0.12763f
+C27 S3 sub 0.18187f
+C28 D2 sub 0.18187f
+C29 B sub 0.46376f
+.ends
+
+.subckt dev_n_w2p92_l0p45_ng6_openn_topc0 G B D4 D2 D0 S5 a_460_n292# S3 S1
+X0 S5 G D4 B sg13_hv_nmos ad=0.5548p pd=3.3u as=0.5548p ps=3.3u w=2.92u l=0.45u
+X1 D4 G S3 B sg13_hv_nmos ad=0.5548p pd=3.3u as=0.5548p ps=3.3u w=2.92u l=0.45u
+X2 D2 G S1 B sg13_hv_nmos ad=0.5548p pd=3.3u as=0.5548p ps=3.3u w=2.92u l=0.45u
+X3 S1 G D0 B sg13_hv_nmos ad=0.5548p pd=3.3u as=0.9928p ps=6.52u w=2.92u l=0.45u
+X4 a_460_n292# G S5 B sg13_hv_nmos ad=0.9928p pd=6.52u as=0.5548p ps=3.3u w=2.92u l=0.45u
+X5 S3 G D2 B sg13_hv_nmos ad=0.5548p pd=3.3u as=0.5548p ps=3.3u w=2.92u l=0.45u
+C0 S1 D2 0.1135f
+C1 D2 S3 0.1135f
+C2 G S1 0.14817f
+C3 G S5 0.14817f
+C4 G S3 0.14817f
+C5 G a_460_n292# 0.07408f
+C6 S5 a_460_n292# 0.1135f
+C7 G D4 0.14817f
+C8 G D0 0.07408f
+C9 D4 S5 0.1135f
+C10 G D2 0.14817f
+C11 D4 S3 0.1135f
+C12 S1 D0 0.1135f
+C13 a_460_n292# B 0.23425f
+C14 S5 B 1.12071f
+C15 D4 B 1.12043f
+C16 S3 B 0.01076f
+C17 D2 B 0.01082f
+C18 S1 B 0.0111f
+C19 D0 B 0.23425f
+.ends
+
+.subckt predriver_comp Gin Din Out Va Vss Mio/B Mldo/G Iref
+XMio Gin Mio/B Out Out Out Out Vss Mio/B Mio/B Mio/B dev_n_w4_l0p45_ng6_opens_botc0
+XMldo Mldo/G Va Va Vss Va Va Va Va Out Out Mldo/G Mldo/G dev_p_w3_l0p4_ng8_topc0
+XMt_0 Iref Vss Vss Vss Vss Mio/B Vss Mio/B Mio/B dev_n_w2p92_l0p45_ng6_openn_topc0
+XMt_1 Iref Vss Vss Vss Vss Mio/B Vss Mio/B Mio/B dev_n_w2p92_l0p45_ng6_openn_topc0
+XMid Din Mio/B Mldo/G Mldo/G Mldo/G Mldo/G Vss Mio/B Mio/B Mio/B dev_n_w4_l0p45_ng6_opens_botc0
+C0 Din Out 0.13681f
+C1 Va Gin 0.02128f
+C2 Va Mldo/G 0.89789f
+C3 Gin Mio/B 0.23719f
+C4 Mldo/G Mio/B 0.56878f
+C5 Iref Gin 0.16262f
+C6 Mldo/G Iref 0.0141f
+C7 Gin Out 0.48854f
+C8 Mldo/G Out 0.62068f
+C9 Va Out 0.47169f
+C10 Iref Mio/B 0.07534f
+C11 Out Mio/B 0.55322f
+C12 Iref Out 0.01397f
+C13 Din Gin 0.30675f
+C14 Din Mldo/G 0.84334f
+C15 Va Din 0.13425f
+C16 Din Mio/B 0.24533f
+C17 Din Iref 0.15966f
+C18 Iref Vss 0.5463f
+C19 Va Vss 0.21668f
+C20 Mldo/G Vss 0.36046f
+C21 Din Vss -0.02489f
+C22 Out Vss 0.61036f
+C23 Mio/B Vss 1.0739f
+C24 Gin Vss -0.31938f
+.ends
+
+.subckt predriver D_p D_n In_p In_n Vss stm/Mpxp/G stm/Mpxp/D Iref kpm/Mio/B stm/Mpn1/G
++ kpm/Mldo/G Va kpm/Out stm/Mpp1/G
+XMref Iref Vss Vss Iref dev_n_w2_l2_ng1
+Xstm kpm/Out knm/Out Vss stm/Mpp1/G stm/Mpxp/G stm/Mpn1/G stm/Mpxp/D In_p Va In_n
++ predriver_stage
+Xkpm D_p D_n kpm/Out Va Vss kpm/Mio/B kpm/Mldo/G Iref predriver_comp
+Xknm D_n D_p knm/Out Va Vss knm/Mio/B knm/Mldo/G Iref predriver_comp
+C0 kpm/Out D_n 0.02731f
+C1 knm/Out Iref 0.1729f
+C2 knm/Out D_n 0.02226f
+C3 stm/Mpxp/D Iref 0.03694f
+C4 kpm/Out kpm/Mio/B 0.08779f
+C5 Iref D_p 0.58605f
+C6 D_n D_p 0.09226f
+C7 Va In_p 0.06461f
+C8 D_n Iref 0.65623f
+C9 knm/Out kpm/Out 0.11191f
+C10 knm/Mio/B knm/Out 0.0876f
+C11 knm/Out stm/Mpxp/G 0.0207f
+C12 Va D_p 0.05525f
+C13 stm/Mpp1/G Iref 0.01213f
+C14 kpm/Mio/B Iref 0.02984f
+C15 Va Iref 0.03315f
+C16 kpm/Out stm/Mpxp/D 0.05734f
+C17 Va In_n 0.06461f
+C18 kpm/Out D_p 0.02869f
+C19 Va D_n 0.05481f
+C20 kpm/Out Iref 0.17188f
+C21 knm/Out D_p 0.03374f
+C22 knm/Mio/B Iref 0.02984f
+C23 stm/Mpxp/G Iref 0.01495f
+C24 knm/Mldo/G Vss -1.08731f
+C25 D_p Vss -0.75069f
+C26 knm/Out Vss -0.8449f
+C27 knm/Mio/B Vss -1.24242f
+C28 D_n Vss -0.76932f
+C29 Iref Vss 1.76224f
+C30 kpm/Mldo/G Vss -1.08731f
+C31 kpm/Out Vss -0.836f
+C32 kpm/Mio/B Vss -1.24242f
+C33 stm/Mpxp/D Vss -1.97921f
+C34 stm/Mpxp/G Vss -2.12824f
+C35 stm/Mpp1/G Vss -0.84163f
+C36 In_n Vss 0.10101f
+C37 In_p Vss 0.10141f
+C38 stm/Mpn1/G Vss -0.84139f
+C39 Va Vss -0.58325f
+.ends
+
+.subckt dev_n_w0p8_l0p5_ng1_cliprail1_topc0_viasrc100 G D B S
+X0 S G D B sg13_hv_nmos ad=0.272p pd=2.28u as=0.272p ps=2.28u w=0.8u l=0.5u
+C0 S G 0.03724f
+C1 S D 0.03107f
+C2 G D 0.03307f
+C3 S B 0.33789f
+C4 D B 0.2659f
+.ends
+
+.subckt dev_n_w5_l1_ng4_topc0 G B a_514_n500# D2 D0 S3 S1
+X0 S1 G D0 B sg13_hv_nmos ad=0.95p pd=5.38u as=1.7p ps=10.68u w=5u l=1u
+X1 D2 G S1 B sg13_hv_nmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=1u
+X2 S3 G D2 B sg13_hv_nmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=1u
+X3 a_514_n500# G S3 B sg13_hv_nmos ad=1.7p pd=10.68u as=0.95p ps=5.38u w=5u l=1u
+C0 G a_514_n500# 0.16707f
+C1 S3 G 0.33414f
+C2 S1 G 0.33414f
+C3 D2 S3 0.10138f
+C4 D2 S1 0.10138f
+C5 S1 D0 0.10138f
+C6 S3 a_514_n500# 0.10138f
+C7 D2 G 0.33414f
+C8 G D0 0.16707f
+C9 a_514_n500# B 0.40045f
+C10 S3 B 0.01634f
+C11 D2 B 0.01619f
+C12 S1 B 1.8195f
+C13 D0 B 2.2036f
+.ends
+
+.subckt dev_p_w5_l1_ng1_botc0 G D B sub S
+X0 S G D B sg13_hv_pmos ad=1.7p pd=10.68u as=1.7p ps=10.68u w=5u l=1u
+C0 D B 0.40459f
+C1 S D 0.10138f
+C2 D G 0.16707f
+C3 S B 0.40459f
+C4 B G 0.86667f
+C5 S G 0.16707f
+C6 S sub 0.05216f
+C7 D sub 0.05216f
+C8 B sub 0.39268f
+.ends
+
+.subckt dev_rppd_w1_l6 B a_n100_n600# R2 R1
+X0 R1 R2 B rppd l=6u w=1u
+C0 R2 a_n100_n600# 0.06516f
+C1 R1 a_n100_n600# 0.06516f
+C2 R2 B 0.91388f
+C3 R1 B 0.91388f
+.ends
+
+.subckt dev_n_w10_l5_ng5_m2rail1_conn_gates0_polycov80_topc0 B D4 D2 D0 G0 S4 S3 S1
+X0 S3 G0 D2 B sg13_hv_nmos ad=1.9p pd=10.38u as=1.9p ps=10.38u w=10u l=5u
+X1 D2 G0 S1 B sg13_hv_nmos ad=1.9p pd=10.38u as=1.9p ps=10.38u w=10u l=5u
+X2 S4 G0 D4 B sg13_hv_nmos ad=3.4p pd=20.68u as=1.9p ps=10.38u w=10u l=5u
+X3 D4 G0 S3 B sg13_hv_nmos ad=1.9p pd=10.38u as=1.9p ps=10.38u w=10u l=5u
+X4 S1 G0 D0 B sg13_hv_nmos ad=1.9p pd=10.38u as=3.4p ps=20.68u w=10u l=5u
+C0 S4 D4 0.04277f
+C1 G0 D4 0.85559f
+C2 S3 G0 0.85559f
+C3 S1 G0 0.85559f
+C4 D2 S3 0.04277f
+C5 D2 S1 0.04277f
+C6 S1 D0 0.04277f
+C7 S4 G0 0.41858f
+C8 S3 D4 0.04277f
+C9 D2 G0 0.85559f
+C10 G0 D0 0.41858f
+C11 S4 B 0.79678f
+C12 D4 B 0.03122f
+C13 S3 B 15.32048f
+C14 D2 B 15.32048f
+C15 S1 B 0.03122f
+C16 D0 B 0.79678f
+.ends
+
+.subckt cmfb_amp cm Vref Iref Va Vss Rc/R1 M14/G M10/S Rc/a_n100_n600# cmfb
+XM10 Iref Vss Vss M10/S dev_n_w0p8_l0p5_ng1_cliprail1_topc0_viasrc100
+XM11 cm Vss M14/G M14/G M14/G M10/S M10/S dev_n_w5_l1_ng4_topc0
+XM12 Vref Vss cmfb cmfb cmfb M10/S M10/S dev_n_w5_l1_ng4_topc0
+XM13 M14/G M14/G Va Vss Va dev_p_w5_l1_ng1_botc0
+XM14 M14/G cmfb Va Vss Va dev_p_w5_l1_ng1_botc0
+XRc Vss Rc/a_n100_n600# cmfb Rc/R1 dev_rppd_w1_l6
+XCc Vss Vss Vss Vss Rc/R1 Vss Vss Vss dev_n_w10_l5_ng5_m2rail1_conn_gates0_polycov80_topc0
+C0 Va cmfb 0.46162f
+C1 cm Rc/R1 0.03919f
+C2 M14/G Rc/R1 0.02384f
+C3 Va Rc/R1 0.06408f
+C4 M14/G cm 0.32179f
+C5 M10/S cmfb 1.57482f
+C6 Rc/a_n100_n600# cmfb 0.09892f
+C7 Va cm 0.01859f
+C8 Va M14/G 0.64273f
+C9 M10/S Vref 0.53378f
+C10 M10/S cm 0.42373f
+C11 M14/G M10/S 1.44377f
+C12 cmfb Vref 0.3013f
+C13 cmfb Rc/R1 0.02935f
+C14 Va M10/S 0.4871f
+C15 Iref cmfb 0.01795f
+C16 Rc/R1 Vref 0.03859f
+C17 Iref Vref 0.01816f
+C18 M14/G cmfb 0.05432f
+C19 Rc/R1 Vss 17.54367f
+C20 Rc/a_n100_n600# Vss 0.01152f
+C21 M14/G Vss 0.67276f
+C22 Va Vss -0.43329f
+C23 M10/S Vss 0.80556f
+C24 cmfb Vss 1.48308f
+C25 Vref Vss 0.02156f
+C26 cm Vss 0.05133f
+C27 Iref Vss 0.05938f
+.ends
+
+.subckt dev_n_w0p8_l0p5_ng1 G D B S
+X0 S G D B sg13_hv_nmos ad=0.272p pd=2.28u as=0.272p ps=2.28u w=0.8u l=0.5u
+C0 S D 0.02483f
+C1 S G 0.0526f
+C2 D G 0.0526f
+C3 S B 0.3558f
+C4 D B 0.3558f
+.ends
+
+.subckt dev_n_w10_l5_ng2_conn_gates1_polycov100_topc0_viagate100 G B D0 a_1038_n1000#
++ S1
+X0 S1 G D0 B sg13_hv_nmos ad=1.9p pd=10.38u as=3.4p ps=20.68u w=10u l=5u
+X1 a_1038_n1000# G S1 B sg13_hv_nmos ad=3.4p pd=20.68u as=1.9p ps=10.38u w=10u l=5u
+C0 S1 D0 0.04277f
+C1 S1 G 0.88629f
+C2 a_1038_n1000# S1 0.04277f
+C3 D0 G 0.44315f
+C4 a_1038_n1000# G 0.44315f
+C5 a_1038_n1000# B 0.78924f
+C6 S1 B 6.27519f
+C7 D0 B 7.04824f
+.ends
+
+.subckt dev_n_w2_l0p45_ng15_botc0 D10 G S14 S13 S11 B D8 D6 D4 D2 D0 S9 S7 S5 S3 D14
++ S1 D12
+X0 D2 G S1 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X1 D10 G S9 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X2 S1 G D0 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.68p ps=4.68u w=2u l=0.45u
+X3 D8 G S7 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X4 D6 G S5 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X5 S13 G D12 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X6 S11 G D10 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X7 S3 G D2 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X8 S9 G D8 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X9 D12 G S11 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X10 S5 G D4 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X11 D14 G S13 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X12 S7 G D6 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X13 D4 G S3 B sg13_hv_nmos ad=0.38p pd=2.38u as=0.38p ps=2.38u w=2u l=0.45u
+X14 S14 G D14 B sg13_hv_nmos ad=0.68p pd=4.68u as=0.38p ps=2.38u w=2u l=0.45u
+C0 S1 D0 0.07594f
+C1 D12 S13 0.07594f
+C2 S1 G 0.11286f
+C3 D4 G 0.11286f
+C4 D2 S1 0.07594f
+C5 S9 G 0.11286f
+C6 S13 G 0.11286f
+C7 S14 G 0.05643f
+C8 D4 S3 0.07594f
+C9 S9 D8 0.07594f
+C10 S11 D10 0.07594f
+C11 S5 G 0.11286f
+C12 D14 S13 0.07594f
+C13 D14 S14 0.07594f
+C14 G D10 0.11286f
+C15 D12 S11 0.07594f
+C16 S5 D6 0.07594f
+C17 S7 G 0.11286f
+C18 D12 G 0.11286f
+C19 S5 D4 0.07594f
+C20 S11 G 0.11286f
+C21 S7 D8 0.07594f
+C22 D0 G 0.05643f
+C23 S7 D6 0.07594f
+C24 S9 D10 0.07594f
+C25 D2 G 0.11286f
+C26 G D8 0.11286f
+C27 D14 G 0.11286f
+C28 S3 G 0.11286f
+C29 G D6 0.11286f
+C30 D2 S3 0.07594f
+C31 S14 B 0.16669f
+C32 D14 B 0.01591f
+C33 S13 B 0.0156f
+C34 D12 B 0.01548f
+C35 S11 B 0.01543f
+C36 D10 B 0.0154f
+C37 S9 B 0.0154f
+C38 D8 B 0.0154f
+C39 S7 B 0.0154f
+C40 D6 B 0.0154f
+C41 S5 B 0.0154f
+C42 D4 B 0.01543f
+C43 S3 B 0.01548f
+C44 D2 B 2.5689f
+C45 S1 B 2.56921f
+C46 D0 B 0.16669f
+.ends
+
+.subckt dev_p_w4p86_l0p5_ng20_botc0 S17 D10 S15 G S13 S11 B D8 D6 sub D4 D2 D0 S9
++ S7 D18 S5 D16 S3 a_1722_n486# D14 S19 S1 D12
+X0 D8 G S7 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X1 S7 G D6 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X2 S5 G D4 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X3 D14 G S13 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X4 D16 G S15 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X5 D6 G S5 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X6 S13 G D12 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X7 S15 G D14 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X8 S3 G D2 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X9 S11 G D10 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X10 D4 G S3 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X11 S17 G D16 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X12 D2 G S1 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X13 S19 G D18 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X14 S1 G D0 B sg13_hv_pmos ad=0.9234p pd=5.24u as=1.6524p ps=10.4u w=4.86u l=0.5u
+X15 D10 G S9 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X16 D18 G S17 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X17 a_1722_n486# G S19 B sg13_hv_pmos ad=1.6524p pd=10.4u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X18 S9 G D8 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+X19 D12 G S11 B sg13_hv_pmos ad=0.9234p pd=5.24u as=0.9234p ps=5.24u w=4.86u l=0.5u
+C0 D12 S13 0.17756f
+C1 D0 B 0.39329f
+C2 D2 S1 0.17756f
+C3 D16 G 0.23442f
+C4 G D4 0.23442f
+C5 G D6 0.23442f
+C6 D16 B 0.01613f
+C7 D4 B 0.01613f
+C8 B D6 0.01609f
+C9 D8 S7 0.17756f
+C10 S19 D18 0.17756f
+C11 S9 G 0.23442f
+C12 D10 S11 0.17756f
+C13 D12 S11 0.17756f
+C14 S9 B 0.01605f
+C15 G D8 0.23442f
+C16 G D18 0.23442f
+C17 G S5 0.23442f
+C18 B D8 0.01607f
+C19 S3 G 0.23442f
+C20 G S15 0.23442f
+C21 B D18 0.01629f
+C22 S5 B 0.0161f
+C23 S15 D14 0.17756f
+C24 D0 S1 0.17756f
+C25 S3 B 0.01618f
+C26 B S15 0.0161f
+C27 S3 D2 0.17756f
+C28 D16 S17 0.17756f
+C29 G S7 0.23442f
+C30 S19 G 0.23442f
+C31 B S7 0.01608f
+C32 S19 B 0.01659f
+C33 D10 S9 0.17756f
+C34 G D14 0.23442f
+C35 G B 8.69585f
+C36 B D14 0.01609f
+C37 S17 D18 0.17756f
+C38 D2 G 0.23442f
+C39 G S13 0.23442f
+C40 D14 S13 0.17756f
+C41 D2 B 0.01629f
+C42 B S13 0.01608f
+C43 D4 S5 0.17756f
+C44 S5 D6 0.17756f
+C45 S3 D4 0.17756f
+C46 D16 S15 0.17756f
+C47 S19 a_1722_n486# 0.17756f
+C48 D10 G 0.23442f
+C49 D12 G 0.23442f
+C50 S9 D8 0.17756f
+C51 D10 B 0.01605f
+C52 D12 B 0.01607f
+C53 G S1 0.23442f
+C54 G S11 0.23442f
+C55 D6 S7 0.17756f
+C56 G a_1722_n486# 0.11721f
+C57 S17 G 0.23442f
+C58 B S1 0.01659f
+C59 S11 B 0.01605f
+C60 B a_1722_n486# 0.39329f
+C61 G D0 0.11721f
+C62 S17 B 0.01618f
+C63 D8 sub 0.47413f
+C64 S7 sub 0.47413f
+C65 B sub 0.90557f
+.ends
+
+.subckt dev_p_w5_l0p4_ng16_topc0 D10 S15 G S13 S11 B D8 D6 sub D4 D2 D0 S9 S7 S5 a_1210_n500#
++ S3 D14 S1 D12
+X0 S13 G D12 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X1 D2 G S1 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X2 D12 G S11 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X3 a_1210_n500# G S15 B sg13_hv_pmos ad=1.7p pd=10.68u as=0.95p ps=5.38u w=5u l=0.4u
+X4 S3 G D2 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X5 S7 G D6 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X6 D8 G S7 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X7 D14 G S13 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X8 S15 G D14 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X9 S1 G D0 B sg13_hv_pmos ad=0.95p pd=5.38u as=1.7p ps=10.68u w=5u l=0.4u
+X10 S9 G D8 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X11 D4 G S3 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X12 S11 G D10 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X13 S5 G D4 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X14 D6 G S5 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+X15 D10 G S9 B sg13_hv_pmos ad=0.95p pd=5.38u as=0.95p ps=5.38u w=5u l=0.4u
+C0 S7 D6 0.21688f
+C1 S15 B 0.01666f
+C2 S1 D2 0.21688f
+C3 S3 G 0.21079f
+C4 B D6 0.01611f
+C5 B D12 0.01616f
+C6 B S5 0.01613f
+C7 D12 S13 0.21688f
+C8 S7 D8 0.21688f
+C9 a_1210_n500# G 0.10539f
+C10 S9 D8 0.21688f
+C11 D4 G 0.21079f
+C12 S3 D4 0.21688f
+C13 S1 G 0.21079f
+C14 D0 G 0.10539f
+C15 B D14 0.01634f
+C16 B D8 0.01612f
+C17 S15 G 0.21079f
+C18 B S11 0.01613f
+C19 D14 S13 0.21688f
+C20 D6 G 0.21079f
+C21 D12 G 0.21079f
+C22 B S7 0.01612f
+C23 S15 a_1210_n500# 0.21688f
+C24 S9 B 0.01612f
+C25 S5 G 0.21079f
+C26 S1 D0 0.21688f
+C27 D10 S11 0.21688f
+C28 B D2 0.01634f
+C29 B S13 0.01622f
+C30 D14 G 0.21079f
+C31 D8 G 0.21079f
+C32 D4 S5 0.21688f
+C33 D10 S9 0.21688f
+C34 S11 G 0.21079f
+C35 D10 B 0.01611f
+C36 S7 G 0.21079f
+C37 S9 G 0.21079f
+C38 D6 S5 0.21688f
+C39 S15 D14 0.21688f
+C40 B G 5.90637f
+C41 S3 B 0.01622f
+C42 D2 G 0.21079f
+C43 S13 G 0.21079f
+C44 S3 D2 0.21688f
+C45 a_1210_n500# B 0.40429f
+C46 D12 S11 0.21688f
+C47 B D4 0.01616f
+C48 B S1 0.01666f
+C49 D10 G 0.21079f
+C50 B D0 0.40429f
+C51 S13 sub 0.32949f
+C52 D12 sub 0.32949f
+C53 B sub 0.76324f
+.ends
+
+.subckt dev_n_w3p2_l0p5_ng31_topc0 S27 D22 S17 D10 D20 S15 G D30 S25 S13 S23 S11 B
++ S21 S30 D8 D6 D4 D2 D0 S9 S7 D18 D28 S5 D16 D26 S3 D14 D24 S19 S1 S29 D12
+X0 S15 G D14 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X1 D26 G S25 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X2 S30 G D30 B sg13_hv_nmos ad=1.088p pd=7.08u as=0.608p ps=3.58u w=3.2u l=0.5u
+X3 S17 G D16 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X4 S5 G D4 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X5 D14 G S13 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X6 S27 G D26 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X7 D18 G S17 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X8 S11 G D10 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X9 S13 G D12 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X10 S19 G D18 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X11 D12 G S11 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X12 D10 G S9 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X13 D22 G S21 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X14 S3 G D2 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X15 D20 G S19 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X16 S29 G D28 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X17 D2 G S1 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X18 D4 G S3 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X19 S21 G D20 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X20 D28 G S27 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X21 D30 G S29 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X22 D16 G S15 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X23 S1 G D0 B sg13_hv_nmos ad=0.608p pd=3.58u as=1.088p ps=7.08u w=3.2u l=0.5u
+X24 D6 G S5 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X25 D8 G S7 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X26 D24 G S23 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X27 S7 G D6 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X28 S9 G D8 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X29 S23 G D22 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+X30 S25 G D24 B sg13_hv_nmos ad=0.608p pd=3.58u as=0.608p ps=3.58u w=3.2u l=0.5u
+C0 G D8 0.1676f
+C1 S23 D22 0.11511f
+C2 G D2 0.1676f
+C3 S13 G 0.1676f
+C4 D18 S17 0.11511f
+C5 S19 G 0.1676f
+C6 S21 G 0.1676f
+C7 D24 G 0.1676f
+C8 D4 S5 0.11511f
+C9 G S27 0.1676f
+C10 D8 S7 0.11511f
+C11 D30 S29 0.11511f
+C12 S3 D2 0.11511f
+C13 G S7 0.1676f
+C14 S23 G 0.1676f
+C15 D6 S5 0.11511f
+C16 S3 G 0.1676f
+C17 S23 D24 0.11511f
+C18 S25 G 0.1676f
+C19 S25 D24 0.11511f
+C20 D10 S11 0.11511f
+C21 D12 S11 0.11511f
+C22 D30 G 0.1676f
+C23 S15 G 0.1676f
+C24 S13 D14 0.11511f
+C25 D16 S17 0.11511f
+C26 D14 G 0.1676f
+C27 S19 D18 0.11511f
+C28 D0 S1 0.11511f
+C29 D18 G 0.1676f
+C30 G S5 0.1676f
+C31 D26 G 0.1676f
+C32 D26 S27 0.11511f
+C33 D10 S9 0.11511f
+C34 G S30 0.0838f
+C35 D12 S13 0.11511f
+C36 S15 D14 0.11511f
+C37 D26 S25 0.11511f
+C38 D10 G 0.1676f
+C39 D12 G 0.1676f
+C40 S1 D2 0.11511f
+C41 G S17 0.1676f
+C42 S11 G 0.1676f
+C43 G D4 0.1676f
+C44 S1 G 0.1676f
+C45 D16 G 0.1676f
+C46 D28 S29 0.11511f
+C47 S19 D20 0.11511f
+C48 D0 G 0.0838f
+C49 D30 S30 0.11511f
+C50 D20 G 0.1676f
+C51 G D6 0.1676f
+C52 S21 D20 0.11511f
+C53 S3 D4 0.11511f
+C54 D22 G 0.1676f
+C55 D28 G 0.1676f
+C56 S21 D22 0.11511f
+C57 S9 D8 0.11511f
+C58 G S29 0.1676f
+C59 D6 S7 0.11511f
+C60 D28 S27 0.11511f
+C61 S9 G 0.1676f
+C62 S15 D16 0.11511f
+C63 S30 B 0.26027f
+C64 D30 B 0.01624f
+C65 S29 B 0.01593f
+C66 D28 B 0.01582f
+C67 S27 B 0.01577f
+C68 D26 B 0.01575f
+C69 S25 B 0.01573f
+C70 D24 B 0.01572f
+C71 S23 B 0.01572f
+C72 D22 B 0.01569f
+C73 S21 B 0.01569f
+C74 D20 B 0.01569f
+C75 S19 B 0.01569f
+C76 D18 B 0.01569f
+C77 S17 B 0.01569f
+C78 D16 B 0.01569f
+C79 S15 B 6.39109f
+C80 D14 B 6.39109f
+C81 S13 B 0.01569f
+C82 D12 B 0.01569f
+C83 S11 B 0.01569f
+C84 D10 B 0.01569f
+C85 S9 B 0.01569f
+C86 D8 B 0.01572f
+C87 S7 B 0.01572f
+C88 D6 B 0.01573f
+C89 S5 B 0.01575f
+C90 D4 B 0.01577f
+C91 S3 B 0.01582f
+C92 D2 B 0.01593f
+C93 S1 B 0.01624f
+C94 D0 B 0.26027f
+.ends
+
+.subckt dev_n_w10_l5_ng3_conn_gates1_polycov100_topc0_viagate100 G B D2 D0 S2 S1
+X0 D2 G S1 B sg13_hv_nmos ad=1.9p pd=10.38u as=1.9p ps=10.38u w=10u l=5u
+X1 S1 G D0 B sg13_hv_nmos ad=1.9p pd=10.38u as=3.4p ps=20.68u w=10u l=5u
+X2 S2 G D2 B sg13_hv_nmos ad=3.4p pd=20.68u as=1.9p ps=10.38u w=10u l=5u
+C0 S1 D2 0.04277f
+C1 S2 G 0.44315f
+C2 S1 G 0.88629f
+C3 D0 G 0.44315f
+C4 S1 D0 0.04277f
+C5 D2 G 0.88629f
+C6 S2 D2 0.04277f
+C7 S2 B 0.78924f
+C8 D2 B 9.3791f
+C9 S1 B 9.3791f
+C10 D0 B 0.78924f
+.ends
+
+.subckt dev_rhigh_w1_l7p35 a_n100_n735# B R2 R1
+X0 R1 R2 B rhigh l=7.35u w=1u
+C0 a_n100_n735# R1 0.06685f
+C1 R2 a_n100_n735# 0.06685f
+C2 R2 B 1.05784f
+C3 R1 B 1.05784f
+.ends
+
+.subckt hbridge cmfb cm Rn/a_n100_n735# Out_n Iref Rp/a_n100_n735# In_p Out_p M6/S9
++ In_n Va M5/D8 Vss
+XM1 Out_p In_p M6/S9 M6/S9 M6/S9 Vss Out_p Out_p Out_p Out_p Out_p M6/S9 M6/S9 M6/S9
++ M6/S9 Out_p M6/S9 Out_p dev_n_w2_l0p45_ng15_botc0
+XM2 M5/D8 Va M5/D8 cmfb M5/D8 M5/D8 Va Va Va Vss Va Va Va M5/D8 M5/D8 Va M5/D8 Va
++ M5/D8 Va Va M5/D8 M5/D8 Va dev_p_w4p86_l0p5_ng20_botc0
+XM3 Out_n In_n M6/S9 M6/S9 M6/S9 Vss Out_n Out_n Out_n Out_n Out_n M6/S9 M6/S9 M6/S9
++ M6/S9 Out_n M6/S9 Out_n dev_n_w2_l0p45_ng15_botc0
+XM4 M5/D8 Out_n In_n Out_n Out_n Va M5/D8 M5/D8 Vss M5/D8 M5/D8 M5/D8 Out_n Out_n
++ Out_n M5/D8 Out_n M5/D8 Out_n M5/D8 dev_p_w5_l0p4_ng16_topc0
+XM5 M5/D8 Out_p In_p Out_p Out_p Va M5/D8 M5/D8 Vss M5/D8 M5/D8 M5/D8 Out_p Out_p
++ Out_p M5/D8 Out_p M5/D8 Out_p M5/D8 dev_p_w5_l0p4_ng16_topc0
+XM6 M6/S9 Vss M6/S9 Vss Vss M6/S9 Iref Vss M6/S9 M6/S9 M6/S9 M6/S9 Vss M6/S9 M6/S9
++ Vss Vss Vss Vss Vss M6/S9 M6/S9 Vss Vss M6/S9 Vss Vss M6/S9 Vss Vss M6/S9 M6/S9
++ M6/S9 Vss dev_n_w3p2_l0p5_ng31_topc0
+XCtn M6/S9 Vss Vss Vss Vss Vss dev_n_w10_l5_ng3_conn_gates1_polycov100_topc0_viagate100
+XRn Rn/a_n100_n735# Vss cm Out_n dev_rhigh_w1_l7p35
+XRp Rp/a_n100_n735# Vss cm Out_p dev_rhigh_w1_l7p35
+C0 cm Iref 0.10025f
+C1 Va M6/S9 0.05345f
+C2 Out_p M6/S9 2.70138f
+C3 In_n M6/S9 0.18389f
+C4 M5/D8 M6/S9 0.01017f
+C5 Iref Rn/a_n100_n735# 0.17083f
+C6 In_p M6/S9 0.26094f
+C7 Out_n Rn/a_n100_n735# 0.042f
+C8 M6/S9 Iref 3.29447f
+C9 Out_n M6/S9 2.49113f
+C10 Out_p Va 0.15846f
+C11 In_n Va 0.66235f
+C12 M5/D8 Va 7.88234f
+C13 In_p Va 0.65085f
+C14 cmfb Va 0.1703f
+C15 Out_p In_n 0.01567f
+C16 M5/D8 Out_p 2.44016f
+C17 M5/D8 In_n 0.41055f
+C18 In_p Out_p 5.43838f
+C19 In_p In_n 0.0933f
+C20 In_p M5/D8 0.41983f
+C21 cmfb In_n 0.0323f
+C22 cmfb M5/D8 2.11223f
+C23 cmfb In_p 0.0323f
+C24 Out_p Iref 0.20227f
+C25 In_n Iref 0.06295f
+C26 Out_n Va 0.15848f
+C27 In_p Iref 0.06295f
+C28 Rp/a_n100_n735# Out_p 0.03758f
+C29 Out_p Out_n 0.14386f
+C30 Out_n In_n 5.44276f
+C31 M5/D8 Out_n 2.44016f
+C32 In_p Out_n 0.01567f
+C33 Rp/a_n100_n735# Iref 0.16505f
+C34 Out_n Iref 0.19568f
+C35 cm Vss 0.12768f
+C36 M6/S9 Vss 16.77498f
+C37 Iref Vss -0.12746f
+C38 Out_p Vss 0.93428f
+C39 M5/D8 Vss 1.11095f
+C40 In_p Vss -0.64704f
+C41 Va Vss -1.35803f
+C42 Out_n Vss 1.04586f
+C43 In_n Vss -0.5986f
+C44 cmfb Vss -0.2562f
+.ends
+
+.subckt Driver In_n Iref Out_n x_cmfb/M10/S x_hbridge/M6/S9 cmfb Vss Vref Out_p
++ Va x_hbridge/M5/D8 In_p
+Xx_cmfb x_cmfb/cm Vref Iref Va Vss x_cmfb/Rc/R1 x_cmfb/M14/G x_cmfb/M10/S x_cmfb/Rc/a_n100_n600#
++ cmfb cmfb_amp
+XM9 Iref Iref Vss Vss dev_n_w0p8_l0p5_ng1
+XCon Out_n Vss Vss Vss Vss dev_n_w10_l5_ng2_conn_gates1_polycov100_topc0_viagate100
+Xx_hbridge cmfb x_cmfb/cm x_hbridge/Rn/a_n100_n735# Out_n Iref x_hbridge/Rp/a_n100_n735#
++ In_p Out_p x_hbridge/M6/S9 In_n Va x_hbridge/M5/D8 Vss hbridge
+XCop Out_p Vss Vss Vss Vss dev_n_w10_l5_ng2_conn_gates1_polycov100_topc0_viagate100
+C0 Va cmfb 0.45848f
+C1 x_hbridge/M5/D8 Va 1.66677f
+C2 x_hbridge/M6/S9 Vref 0.11374f
+C3 x_cmfb/cm Iref 0.20272f
+C4 x_cmfb/cm x_cmfb/M14/G 0.08869f
+C5 x_cmfb/cm x_cmfb/M10/S 0.04207f
+C6 cmfb Vref 0.33617f
+C7 Out_p In_p 0.12224f
+C8 x_cmfb/cm Out_p 0.7036f
+C9 x_hbridge/M6/S9 In_p 0.23296f
+C10 Iref Out_p 0.28848f
+C11 Out_p x_cmfb/M14/G 0.01037f
+C12 x_cmfb/M10/S Out_p 0.05074f
+C13 cmfb In_p 0.21261f
+C14 x_hbridge/M5/D8 In_p 0.354f
+C15 x_cmfb/cm cmfb 0.0241f
+C16 Iref x_hbridge/M6/S9 1.10367f
+C17 x_cmfb/M10/S x_hbridge/M6/S9 0.01631f
+C18 Va In_p 0.57248f
+C19 x_hbridge/M5/D8 In_n 0.22997f
+C20 x_cmfb/cm Va 0.22415f
+C21 x_cmfb/cm x_hbridge/Rp/a_n100_n735# 0.05214f
+C22 Iref cmfb 0.2432f
+C23 x_cmfb/M10/S cmfb 0.59262f
+C24 x_hbridge/M6/S9 Out_p 0.37388f
+C25 Va In_n 0.20806f
+C26 Out_n In_n 0.07261f
+C27 Iref Out_n 0.11004f
+C28 Va x_cmfb/M14/G 0.16357f
+C29 cmfb Out_p 0.07348f
+C30 x_cmfb/M10/S Va 0.08378f
+C31 x_cmfb/Rc/R1 x_hbridge/M6/S9 0.11978f
+C32 x_hbridge/M6/S9 cmfb 0.45783f
+C33 Out_n Out_p 0.23253f
+C34 Iref Vref 0.01214f
+C35 x_hbridge/M6/S9 x_cmfb/Rc/a_n100_n600# 0.06477f
+C36 x_hbridge/M5/D8 cmfb 1.26209f
+C37 Va x_hbridge/M6/S9 0.28052f
+C38 Out_n x_hbridge/M6/S9 0.42091f
+C39 x_cmfb/Rc/R1 Va 0.55095f
+C40 cmfb x_cmfb/Rc/a_n100_n600# 0.01595f
+C41 x_hbridge/Rp/a_n100_n735# Vss 0.066f
+C42 x_cmfb/cm Vss 2.18037f
+C43 x_hbridge/Rn/a_n100_n735# Vss 0.066f
+C44 x_hbridge/M6/S9 Vss -6.46832f
+C45 Out_p Vss 4.98544f
+C46 x_hbridge/M5/D8 Vss -6.89321f
+C47 In_p Vss -0.43138f
+C48 Va Vss 3.53004f
+C49 Out_n Vss 5.67517f
+C50 In_n Vss -0.87433f
+C51 Iref Vss -0.36988f
+C52 x_cmfb/Rc/R1 Vss 2.15122f
+C53 x_cmfb/M14/G Vss -1.23752f
+C54 x_cmfb/M10/S Vss -1.16231f
+C55 cmfb Vss -0.1374f
+C56 Vref Vss -0.50569f
+.ends
+
+.subckt lvds_tx D_p D_n Iref_pd Iref_drv Vref Va Out_p Out_n Vss
+Xpd D_p D_n In_p In_n Vss pd/stm/Mpxp/G pd/stm/Mpxp/D Iref_pd pd/kpm/Mio/B pd/stm/Mpn1/G
++ pd/kpm/Mldo/G Va pd/kpm/Out pd/stm/Mpp1/G predriver
+Xdrv In_n Iref_drv Out_n drv/x_cmfb/M10/S drv/x_hbridge/M6/S9 xdrv.cmfb Vss
++ Vref Out_p Va drv/x_hbridge/M5/D8 In_p Driver
+C0 Vref D_p 0.01107f
+C1 xdrv.cmfb pd/stm/Mpn1/G 0.01969f
+C2 Iref_pd D_n 0.01812f
+C3 xdrv.cmfb Iref_drv 0.21485f
+C4 pd/kpm/Mldo/G Iref_drv 0.03969f
+C5 xdrv.cmfb Va 0.33058f
+C6 pd/kpm/Mldo/G Va 0.0239f
+C7 drv/x_hbridge/M6/S9 Iref_drv 0.15413f
+C8 drv/x_hbridge/M6/S9 Va 0.15043f
+C9 pd/stm/Mpxp/G xdrv.cmfb 0.0379f
+C10 pd/stm/Mpn1/G Va 0.01047f
+C11 Iref_drv Va 0.63745f
+C12 pd/stm/Mpp1/G Iref_drv 0.1942f
+C13 Vref D_n 0.02305f
+C14 pd/stm/Mpxp/G Iref_drv 0.03774f
+C15 Iref_pd Iref_drv 0.04846f
+C16 pd/stm/Mpxp/G Va 0.05878f
+C17 drv/x_hbridge/M6/S9 pd/stm/Mpxp/D 0.02249f
+C18 Iref_pd Va 0.23832f
+C19 drv/x_hbridge/M5/D8 In_n 0.05647f
+C20 Iref_drv pd/stm/Mpxp/D 0.26446f
+C21 Va pd/stm/Mpxp/D 0.43918f
+C22 Vref xdrv.cmfb 0.94495f
+C23 pd/kpm/Mldo/G Vref 0.24653f
+C24 drv/x_hbridge/M6/S9 In_p 0.03821f
+C25 Vref drv/x_hbridge/M6/S9 0.19405f
+C26 In_p Iref_drv 0.29f
+C27 In_p Va 2.45925f
+C28 In_p pd/stm/Mpp1/G 0.01992f
+C29 Vref Iref_drv 1.36526f
+C30 pd/kpm/Mio/B Iref_drv 0.10347f
+C31 Vref Va 0.58382f
+C32 Out_p Iref_drv 0.13804f
+C33 Vref pd/stm/Mpp1/G 0.12248f
+C34 drv/x_hbridge/M5/D8 Iref_drv 0.21152f
+C35 Vref Iref_pd 0.04331f
+C36 xdrv.cmfb drv/x_cmfb/M10/S -0.01041f
+C37 pd/kpm/Out Iref_drv 0.76471f
+C38 In_p pd/stm/Mpxp/D 0.05536f
+C39 Vref pd/stm/Mpxp/D 0.44569f
+C40 drv/x_hbridge/M6/S9 drv/x_cmfb/M10/S -0.01278f
+C41 Vref In_p 0.17634f
+C42 Vref pd/kpm/Mio/B 0.12059f
+C43 D_p Iref_drv 0.04079f
+C44 Vref pd/kpm/Out 0.73786f
+C45 pd/knm/Out Iref_drv 0.01311f
+C46 Iref_pd D_p 0.01816f
+C47 xdrv.cmfb In_n 0.16149f
+C48 Vref drv/x_cmfb/M10/S 0.10271f
+C49 Iref_drv D_n 0.04727f
+C50 In_n Va 0.31119f
+C51 drv/x_cmfb/cm Vss -1.40059f
+C52 drv/x_hbridge/M6/S9 Vss -6.80593f
+C53 Out_p Vss -4.80619f
+C54 drv/x_hbridge/M5/D8 Vss -6.6905f
+C55 Out_n Vss -4.61357f
+C56 Iref_drv Vss -2.27683f
+C57 drv/x_cmfb/Rc/R1 Vss -0.85692f
+C58 drv/x_cmfb/M14/G Vss -1.23915f
+C59 drv/x_cmfb/M10/S Vss -1.15667f
+C60 xdrv.cmfb Vss -4.64789f
+C61 Vref Vss 0.59164f
+C62 pd/knm/Mldo/G Vss -1.09956f
+C63 D_p Vss -1.21625f
+C64 pd/knm/Out Vss -1.89751f
+C65 pd/knm/Mio/B Vss -1.28987f
+C66 D_n Vss -1.16656f
+C67 Iref_pd Vss -2.51579f
+C68 pd/kpm/Mldo/G Vss -1.09956f
+C69 pd/kpm/Out Vss -1.92078f
+C70 pd/kpm/Mio/B Vss -1.28987f
+C71 pd/stm/Mpxp/D Vss -2.74228f
+C72 pd/stm/Mpxp/G Vss -2.64305f
+C73 pd/stm/Mpp1/G Vss -1.00689f
+C74 In_n Vss -3.46819f
+C75 In_p Vss -3.66529f
+C76 pd/stm/Mpn1/G Vss -1.00783f
+C77 Va Vss -19.67002f
+.ends
+

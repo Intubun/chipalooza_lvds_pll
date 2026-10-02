@@ -159,6 +159,20 @@ sim-prepare: $(PLL_COSIM_SO) ## Netlist every top-level bench and inject the d_c
 	@$(SCRIPTS_DIR)/prepare_benches.sh $(abspath .)
 .PHONY: sim-prepare
 
+extract-lvds: ## Extract lvds_tx and lvds_pattern with coupling C into netlist/pex/, for the post-layout LVDS bench
+	bash $(SCRIPTS_DIR)/sim/extract_lvds.sh
+.PHONY: extract-lvds
+
+sim-lvds-postlayout: extract-lvds ## Post-layout LVDS bench in batch mode: extracted lvds_pattern + lvds_tx, PRBS-7 at 500 Mb/s, no PLL
+	mkdir -p $(XSCHEM_TB_DIR)/simulations
+	-cd $(XSCHEM_TB_DIR) && xschem -r -x -q --rcfile xschemrc --command ' \
+		xschem set netlist_type spice; \
+		set netlist_dir $(abspath $(XSCHEM_TB_DIR)/simulations); \
+		xschem netlist \
+	' $(TOP)_tb_lvds_postlayout.sch
+	cd $(XSCHEM_TB_DIR)/simulations && ngspice -b $(TOP)_tb_lvds_postlayout.spice
+.PHONY: sim-lvds-postlayout
+
 list-pll-sweep: ## List the generated PLL combination benches
 	@for tb in $(PLL_TBS); do echo "  $$tb"; done
 .PHONY: list-pll-sweep
