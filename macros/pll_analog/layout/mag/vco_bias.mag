@@ -1,0 +1,65 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 0
+use dev_p_w0p15_l0p13_ng1_noguard_sdvia  M1
+timestamp 0
+transform 1 0 300 0 1 400
+box 0 0 1 1
+use dev_n_w0p15_l0p13_ng1_noguard_sdvia  M2
+timestamp 0
+transform 1 0 300 0 1 1000
+box 0 0 1 1
+<< nwell >>
+rect -48 0 648 600
+<< nsubdiff >>
+rect 0 100 600 160
+<< nsubdiffcont >>
+rect 14 114 46 146
+rect 86 114 118 146
+rect 158 114 190 146
+rect 230 114 262 146
+rect 302 114 334 146
+rect 374 114 406 146
+rect 446 114 478 146
+rect 518 114 550 146
+<< psubdiff >>
+rect 0 760 600 820
+<< psubdiffcont >>
+rect 14 774 46 806
+rect 86 774 118 806
+rect 158 774 190 806
+rect 230 774 262 806
+rect 302 774 334 806
+rect 374 774 406 806
+rect 446 774 478 806
+rect 518 774 550 806
+<< metal1 >>
+rect -100 100 600 160
+rect 243 458 529 569
+rect -100 760 600 820
+rect 71 1058 357 1169
+<< via1 >>
+rect 430 110 470 150
+rect 480 520 520 560
+rect 430 770 470 810
+rect 80 1120 120 1160
+<< metal2 >>
+rect 337 101 479 159
+rect 337 106 377 430
+rect 220 370 268 1030
+rect 220 511 529 569
+rect 220 640 700 688
+rect 337 761 479 819
+rect 337 766 377 1030
+rect -100 1111 129 1169
+<< labels >>
+rlabel metal2 -100 1116 -60 1164 0 VCTRL
+port 1 nsew
+rlabel metal2 660 640 700 688 0 VBP
+port 2 nsew
+rlabel metal1 -100 100 -60 160 0 VDD
+port 3 nsew
+rlabel metal1 -100 760 -60 820 0 VSS
+port 4 nsew
+<< end >>

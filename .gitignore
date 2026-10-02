@@ -27,6 +27,7 @@ sim_build/
 /macros/iref_x15/netlist
 /macros/iref_x15/verification
 /macros/lvds_tx/verification
+/macros/pll_analog/verification
 /macros/lvds_tx/build
 /macros/lvds_tx/layout/*.lyrdb
 /macros/inverter/verification/cace/templates/simulations
@@ -48,3 +49,4 @@ sim_build/
 /macros/pll_digital/flow/librelane/runs
 /macros/counter/flow/final
 /macros/counter/fpga/*/build/
+tmp_pics/
