@@ -30,13 +30,17 @@ module tb_fractional_divider;
         integer minimum_interval;
         integer maximum_interval;
         integer interval_sum;
+        reg previous_feedback;
         real measured_ratio;
         real expected_ratio;
         begin
-            enable = 1'b0;
-            reset_n = 1'b0;
+            $display("TEST N=%0d frac=%0d", n, frac);
+            enable = 1'b1;
+            reset_n = 1'b1;
             integer_div = n;
             fractional_num = frac;
+            #0.001;
+            reset_n = 1'b0;
             repeat (4) @(posedge vco_clk);
             reset_n = 1'b1;
             enable = 1'b1;
@@ -47,11 +51,12 @@ module tb_fractional_divider;
             minimum_interval = 1000000;
             maximum_interval = 0;
             interval_sum = 0;
+            previous_feedback = 1'b0;
             while (pulses < pulses_required + 1) begin
                 @(posedge vco_clk);
                 #0.001;
                 cycles = cycles + 1;
-                if (feedback_clk) begin
+                if (feedback_clk && !previous_feedback) begin
                     if (pulses != 0) begin
                         interval = cycles - previous_cycle;
                         interval_sum = interval_sum + interval;
@@ -62,6 +67,14 @@ module tb_fractional_divider;
                     end
                     previous_cycle = cycles;
                     pulses = pulses + 1;
+                end
+                previous_feedback = feedback_clk;
+                if (cycles > pulses_required * (n + 2) * 2) begin
+                    $display("FAIL N=%0d frac=%0d divider stopped after %0d pulses (q1=%b q2=%b modulus_2=%b group=%0d phase=%0d)",
+                             n, frac, pulses, dut.prescaler_i.q1,
+                             dut.prescaler_q2, dut.prescaler_i.modulus_2,
+                             dut.group_counter, dut.pulse_phase);
+                    $fatal(1);
                 end
             end
 
@@ -82,6 +95,11 @@ module tb_fractional_divider;
 
     initial begin
         run_case(7'd4, 3'd0, 128);
+        run_case(7'd5, 3'd0, 128);
+        run_case(7'd6, 3'd0, 128);
+        run_case(7'd7, 3'd0, 128);
+        run_case(7'd4, 3'd3, 256);
+        run_case(7'd4, 3'd4, 256);
         run_case(7'd7, 3'd4, 256);
         run_case(7'd39, 3'd2, 256);
         run_case(7'd79, 3'd6, 256);
