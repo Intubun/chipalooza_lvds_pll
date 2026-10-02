@@ -44,12 +44,13 @@ flops therefore hold the **complement** of the LFSR word. An all-zero complement
 *is* the all-ones seed, the feedback becomes `XNOR(s6, s5)` instead of XOR, and
 the bit that goes to the line is `s6_n`. No set-capable flop, no seed logic.
 
-**The pair is registered after the inversion.** `s6` and `s6_n` — the line bit and
-its native complement, both straight off the last shift-register flop — go into two
-identical `dfrbp_2` on the same clock, `xffp` and `xffn`. What leaves those flops is
-two edges from the same cell type at the same instant, so the Q/Q_N mismatch of
-`xs6` (~55 ps) is absorbed by the output flops' setup margin instead of appearing as
-output skew.
+**The pair is registered after the inversion.** `s6` goes straight into `xffp` and,
+through `xinvd` (`inv_1`), into `xffn` — two identical `dfrbp_2` on the same clock.
+What leaves those flops is two edges from the same cell type at the same instant;
+the inverter sits in the D path only, so its delay is absorbed by the output flops'
+setup margin instead of appearing as output skew. (Until 2026-10-02 `xffn` took
+`s6_n`, `Q_N` of `xs6`, with the same effect; the inverter came in with the layout
+rework below, where it saved routing `s6_n` across the block.)
 
 **Those two flops answer to neither `en` nor `reset`, by construction.** They are
 clocked by `gclk_free_b`, an ungated copy of the clock — a second `lgcp_1` with its
@@ -64,16 +65,40 @@ runs to a rail and needs ~60 ns to climb back every time the pattern is enabled.
 Hanging the output flops off the gated clock had the same effect for `en = 0` — never
 clocked, never reset, both sides drifting to the same level.
 
-`s6` and `s6_n` are `Q` and `Q_N` of one cell, so they are opposite in *every* state
-the register can hold: held in reset, stopped by `en`, or running. Clocking the two
-output flops unconditionally therefore hands the driver a complementary pair from the
-first edge after power-up, and `en` still does its job — the register stops, the
-output pair just holds its last complementary value instead of collapsing.
+`s6` and its inverse are opposite in *every* state the register can hold: held in
+reset (`s6` = 0, so the pair loads `D_p` = 1, `D_n` = 0), stopped by `en`, or running.
+Clocking the two output flops unconditionally therefore hands the driver a
+complementary pair from the first edge after power-up, and `en` still does its job —
+the register stops, the output pair just holds its last complementary value instead
+of collapsing. A reset in the middle of operation does not disturb the pair either:
+simulated (this block from the schematic, the extracted driver as load, a reset
+pulse of 10 ns in the middle of PRBS-7), the pair never shows two equal levels and
+`Vos` stays within 27 mV pp through the reset.
 
 The library has no reset-less flop: `dfrbp`, `dfrbpq`, `sdfrbp` and `sdfbbp` all carry
-`RESET_B`. Tying it high is that flop. `sg13cmos5l_sdfbbp_1` would do the same with
-`SET_B` and `RESET_B` both tied off, but it only comes in drive 1 and adds two scan
-pins to tie down, so it buys nothing here.
+`RESET_B`. Tying it high is that flop.
+
+**Not `sdfbbp_1`.** The first layout (2026-10-02, `b6ddedf`) placed two
+`sg13cmos5l_sdfbbp_1` instead, `xffp` reset and `xffn` set by `reset_b`, for a
+complementary state without a clock edge. That cell comes in drive 1 only, its `Q`
+rises ~50 ps slower than it falls, and in the layout `xffn`'s `Q` wire carried 7.0 fF
+against 4.3 fF on `xffp`. Extracted, the pair came out one-sided: `D_p` rose 28 ps
+before `D_n` fell (39 ps at ss, 125 °C), and the lvds_tx pre-driver turned that into
+`Vos` pp of 154 mV at ss, 125 °C, 2.97 V - over the 150 mV of TIA/EIA-644-A
+(lvds_tx README, *Output crossing point*). `scripts/rework_outflops.py` put the
+`dfrbp_2` back, mirrored against each other so both `Q` pins sit in the middle of
+the row and `fp`/`fn` leave together (4.7 / 5.1 fF). `D_p`/`D_n` skew, extracted
+(magic, coupling C), with the extracted lvds_tx as load, PRBS-7 at 500 Mb/s,
+`D_p` rising / falling:
+
+| | tt, 27 °C | tt, −40 °C, 3.63 V | ss, 125 °C, 2.97 V |
+|---|---|---|---|
+| `sdfbbp_1` | −28.5 / +2.1 ps | — | −38.9 / +3.5 ps |
+| **`dfrbp_2`** | **+13.1 / −17.9 ps** | **+11.1 / −15.1 ps** | **+15.7 / −22.1 ps** |
+
+The rest is symmetric: the falling output now comes ~15 ps early on either side,
+which the pre-driver tolerates far better than one rising edge early (`Vos` pp on
+that bench 154 → 80 mV at ss, 125 °C).
 
 The capture clock is ~38 ps **earlier** than `gclk_b`, because its buffer drives two
 flop clock pins instead of seven. That is skew in the safe direction: the launch flop
@@ -116,6 +141,11 @@ measured in.
 The schematic is written out from a table rather than drawn, so the drawing and
 the net list cannot drift: every pin of every cell is named exactly once in
 `CELLS`. Edit the table, run `make gen`, do not hand-edit the `.sch`.
+
+**Since `b6ddedf` the `.sch` is ahead of the table**: the decap cells and the
+output-flop changes (`sdfbbp_1`, then `dfrbp_2` with `xinvd`, 2026-10-02) were
+made in the `.sch` itself, so `make gen` would drop them. Bring `CELLS` up to
+the `.sch` before using it again.
 
 ## Running
 

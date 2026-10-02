@@ -38,15 +38,18 @@ the pre-driver's ~40 ps budget.  XOR/XNOR against VSS measured 48 ps.} 2800 -900
 T {clock trunk} 1150 -232 0 0 0.3 0.3 {}
 T {reset trunk - shift register only} 1150 48 0 0 0.3 0.3 {}
 T {The output pair is free of both en and reset by construction.  Their clock is
-the ungated copy and their RESET_B is tied high, so from the first edge after
-power-up they hold s6 and s6_n, which are Q and Q_N of one cell and therefore
-opposite in every state - held in reset, stopped by en, or running.  The LVDS
-driver's common-mode loop always sees a valid differential pair and settles
-once, at t=0, instead of at every enable.
+the ungated copy and their RESET_B is tied high.  xffp loads s6, xffn loads s6
+through xinvd, so the two always load opposite values - in reset too, where s6
+is 0: the pair then holds D_p = 1, D_n = 0, the state the set/reset flops gave
+it, from the first clock edge on and through any reset.  It is never two equal
+levels, so the common-mode loop of the LVDS driver settles once, at t=0, and
+not again after a reset or an enable.
 
-The library has no reset-less flop, so this is dfrbp_2 with RESET_B on VDD.
-sg13cmos5l_sdfbbp_1 would do the same with SET_B and RESET_B both tied off, but
-it only comes in drive 1 and adds two scan pins to tie down as well.} 2400 40 0 0 0.35 0.35 {}
+dfrbp_2 and not sg13cmos5l_sdfbbp_1 with asynchronous set/reset: that comes in
+drive 1 only, its Q rises ~50 ps slower than it falls, and D_p/D_n came out
+15 ps apart (28 ps extracted, with unequal Q loads) - enough to dent Vos of the
+driver (lvds_tx README).  The inverter is in the D path only, not between clock
+and output.} 2400 40 0 0 0.35 0.35 {}
 N 200 -620 360 -620 {lab=ref_clk}
 N 200 -580 360 -580 {lab=pll_clk}
 N 200 -540 360 -540 {lab=clk_src}
@@ -107,7 +110,6 @@ N 2350 -100 2350 200 {lab=s6}
 N 2140 200 2350 200 {lab=s6}
 N 2140 200 2140 230 {lab=s6}
 N 2350 -100 2460 -100 {lab=s6}
-N 2700 -100 2760 -100 {lab=s6_n}
 N 2640 -580 2640 -120 {lab=fp}
 N 2640 -580 3110 -580 {lab=fp}
 N 2940 -280 2940 -120 {lab=fn}
@@ -166,20 +168,8 @@ N 1090 -610 1090 -500 {lab=gclk_b}
 N 1090 -500 1090 -320 {lab=gclk_b}
 N 2290 -100 2320 -100 {lab=s6_n}
 N 2320 -140 2320 -100 {lab=s6_n}
-N 2320 -140 2700 -140 {lab=s6_n}
-N 2700 -140 2700 -100 {lab=s6_n}
+N 2320 -140 2400 -140 {lab=s6_n}
 N 2700 -80 2760 -80 {lab=VDD}
-N 2700 -60 2760 -60 {lab=VSS}
-N 2700 -40 2760 -40 {lab=VSS}
-N 2700 -20 2760 -20 {lab=reset_b}
-N 2420 -60 2460 -60 {lab=VSS}
-N 2420 -40 2460 -40 {lab=VSS}
-N 2420 -20 2460 -20 {lab=VDD}
-N 2700 -20 2700 20 {lab=reset_b}
-N 2380 20 2700 20 {lab=reset_b}
-N 2380 -80 2380 20 {lab=reset_b}
-N 2380 -80 2460 -80 {lab=reset_b}
-N 2110 20 2380 20 {lab=reset_b}
 N 2110 -80 2110 20 {lab=reset_b}
 N 1090 -320 3110 -320 {lab=gclk_b}
 N 3060 -620 3060 -500 {lab=gclk_bn}
@@ -258,14 +248,8 @@ C {sg13cmos5l_stdcells/sg13cmos5l_inv_16.sym} 3900 -600 0 0 {name=xbp}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_2.sym} 3400 -300 0 0 {name=xn1}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_8.sym} 3650 -300 0 0 {name=xn2}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_16.sym} 3900 -300 0 0 {name=xbn}
-C {devices/lab_wire.sym} 2730 -60 0 0 {name=lw43 sig_type=std_logic lab=VSS}
-C {devices/lab_wire.sym} 2730 -40 0 0 {name=lw44 sig_type=std_logic lab=VSS
-}
-C {devices/lab_wire.sym} 2440 -60 0 0 {name=lw46 sig_type=std_logic lab=VSS}
-C {devices/lab_wire.sym} 2440 -40 0 0 {name=lw47 sig_type=std_logic lab=VSS}
-C {devices/lab_wire.sym} 2440 -20 0 0 {name=lw48 sig_type=std_logic lab=VDD}
-C {sg13cmos5l_stdcells/sg13cmos5l_sdfbbp_1.sym} 2850 -70 0 0 {name=xffn VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
-C {sg13cmos5l_stdcells/sg13cmos5l_sdfbbp_1.sym} 2550 -70 0 0 {name=xffp VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 2850 -100 0 0 {name=xffn}
+C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 2550 -100 0 0 {name=xffp}
 C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 180 0 0 {name=x1 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
 C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 200 0 0 {name=x2 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
 C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 220 0 0 {name=x3 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
@@ -307,3 +291,10 @@ C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 200 0 0 {name=x38 VDD=VDD VS
 C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 220 0 0 {name=x39 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
 C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 240 0 0 {name=x40 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
 C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 260 0 0 {name=x41 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+N 2420 -80 2460 -80 {lab=VDD}
+N 2740 -170 2740 -100 {lab=s6_i}
+N 2740 -100 2760 -100 {lab=s6_i}
+C {devices/lab_wire.sym} 2440 -80 0 0 {name=lw48 sig_type=std_logic lab=VDD}
+C {devices/lab_wire.sym} 2740 -130 1 0 {name=lw49 sig_type=std_logic lab=s6_i}
+C {devices/lab_pin.sym} 2660 -170 0 0 {name=p40 sig_type=std_logic lab=s6}
+C {sg13cmos5l_stdcells/sg13cmos5l_inv_1.sym} 2700 -170 0 0 {name=xinvd}
