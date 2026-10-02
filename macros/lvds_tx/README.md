@@ -300,6 +300,61 @@ corners under `Cc`, so the area did not change. In the top-level bench (PRBS-7 a
 500 Mb/s, no pad model, so less capacitance on the outputs) the crossing moves
 from −23 % to −9 % of the swing and `Vos` pp from 119 to 72 mV.
 
+### The pre-driver's last stage (2026-10-02)
+
+The extracted layout brought the dip back. With lvds_pattern as the source (top-level
+bench, PRBS-7 at 500 Mb/s, both blocks extracted with coupling C) `Vos` pp was 130 mV
+at tt and **165 mV at tt, −40 °C, 3.63 V** — over the 150 mV limit. Two causes:
+
+* **`Mpp2`/`Mnp2` (and `Mpn2`/`Mnn2`) pulled up ~10 ps faster than they pulled
+  down** — 9 ps in the schematic, 11 to 14 ps extracted — so at every edge `In_p`
+  and `In_n` were both high for a moment: both NMOS switches on, both PMOS off,
+  and the bridge pulled the outputs down together. The latch before that stage
+  holds the two sides to ±1 ps; the skew is the last stage's own.
+* **lvds_pattern's pair was one-sided**: `D_p` rose 28 ps before `D_n` fell
+  (39 ps at ss, 125 °C), its drive-1 output flops (lvds_pattern README).
+
+`Mpp2`/`Mpn2` went from `w=40u` to `w=32u` (ten fingers of 3.2 instead of 4 µm;
+`docs/layout.md`, `scripts/archive/fix_stage_pmos32.py`): the falling input now
+crosses first and the two are never both high. Both inputs low for a moment costs
+far less — the PMOS side's current has nowhere to go but the outputs. This bench
+(CACE's, ideal complementary inputs), extracted, dip / bump after an edge:
+
+| | `w=40u` | `w=32u` |
+|---|---|---|
+| tt, 27 °C, 3.3 V, 110 ps edges | −61 / +17 mV (`Vos` pp 78) | −17 / +13 mV (`Vos` pp 30) |
+| the same with the ESD pad (`esdpad.sch`) on both outputs | −47 / +15 mV | −11 / +11 mV |
+| tt, −40 °C, 3.63 V, 50 ps | −113 / +20 mV | −81 / +18 mV |
+| ss, −40 °C, 3.63 V, 50 ps | −111 / +20 mV | −66 / +19 mV |
+| ff, −40 °C, 3.63 V, 50 ps | −112 / +19 mV | −87 / +17 mV |
+| ss, 125 °C, 2.97 V, 50 ps | −61 / +23 mV | −14 / +36 mV |
+
+CACE over the 54 conditions, extracted: `Vos` pp worst 119 → 98 mV (rcx 136 → 118),
+median 68 → 59 mV; everything else moves by a few mV and ps. It does not centre the
+crossing everywhere: the switches balance near the common mode, ~1.2 V, while the
+pre-driver crosses at Va/2, so the best skew depends on Va. At 3.63 V the dip stays
+(−81 mV at tt, −40 °C, even with no overlap left), at 2.97 V and 50 ps edges the
+new worst case is a bump (98 mV pp at ss, 125 °C). 3.0 µm fingers do better cold
+and worse hot, 3.4 µm the reverse; 3.2 µm is the middle.
+
+In the top-level bench, with lvds_pattern's output flops changed as well
+(`dfrbp_2`, lvds_pattern README), both blocks extracted, PRBS-7 at 500 Mb/s:
+
+| `Vos` pp | before | `w=32u` only | `w=32u` + `dfrbp_2` |
+|---|---|---|---|
+| tt, 27 °C, 3.3 V | 130 mV | 107 mV | **81 mV** |
+| tt, −40 °C, 3.63 V | **165 mV ✗** | 126 mV | **136 mV** |
+| ss, 125 °C, 2.97 V | 128 mV | **152 mV ✗** | **74 mV** |
+
+`D_p`/`D_n` skew there 30 / 30 / 42 ps before, 18 / 15 / 22 ps after. The cold,
+high-Va corner keeps the least margin (14 mV): that is the crossing point
+above, not the pair.
+
+This contradicts *a weaker `Mpp2` … trebles `Vos` pp* above. That was measured on
+`predriver.tb` before `Ctn`; with `Ctn` in place it does not reproduce, with or
+without the ESD pad model. A cap on `tail_p` still makes it worse (−160 mV instead
+of −80 mV at tt, −40 °C, 3.63 V), and so does removing `Ctn` (−130 mV).
+
 ## Not imported yet
 
 `compliance/`, `predriver/` and `serdes/` batch benches, `predelay` (verified but out

@@ -186,7 +186,7 @@ spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_pmos.sym} 700 -300 0 0 {name=Mpp2
 l=0.4u
-w=40u
+w=32u
  ng=10
  m=1
   mm_ok=1
@@ -242,7 +242,7 @@ spiceprefix=X
 }
 C {sg13cmos5l_pr/sg13_hv_pmos.sym} 700 1000 0 0 {name=Mpn2
 l=0.4u
-w=40u
+w=32u
  ng=10
  m=1
   mm_ok=1

@@ -262,7 +262,7 @@ similar height and mirror pairs line up:
 | | `Mid`, `Mio` | 2 → 6 | 4 µm |
 | | `Mt` | 14 → 20 → 2 × 6 | 7 µm, then 1.75 µm (`w=140u` → `35u` with `MRef` at `l=2u`), then 2.92 µm at `l=0.45u` in two halves under the pair (macro README) |
 | `predriver_stage` | `Mpp1`, `Mpn1` | 2 → 4 | 3.13 µm |
-| | `Mpp2`, `Mpn2` | 4 → 10 | 4 µm |
+| | `Mpp2`, `Mpn2` | 4 → 10 | 4 µm; 3.2 µm since 2026-10-02 (`w=32u`, macro README *Output crossing point*, `fix_stage_pmos32.py`) |
 | | `Mnp1`, `Mnn1` | 1 → 2 | 2.5 µm |
 | | `Mnp2`, `Mnn2` | 2 → 8 | 2 µm |
 

@@ -243,6 +243,13 @@ y 0      NWell bottom  merges with Cc's NWell below, 0.85 um into it
   between columns.
 * **One NWell** over the whole PMOS row and **one ThickGateOx** over the
   whole stage, each reaching at least 0.27 µm past every Activ (TGO.a).
+* **`Mpp2`/`Mpn2` are the exception to bottom-flush** since 2026-10-02: their
+  fingers went from 4 to 3.2 µm (`w=40u` → `32u`, README *Output crossing
+  point*). The cells were moved up 0.4 µm so that their gate rail is where
+  the 4 µm cells had it, and the stage's six Va tabs under each run 0.8 µm
+  further up to the shorter source stripes; the lowest two via1 rows of the
+  `Out_p`/`Out_n` columns, which no longer land on a stripe, are gone
+  (`scripts/archive/fix_stage_pmos32.py`).
 * **Gates on the inside only.** Every gate is contacted on the side facing
   the other row (`devices.py: MODEL_OVERRIDES`): PMOS `botc 0`, gate rail on
   top; NMOS `topc 0`, gate rail at the bottom. The two rails of a column
