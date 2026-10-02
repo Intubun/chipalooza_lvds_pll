@@ -4,7 +4,7 @@ magscale 1 2
 timestamp 0
 use dev_rhigh_w1_l22p08  R1
 timestamp 0
-transform 1 0 304 0 1 2498
+transform 1 0 304 0 1 12264
 box 0 0 1 1
 use dev_cap_cmomf_w100_l100  C1A
 timestamp 0
@@ -12,6 +12,39 @@ transform 1 0 1008 0 1 0
 box 0 0 1 1
 use dev_cap_cmomf_w32p6431_l32p6431  C2
 timestamp 0
-transform 1 0 0 0 1 20400
+transform -1 0 -200 0 1 11264
 box 0 0 1 1
+<< metal1 >>
+rect 275 9829 333 9887
+<< via1 >>
+rect 284 9838 324 9878
+<< metal2 >>
+rect 275 9829 333 9887
+rect 275 9971 333 10029
+rect 275 14499 333 14557
+<< via2 >>
+rect 284 9838 324 9878
+rect 284 9980 324 10020
+rect 284 14508 324 14548
+<< metal3 >>
+rect -7029 9829 333 9887
+rect -7029 9829 -6971 20329
+rect 275 9971 333 10029
+rect 275 14499 333 14557
+rect -7029 20271 -6971 20329
+<< via3 >>
+rect 284 9980 324 10020
+rect 284 14508 324 14548
+rect -7016 20284 -6976 20324
+<< metal4 >>
+rect 275 9971 1010 10029
+rect -202 14499 333 14557
+rect -3493 17791 -3435 20329
+rect -7029 20271 11037 20329
+rect 10979 19998 11037 20329
+<< labels >>
+rlabel metal4 -100 14499 -42 14557 0 VCTRL
+port 1 nsew
+rlabel metal4 -6800 20271 -6742 20329 0 VSS
+port 2 nsew
 << end >>
