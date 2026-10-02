@@ -65,7 +65,9 @@ proc cosim_inject_after_netlist {} {
   set stem [file tail [file rootname [xschem get schname]]]
   set spice [file join $netlist_dir $stem.spice]
   if {![file exists $spice]} return
-  if {[catch {exec $COSIM_INJECT $spice} res]} {
+  # through python3, not the shebang: a Windows checkout gives the script CRLF
+  # line ends, and "#!/usr/bin/env python3\r" finds no interpreter
+  if {[catch {exec python3 $COSIM_INJECT $spice} res]} {
     puts "cosim bridge injection failed: $res"
   }
 }

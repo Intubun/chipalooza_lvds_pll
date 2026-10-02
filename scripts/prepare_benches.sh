@@ -47,7 +47,7 @@ for sch in "${BENCHES[@]}"; do
     continue
   fi
 
-  "$INJECT" "$spice" >/dev/null
+  python3 "$INJECT" "$spice" >/dev/null
   n=$(grep -c '^pre_set' "$spice" || true)
   if [ "$n" -eq 2 ]; then
     printf '  %-58s ready\n' "$name"

@@ -125,7 +125,7 @@ sim-xschem: $(PLL_COSIM_SO) ## Run TB simulation with Xschem in batch mode (usag
 #	nets while it netlists.  The arrow inside xschem therefore gets exactly the
 #	same treatment as this target - rewriting it again here with sed would give
 #	the two paths different net names.
-	$(SCRIPTS_DIR)/pll/inject_cosim_bridges.py $(XSCHEM_TB_DIR)/simulations/$(TB).spice
+	python3 $(SCRIPTS_DIR)/pll/inject_cosim_bridges.py $(XSCHEM_TB_DIR)/simulations/$(TB).spice
 	cd $(XSCHEM_TB_DIR)/simulations && ngspice -b $(TB).spice
 .PHONY: sim-xschem
 
