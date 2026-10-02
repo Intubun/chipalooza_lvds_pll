@@ -12,7 +12,7 @@ T {lvds_pattern - data source for the LVDS transmitter, sg13cmos5l standard cell
   reset     active high, asynchronous, seeds the PRBS - shift register only
   mode      0 = gated clock straight to the pair, 1 = PRBS-7
 
-D_p / D_n drive the pre-driver of macros/lvds_tx.} 150 -1000 0 0 0.6 0.6 {}
+D_p / D_n drive the pre-driver of macros/lvds_tx.} 90 -1280 0 0 0.6 0.6 {}
 T {Clock source select, then the PDK's latch-based clock gate.  GCLK is
 held low while en is 0, so en may change at any point in the cycle
 without producing a runt pulse.} 200 -700 0 0 0.35 0.35 {}
@@ -51,14 +51,14 @@ N 200 -620 360 -620 {lab=ref_clk}
 N 200 -580 360 -580 {lab=pll_clk}
 N 200 -540 360 -540 {lab=clk_src}
 N 200 -500 600 -500 {lab=en}
-N 600 -500 600 -590 {lab=en}
+N 600 -590 600 -500 {lab=en}
 N 600 -590 660 -590 {lab=en}
 N 440 -600 620 -600 {lab=clk_sel}
-N 620 -600 620 -610 {lab=clk_sel}
+N 620 -610 620 -600 {lab=clk_sel}
 N 620 -610 660 -610 {lab=clk_sel}
 N 840 -610 1010 -610 {lab=gclk}
-N 1090 -610 1090 -220 {lab=gclk_b}
-N 310 -220 2760 -220 {lab=gclk_b}
+N 1090 -320 1090 -220 {lab=gclk_b}
+N 2110 -220 2760 -220 {lab=gclk_b}
 N 310 -220 310 -120 {lab=gclk_b}
 N 610 -220 610 -120 {lab=gclk_b}
 N 910 -220 910 -120 {lab=gclk_b}
@@ -66,9 +66,6 @@ N 1210 -220 1210 -120 {lab=gclk_b}
 N 1510 -220 1510 -120 {lab=gclk_b}
 N 1810 -220 1810 -120 {lab=gclk_b}
 N 2110 -220 2110 -120 {lab=gclk_b}
-N 1090 -610 2520 -610 {lab=gclk_b}
-N 2520 -610 2520 -620 {lab=gclk_b}
-N 2520 -620 2560 -620 {lab=gclk_b}
 N 620 -790 660 -790 {lab=clk_sel}
 N 600 -770 660 -770 {lab=VDD}
 N 840 -790 1010 -790 {lab=gclk_free}
@@ -77,16 +74,14 @@ N 2460 -170 2460 -120 {lab=gclk_free_b}
 N 2760 -170 2760 -120 {lab=gclk_free_b}
 N 0 -450 110 -450 {lab=reset}
 N 190 -450 190 60 {lab=reset_b}
-N 190 60 2110 60 {lab=reset_b}
-N 310 60 310 -80 {lab=reset_b}
-N 610 60 610 -80 {lab=reset_b}
-N 910 60 910 -80 {lab=reset_b}
-N 1210 60 1210 -80 {lab=reset_b}
-N 1510 60 1510 -80 {lab=reset_b}
-N 1810 60 1810 -80 {lab=reset_b}
-N 2110 60 2110 -80 {lab=reset_b}
-N 2460 -80 2460 20 {lab=VDD}
-N 2760 -80 2760 20 {lab=VDD}
+N 1810 60 2110 60 {lab=reset_b}
+N 310 -80 310 60 {lab=reset_b}
+N 610 -80 610 60 {lab=reset_b}
+N 910 -80 910 60 {lab=reset_b}
+N 1210 -80 1210 60 {lab=reset_b}
+N 1510 -80 1510 60 {lab=reset_b}
+N 1810 -80 1810 60 {lab=reset_b}
+N 2110 20 2110 60 {lab=reset_b}
 N 490 -120 550 -120 {lab=s0}
 N 550 -120 550 -100 {lab=s0}
 N 550 -100 610 -100 {lab=s0}
@@ -108,17 +103,14 @@ N 2050 -100 2110 -100 {lab=s5}
 N 2050 -100 2050 270 {lab=s5}
 N 2050 270 2140 270 {lab=s5}
 N 2290 -120 2350 -120 {lab=s6}
-N 2350 -120 2350 200 {lab=s6}
-N 2350 200 2140 200 {lab=s6}
+N 2350 -100 2350 200 {lab=s6}
+N 2140 200 2350 200 {lab=s6}
 N 2140 200 2140 230 {lab=s6}
 N 2350 -100 2460 -100 {lab=s6}
-N 2290 -100 2290 -40 {lab=s6_n}
-N 2290 -40 2700 -40 {lab=s6_n}
-N 2700 -40 2700 -100 {lab=s6_n}
 N 2700 -100 2760 -100 {lab=s6_n}
-N 2640 -120 2640 -580 {lab=fp}
+N 2640 -580 2640 -120 {lab=fp}
 N 2640 -580 3110 -580 {lab=fp}
-N 2940 -120 2940 -280 {lab=fn}
+N 2940 -280 2940 -120 {lab=fn}
 N 2940 -280 3110 -280 {lab=fn}
 N 2640 -100 2680 -100 {lab=fp_n}
 N 2680 -100 2680 -60 {lab=fp_n}
@@ -140,9 +132,7 @@ N 1990 -100 2030 -100 {lab=s5_n}
 N 2030 -100 2030 -60 {lab=s5_n}
 N 1090 -500 1260 -500 {lab=gclk_b}
 N 1340 -500 3060 -500 {lab=gclk_bn}
-N 3060 -500 3060 -620 {lab=gclk_bn}
 N 3060 -620 3110 -620 {lab=gclk_bn}
-N 1090 -320 3110 -320 {lab=gclk_b}
 N 2900 -700 3080 -700 {lab=mode}
 N 3080 -700 3080 -540 {lab=mode}
 N 3080 -540 3110 -540 {lab=mode}
@@ -158,6 +148,41 @@ N 3690 -300 3860 -300 {lab=dn2}
 N 3940 -300 4100 -300 {lab=D_n}
 N 1200 -900 1320 -900 {lab=VDD}
 N 1200 400 1320 400 {lab=VSS}
+N 910 -220 1090 -220 {lab=gclk_b}
+N 310 -220 610 -220 {lab=gclk_b}
+N 610 -220 910 -220 {lab=gclk_b}
+N 1090 -220 1210 -220 {lab=gclk_b}
+N 1210 -220 1510 -220 {lab=gclk_b}
+N 1510 -220 1810 -220 {lab=gclk_b}
+N 1810 -220 2110 -220 {lab=gclk_b}
+N 190 60 310 60 {lab=reset_b}
+N 310 60 610 60 {lab=reset_b}
+N 610 60 910 60 {lab=reset_b}
+N 910 60 1210 60 {lab=reset_b}
+N 1210 60 1510 60 {lab=reset_b}
+N 1510 60 1810 60 {lab=reset_b}
+N 2350 -120 2350 -100 {lab=s6}
+N 1090 -610 1090 -500 {lab=gclk_b}
+N 1090 -500 1090 -320 {lab=gclk_b}
+N 2290 -100 2320 -100 {lab=s6_n}
+N 2320 -140 2320 -100 {lab=s6_n}
+N 2320 -140 2700 -140 {lab=s6_n}
+N 2700 -140 2700 -100 {lab=s6_n}
+N 2700 -80 2760 -80 {lab=VDD}
+N 2700 -60 2760 -60 {lab=VSS}
+N 2700 -40 2760 -40 {lab=VSS}
+N 2700 -20 2760 -20 {lab=reset_b}
+N 2420 -60 2460 -60 {lab=VSS}
+N 2420 -40 2460 -40 {lab=VSS}
+N 2420 -20 2460 -20 {lab=VDD}
+N 2700 -20 2700 20 {lab=reset_b}
+N 2380 20 2700 20 {lab=reset_b}
+N 2380 -80 2380 20 {lab=reset_b}
+N 2380 -80 2460 -80 {lab=reset_b}
+N 2110 20 2380 20 {lab=reset_b}
+N 2110 -80 2110 20 {lab=reset_b}
+N 1090 -320 3110 -320 {lab=gclk_b}
+N 3060 -620 3060 -500 {lab=gclk_bn}
 C {devices/lab_wire.sym} 530 -600 0 0 {name=lw0 sig_type=std_logic lab=clk_sel}
 C {devices/lab_wire.sym} 930 -610 0 0 {name=lw1 sig_type=std_logic lab=gclk}
 C {devices/lab_wire.sym} 1090 -400 0 0 {name=lw2 sig_type=std_logic lab=gclk_b}
@@ -168,8 +193,7 @@ C {devices/lab_wire.sym} 1150 -790 0 0 {name=lw6 sig_type=std_logic lab=gclk_fre
 C {devices/lab_wire.sym} 2460 -170 0 0 {name=lw7 sig_type=std_logic lab=gclk_free_b}
 C {devices/lab_wire.sym} 2760 -170 0 0 {name=lw8 sig_type=std_logic lab=gclk_free_b}
 C {devices/lab_wire.sym} 190 -200 0 0 {name=lw9 sig_type=std_logic lab=reset_b}
-C {devices/lab_wire.sym} 2460 20 0 0 {name=lw10 sig_type=std_logic lab=VDD}
-C {devices/lab_wire.sym} 2760 20 0 0 {name=lw11 sig_type=std_logic lab=VDD}
+C {devices/lab_wire.sym} 2730 -80 0 0 {name=lw11 sig_type=std_logic lab=VDD}
 C {devices/lab_wire.sym} 550 -112 0 0 {name=lw12 sig_type=std_logic lab=s0}
 C {devices/lab_wire.sym} 850 -112 0 0 {name=lw13 sig_type=std_logic lab=s1}
 C {devices/lab_wire.sym} 1150 -112 0 0 {name=lw14 sig_type=std_logic lab=s2}
@@ -177,7 +201,7 @@ C {devices/lab_wire.sym} 1450 -112 0 0 {name=lw15 sig_type=std_logic lab=s3}
 C {devices/lab_wire.sym} 1750 -112 0 0 {name=lw16 sig_type=std_logic lab=s4}
 C {devices/lab_wire.sym} 2050 -112 0 0 {name=lw17 sig_type=std_logic lab=s5}
 C {devices/lab_wire.sym} 2350 100 0 0 {name=lw18 sig_type=std_logic lab=s6}
-C {devices/lab_wire.sym} 2500 -40 0 0 {name=lw19 sig_type=std_logic lab=s6_n}
+C {devices/lab_wire.sym} 2400 -140 0 0 {name=lw19 sig_type=std_logic lab=s6_n}
 C {devices/lab_wire.sym} 2640 -350 0 0 {name=lw20 sig_type=std_logic lab=fp}
 C {devices/lab_wire.sym} 2940 -200 0 0 {name=lw21 sig_type=std_logic lab=fn}
 C {devices/lab_wire.sym} 2680 -60 0 0 {name=lw22 sig_type=std_logic lab=fp_n}
@@ -217,16 +241,14 @@ C {sg13cmos5l_stdcells/sg13cmos5l_buf_4.sym} 1050 -610 0 0 {name=xclkb}
 C {sg13cmos5l_stdcells/sg13cmos5l_lgcp_1.sym} 750 -780 0 0 {name=xicg2}
 C {sg13cmos5l_stdcells/sg13cmos5l_buf_4.sym} 1050 -790 0 0 {name=xclkb2}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_2.sym} 150 -450 0 0 {name=xrstb}
-C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_1.sym} 400 -100 0 0 {name=xs0}
-C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_1.sym} 700 -100 0 0 {name=xs1}
-C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_1.sym} 1000 -100 0 0 {name=xs2}
-C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_1.sym} 1300 -100 0 0 {name=xs3}
-C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_1.sym} 1600 -100 0 0 {name=xs4}
+C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 400 -100 0 0 {name=xs0}
+C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 700 -100 0 0 {name=xs1}
+C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 1000 -100 0 0 {name=xs2}
+C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 1300 -100 0 0 {name=xs3}
+C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 1600 -100 0 0 {name=xs4}
 C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 1900 -100 0 0 {name=xs5}
 C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 2200 -100 0 0 {name=xs6}
 C {sg13cmos5l_stdcells/sg13cmos5l_xnor2_1.sym} 2200 250 0 0 {name=xfb}
-C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 2550 -100 0 0 {name=xffp}
-C {sg13cmos5l_stdcells/sg13cmos5l_dfrbp_2.sym} 2850 -100 0 0 {name=xffn}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_2.sym} 1300 -500 0 0 {name=xclkn}
 C {sg13cmos5l_stdcells/sg13cmos5l_mux2_2.sym} 3150 -600 0 0 {name=xmodep}
 C {sg13cmos5l_stdcells/sg13cmos5l_mux2_2.sym} 3150 -300 0 0 {name=xmoden}
@@ -236,3 +258,52 @@ C {sg13cmos5l_stdcells/sg13cmos5l_inv_16.sym} 3900 -600 0 0 {name=xbp}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_2.sym} 3400 -300 0 0 {name=xn1}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_8.sym} 3650 -300 0 0 {name=xn2}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_16.sym} 3900 -300 0 0 {name=xbn}
+C {devices/lab_wire.sym} 2730 -60 0 0 {name=lw43 sig_type=std_logic lab=VSS}
+C {devices/lab_wire.sym} 2730 -40 0 0 {name=lw44 sig_type=std_logic lab=VSS
+}
+C {devices/lab_wire.sym} 2440 -60 0 0 {name=lw46 sig_type=std_logic lab=VSS}
+C {devices/lab_wire.sym} 2440 -40 0 0 {name=lw47 sig_type=std_logic lab=VSS}
+C {devices/lab_wire.sym} 2440 -20 0 0 {name=lw48 sig_type=std_logic lab=VDD}
+C {sg13cmos5l_stdcells/sg13cmos5l_sdfbbp_1.sym} 2850 -70 0 0 {name=xffn VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_sdfbbp_1.sym} 2550 -70 0 0 {name=xffp VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 180 0 0 {name=x1 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 200 0 0 {name=x2 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 220 0 0 {name=x3 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 240 0 0 {name=x4 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 260 0 0 {name=x5 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_4.sym} -130 280 0 0 {name=x6 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 180 0 0 {name=x7 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 200 0 0 {name=x8 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 220 0 0 {name=x9 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 240 0 0 {name=x10 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 260 0 0 {name=x11 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 280 0 0 {name=x12 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 300 0 0 {name=x13 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 320 0 0 {name=x14 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 340 0 0 {name=x15 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -310 360 0 0 {name=x16 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 180 0 0 {name=x17 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 200 0 0 {name=x18 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 220 0 0 {name=x19 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 240 0 0 {name=x20 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 260 0 0 {name=x21 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 280 0 0 {name=x22 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 300 0 0 {name=x23 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 320 0 0 {name=x24 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 340 0 0 {name=x25 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -520 360 0 0 {name=x26 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 180 0 0 {name=x27 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 200 0 0 {name=x28 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 220 0 0 {name=x29 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 240 0 0 {name=x30 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 260 0 0 {name=x31 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 280 0 0 {name=x32 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 300 0 0 {name=x33 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 320 0 0 {name=x34 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 340 0 0 {name=x35 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -730 360 0 0 {name=x36 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 180 0 0 {name=x37 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 200 0 0 {name=x38 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 220 0 0 {name=x39 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 240 0 0 {name=x40 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+C {sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym} -960 260 0 0 {name=x41 VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
