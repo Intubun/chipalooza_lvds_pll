@@ -43,10 +43,17 @@ from build_placement import (MARGIN, ROUTED, leaf_bbox, leaf_shape,
                              save_floorplan)
 from devices import build_order, parse
 from magfile import orient_box
-from spacing import KIND, Shape, moved, slide, violations
+from spacing import KIND, MERGE, Shape, moved, slide, violations
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 USER_GDS = os.path.join(HERE, "lvds_tx.gds")
+
+# The driver's outer edges, where Rp, Ctn1 and Cop stand on the left and
+# their twins on the right.  The pre-driver fits between Cop and Con with
+# its NWell and ThickGateOx exactly TGO.e from theirs (docs/layout.md, *The
+# stage*), so the width is fixed by that, not by the rows.  M6_0|M6_1 used
+# to set it; M6 is one block of half that width now.
+DRIVER_WIDTH = 11504            # 57.52 um
 
 
 class Block:
@@ -223,18 +230,19 @@ def plan_driver(p):
                                         tail_n caps in the corners
         M5 | M4       Rc                switches, Out_p left, Out_n right;
                                         Rc (cmfb - cc_g) on Rn, right edge
-        M1 | M3        flanks: Rp,Cxp / Cxn,Rn
-        M6_0 | M6_1                     tail, 62 fingers of 1.6 um
-        M11  M9 M10  M12                CMFB pair, the two references between
+        M1 | M3
+        Rp       M6       Rn        tail, 31 fingers of 3.2 um
+                M11 M9 M10 M12          CMFB pair (8 fingers each), the two
+                                        references between, all under M6;
+                                        the flanks down to the bottom edge
 
-    M6 is two blocks side by side, one under each half of the bridge.  M9,
-    its reference, and M10 are single 0.8 um fingers, 0.8 um lower than an
-    M6 block: in the M6 row that step would face a row above or below that
-    can then no longer share its ThickGateOx with the row.  In the bottom
-    row there is nothing below, so they sit there, flush with the top of
-    M11/M12 and right under the middle of M6 -- M9 touching both halves of
-    the device it is the reference for, M10 next to the sources of M11/M12
-    it feeds.
+    M6 is one block on the axis, under both halves of the bridge.  M9, its
+    reference, and M10 are single 0.8 um fingers, much lower than M6: in the
+    M6 row that step would face a row above or below that can then no
+    longer share its ThickGateOx with the row.  In the bottom row there is
+    nothing below, so they sit there, flush with the top of M11/M12 and
+    right under the middle of M6 -- M9 under the device it is the reference
+    for, M10 next to the sources of M11/M12 it feeds.
 
     Cop/Con are gate capacitors, where only W*L counts: at 2 x 10 x 5 um,
     two halves on one shared ring, they are 7.3 um wide and 23.3 um tall,
@@ -244,19 +252,23 @@ def plan_driver(p):
     fits the pre-driver in between."""
     a1 = p.row(["M11", "M9", "M10", ("M12", "m90")], valign=1.0)
     p.drop(a1, p.centred(a1))
-    a2 = p.row(["M6_0", ("M6_1", "m90")])
-    p.drop(a2, p.centred(a2))
+    m6 = p.one("M6")
+    p.drop(m6, p.centred(m6))
 
-    # The sense resistor and the cross cap of each output, at the outer
-    # edge on top of M6.  The gap between them and the switches is where
-    # the Out trunk runs.  The cross cap is metal1-metal4 all through, so
-    # nothing can be routed across it: it is turned so that c1, its Out
-    # terminal, faces the switches and the trunk, and c2 (In) is on top.
-    left, _, right, _ = p.extent(["M11", "M12", "M6_0", "M6_1"])
-    lf = p.row(["Rp", ("Cxp", "m90")])
-    rf = p.row([("Cxn", "r0"), ("Rn", "m90")])
-    p.drop(lf, left)
-    p.drop(rf, right - rf.w)
+    # The sense resistor of each output, at the outer edge, beside M6 and
+    # the CMFB row (which is no wider than M6 since M11/M12 have eight
+    # fingers), down on the bottom edge.  The gap between it and M6 and the
+    # switches is where the Out trunk runs.  (The cross caps Cxp/Cxn that
+    # stood next to it were taken out of the schematic on 2026-09-30.)
+    left = -DRIVER_WIDTH // 2
+    right = left + DRIVER_WIDTH
+    lf = p.one("Rp")
+    rf = p.one("Rn", "m90")
+    # Put, not dropped: with nothing under them, drop stops on the first
+    # edge a neighbour offers (the top of M11), not on the floor.
+    floor = p.extent(["M11"])[1]
+    p.put(lf, left, floor)
+    p.put(rf, right - rf.w, floor)
 
     for spec, valign in ((["M1", ("M3", "m90")], 0.0),
                          (["M5", ("M4", "m90")], 0.0),
@@ -275,16 +287,16 @@ def plan_driver(p):
     rc = p.one("Rc", "r90")
     p.drop(rc, right - rc.w)
     cc = p.one("Cc")
-    p.drop(cc, p.centred(cc))
+    cc_y = p.drop(cc, p.centred(cc))
 
-    # Ctn1/Ctn2, the tail_n caps, fill the two corners left under Cc: Ctn1
-    # on top of Rp/Cxp, Ctn2 on top of Rc.  Sized to merge into Cc above
-    # (0.85 um) and to keep NW.b's 0.62 um from M5/M13 and M14 beside them,
-    # which holds because all of them are one nwell through Cc.  Put, not
-    # dropped: dropped they would stack on top of Cc.
+    # Ctn1/Ctn2, the tail_n caps, in the two corners under Cc, hanging from
+    # it: merged into Cc above (0.85 um) and keeping NW.b's 0.62 um from
+    # M5/M13 and M14 beside them, which holds because all of them are one
+    # nwell through Cc.  Below them the corners are free down to Rp and
+    # Rc.  Put, not dropped: dropped they would stack on top of Cc.
     ctn1, ctn2 = p.one("Ctn1"), p.one("Ctn2")
-    p.put(ctn1, left, p.extent(["Rp"])[3])
-    p.put(ctn2, right - ctn2.w, p.extent(["Rc"])[3])
+    p.put(ctn1, left, cc_y - MERGE["p"][1] - ctn1.h)
+    p.put(ctn2, right - ctn2.w, cc_y - MERGE["p"][1] - ctn2.h)
 
     # Cop/Con are two 10 um halves each (the PDK allows 10 um per finger),
     # stacked on one shared guard ring

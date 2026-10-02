@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Put freshly generated device cells into lvds_tx.gds, and change nothing else.
 
-    python3 swap_pcells.py [--dry-run] [--gds <file>]
+    python3 swap_pcells.py [--dry-run] [--gds <file>] [--only <subckt>]
 
 layout/lvds_tx.gds is the layout, placed and routed by hand in KLayout.  Its
 device cells -- every cell whose name starts with `dev_` -- are the one
@@ -25,6 +25,11 @@ Every other cell -- its shapes, texts and instances -- is compared before
 and after, and the file is written only if nothing but the device cells and
 the re-pointed instances changed.  The old file goes to layout/backups/
 first.
+
+`--only <subckt>` keeps the update to one subcircuit: only its instances are
+re-pointed, and only its device cells are replaced, added or deleted.  A
+cell another subcircuit places as well is left as it is and reported, so
+the other subcircuits come out of the update exactly as they went in.
 
 That makes two rules for editing lvds_tx.gds: never draw inside a dev_*
 cell (the next update puts the generator's geometry back), and never give a
@@ -143,12 +148,16 @@ def main():
                     help="nur berichten, nichts schreiben")
     ap.add_argument("--gds", default=GDS,
                     help="die Layoutdatei (Standard: lvds_tx.gds)")
+    ap.add_argument("--only", metavar="SUBCKT",
+                    help="nur die Devices dieses Subcircuits; Zellen, die "
+                         "auch ein anderer benutzt, bleiben")
     args = ap.parse_args()
 
     generated = load_generated()
     # Which cell every device of the schematic is, by (subcircuit, name).
+    subckts = parse()
     wanted = {(sub.name, dev.name): dev.cellname
-              for sub in parse().values() for dev in sub.devices}
+              for sub in subckts.values() for dev in sub.devices}
     missing = sorted(set(wanted.values()) - set(generated))
     if missing:
         raise SystemExit("nicht erzeugt: %s" % ", ".join(missing))
@@ -163,9 +172,38 @@ def main():
                              % (name, lib.dbu, dbu))
     before = frame(layout)
 
+    # --only: the device cells the update may touch -- those the subcircuit
+    # wants or places now -- less those another subcircuit wants or places.
+    shared, users = {}, {}
+    if args.only:
+        if args.only not in subckts or layout.cell(args.only) is None:
+            raise SystemExit("--only %s: kein Subcircuit mit Zelle in %s"
+                             % (args.only, os.path.basename(args.gds)))
+        for (sub, _dev), cellname in wanted.items():
+            users.setdefault(cellname, set()).add(sub)
+        for parent in layout.each_cell():
+            if not is_device(parent.name):
+                for inst in parent.each_inst():
+                    users.setdefault(layout.cell(inst.cell_index).name,
+                                     set()).add(parent.name)
+        scope = {c for c, subs in users.items()
+                 if is_device(c) and args.only in subs}
+        shared = {c: sorted(users[c] - {args.only}) for c in scope
+                  if users[c] - {args.only}}
+        scope -= set(shared)
+
+    def in_scope(name):
+        return not args.only or name in scope
+
     # 1. the geometry of every device cell
-    replaced, same = [], 0
+    replaced, same, kept = [], 0, []
     for name, (lib, source) in sorted(generated.items()):
+        if not in_scope(name):
+            cell = layout.cell(name)
+            if (name in shared and cell is not None and differences(
+                    content(layout, cell), content(lib, source), dbu)):
+                kept.append((name, shared[name]))
+            continue
         cell = layout.cell(name)
         if cell is None:
             layout.create_cell(name).copy_shapes(source)
@@ -186,7 +224,7 @@ def main():
     # 2. every device instance, against the schematic
     placed, strangers, repoint = set(), [], []
     for parent in layout.each_cell():
-        if is_device(parent.name):
+        if is_device(parent.name) or args.only not in (None, parent.name):
             continue
         for inst in parent.each_inst():
             child = layout.cell(inst.cell_index).name
@@ -201,26 +239,43 @@ def main():
                 repoint.append((inst, key, child))
     repointed, resized = {}, set()
     for inst, key, child in repoint:
+        if not in_scope(wanted[key]):
+            # the new cell is one another subcircuit places as well, and was
+            # left alone above -- pointing at it would take in its old state
+            kept.append((wanted[key], shared.get(wanted[key], [])))
+            continue
         new = layout.cell(wanted[key])
         if new.dbbox() != layout.cell(child).dbbox():
             resized.add(key)
         inst.cell_index = new.cell_index()
         repointed[key] = (child, wanted[key])
-    unplaced = sorted(k for k in wanted if k not in placed)
+    unplaced = sorted(k for k in wanted if k not in placed
+                      and args.only in (None, k[0]))
 
-    # 3. device cells nothing uses any more, and that are not current
+    # 3. device cells nothing uses any more, and that are not current -- with
+    # --only those of the subcircuit, and those no subcircuit had at all
     dropped = sorted(c.name for c in layout.each_cell()
                      if is_device(c.name) and c.name not in generated
-                     and c.parent_cells() == 0)
+                     and c.parent_cells() == 0
+                     and (in_scope(c.name) or c.name not in users))
     for name in dropped:
         layout.delete_cell(layout.cell(name).cell_index())
     stale = sorted(c.name for c in layout.each_cell()
-                   if is_device(c.name) and c.name not in generated)
+                   if is_device(c.name) and c.name not in generated
+                   and in_scope(c.name))
 
+    if args.only:
+        print("Nur %s: %d Device-Zellen, alle anderen bleiben, wie sie sind."
+              % (args.only, len(scope)))
     print("Zellen: %d unveraendert, %d neu oder ersetzt"
           % (same, len(replaced)))
     for name, note in replaced:
         print("  %-36s %s" % (name, note))
+    if kept:
+        print("Nicht angefasst, weil auch anderswo platziert (ohne --only "
+              "aktualisieren):")
+        for name, others in sorted(set((n, tuple(o)) for n, o in kept)):
+            print("  %-36s %s" % (name, ", ".join(others)))
     if repointed:
         print("Instanzen auf eine neue Zelle umgehaengt (Lage und "
               "Orientierung bleiben):")

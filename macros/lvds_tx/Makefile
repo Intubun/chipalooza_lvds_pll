@@ -161,12 +161,12 @@ sim-all: ## Run the analog benches that need no co-simulation
 # Layout Targets
 # layout/$(TOP).gds is edited by hand in KLayout. The device cells in it (dev_*) are the only
 # generated part: from the schematic, by the PDK's magic gencells (scripts/pcells/, docs/layout.md).
-layout-pcells: ## Regenerate the device cells (dev_*) in layout/lvds_tx.gds from the schematic; nothing else in the file changes
-	bash $(SCRIPTS_DIR)/pcells/update_pcells.sh
+layout-pcells: ## Regenerate the device cells (dev_*) in layout/lvds_tx.gds from the schematic; nothing else in the file changes (usage: make layout-pcells [ONLY=<subckt>])
+	bash $(SCRIPTS_DIR)/pcells/update_pcells.sh $(if $(ONLY),--only $(ONLY))
 .PHONY: layout-pcells
 
-layout-pcells-check: ## Show what layout-pcells would change in layout/lvds_tx.gds, without writing it
-	bash $(SCRIPTS_DIR)/pcells/update_pcells.sh --dry-run
+layout-pcells-check: ## Show what layout-pcells would change in layout/lvds_tx.gds, without writing it (usage: make layout-pcells-check [ONLY=<subckt>])
+	bash $(SCRIPTS_DIR)/pcells/update_pcells.sh --dry-run $(if $(ONLY),--only $(ONLY))
 .PHONY: layout-pcells-check
 
 layout-view: ## Open layout/lvds_tx.gds in a new KLayout window, in edit mode, with both standard cell libraries

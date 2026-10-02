@@ -65,7 +65,7 @@ make sim-xschem TB=tb_dc      # or any single bench by name
 `layout/lvds_tx.gds` is the layout, edited by hand in KLayout. Only its device cells
 (`dev_*`) are generated: `make layout-pcells` rebuilds them from the schematic with the
 PDK's magic gencells and swaps them into the file, leaving everything else as it is.
-57.5 × 61.1 µm, every device at the least spacing the sign-off deck allows, mirror pairs
+57.5 × 62.9 µm, every device at the least spacing the sign-off deck allows, mirror pairs
 on shared guard rings, `make klayout-drc` clean. Routing by hand has just started, so
 there is no LVS yet. `docs/layout.md` has the rules for editing the file and what an
 update does. `docs/routing.md` has the planned wiring net by net, and
@@ -86,6 +86,9 @@ not circuit ones, and the schematic is the place they had to be made.
 | `predriver_comp` `Mld`/`Mlo` | `w=20u ng=2` | `w=12u ng=1` | the pmos load, kept at half the pair — the 2:1 ratio is what matters |
 | `predriver_stage` `Mpp1`/`Mpn1` | `w=12.5u` | `w=12.52u` | what the layout has: the gencell draws a finger on the 10 nm grid, 3.125 µm comes out 3.13 µm. LVS compares widths exactly (+0.16 %) |
 | `predriver_stage` `Mpxn`/`Mpxp` | `w=4.375u` | `w=4.38u` | the same rounding (+0.11 %) |
+| `Driver` `M11`/`M12` | `w=40u ng=16` | `w=20u ng=4` | 2026-09-30 to `w=20u ng=8`: the CMFB pair at half the width fits under `M6` with `M9`/`M10` between, and the flanks beside `M6` drop to the bottom edge. 2026-10-01 to four fingers of 5 µm, the finger of `M13`/`M14`, for the placement by hand (7.4 × 7.0 µm each); no measurable change. The loop is better damped (*CMFB compensation*); `Vod`, `Vos` and `Vos` pp move by less than 1 mV. The pair's offset goes straight into `Vos` and its spread grows by about √2 — Monte-Carlo is still open |
+| `Driver` `Cc` | `w=50u l=5u ng=10` | `w=50u l=5u ng=5` | 2026-10-01, for the placement by hand: five fingers of 10 µm (the PDK's maximum) instead of ten of 5 µm, same W and L and so the same capacitance; 29.5 × 12.7 µm instead of 56.4 × 7.7 µm. `tb_cmfb` and the CACE bench at tt and the two worst corners show no difference (< 0.5 mV, 28.9 % overshoot either way). Making `Cc` smaller would cost the margin the smaller `M11`/`M12` gained: at 70 % 42 % overshoot, at 50 % 57 % and +6.2 dB, as bad as with the 40u pair |
+| `Driver` `Cxp`/`Cxn` | `cap_cmomf` 5.913 × 5.913 µm, `Out_p`–`In_n` and `Out_n`–`In_p` | removed | 2026-09-30, for routing room: a MOM cap fills metal1 to metal4, and the two stood where the `Out` trunks and `cm` have to pass. They damped the output overshoot; without them it is 13 % instead of 0.7 % at ff, −40 °C, 3.63 V (fastest edges) and 5.5 % instead of 4.1 % at tt, `Vos` pp rises by up to 11 mV there (104 mV worst). Edges at tt 4 ps faster, 0.12 mA less supply current. The overshoot shows in CACE's `vod`, which takes the peak; CACE has no overshoot limit of its own. CACE over all 54 conditions, with `M11`/`M12` at 20u: pass, \|Vod\| 356–400 mV, `Vos` 1.190–1.195 V, `Vos` pp 45 mV typ / 105 mV worst, edges 49.6 / 68.9 ps, 5.99 / 6.70 mA. Measured on the CACE bench (ideal 2 × 49.9 Ω) — the pad, ESD and bond wire can make the ringing worse |
 
 The floorplan changed finger counts once more, W and L untouched: `M5`/`M4`
 40 → 16, `M2` 12 → 20, `M11`/`M12` 20 → 16, `Mt` 14 → 20, `Mid`/`Mio` 2 → 6,
@@ -93,9 +96,20 @@ The floorplan changed finger counts once more, W and L untouched: `M5`/`M4`
 so their gate runs through in metal1 — `docs/layout.md`, *One cell for two
 transistors*) and four pairs in `predriver_stage`; `M6` went from four
 blocks of 31 fingers à 0.8 µm to two à 1.6 µm, which raises |Vod| by 2–6 %
-(the reference `M9` keeps its 0.8 µm finger). `Cop`/`Con` went from 10 × 10 µm to
+(the reference `M9` keeps its 0.8 µm finger), and on 2026-09-30 to one
+block of 31 fingers à 3.2 µm (`w=99.2u ng=31 m=1`, same total W). That step
+goes the other way: at tt, 27 °C, 3.3 V |Vod| drops from 386 to 376 mV
+(−2.4 %) and the supply current by 0.1 mA; CACE passes everywhere, |Vod|
+352–386 mV. `Cop`/`Con` went from 10 × 10 µm to
 two 10 × 5 µm halves each (`m=2`), same gate area, so they stand upright beside the pre-driver;
-two halves because the PDK allows at most 10 µm per finger. The table and the corner comparison are in
+two halves because the PDK allows at most 10 µm per finger. On 2026-10-01, for the placement by
+hand, each became one device of two such fingers (`w=20u ng=2 m=1`): same W, L and gate area, one
+guard ring, 12.6 × 12.0 µm. That is not neutral in the model: the capacitance stays (426 vs
+428 fF at 1.2 V), but the series resistance at the gate goes from 19 to 37 Ω, and with it
+`Vos` pp rises from 38.2 to 40.0 mV at tt and from 103.5 to 113.1 mV at ff, −40 °C, 3.63 V,
+edges 2–3 ps slower — still inside the 150 mV. CACE over all 54 conditions with `Cop`/`Con`
+at `ng=2`, `Ctn` in one and `Cc`, `M11`/`M12` reshaped: pass, \|Vod\| 355–402 mV, `Vos` pp 46 mV
+typ / 112 mV worst (ff, −40 °C, 3.63 V), edges 51.3 / 70.5 ps. The table and the corner comparison are in
 `scripts/archive/README.md`, *Finger counts changed for the floorplan*.
 
 In `predriver_stage` every NMOS now has as many gates as the PMOS in its column. Only
@@ -203,6 +217,39 @@ fits in a free corner (`scripts/archive/README.md`). More margin costs area — 
 (ten fingers of 8 µm) with `rppd l=4u` gives 45° worst case for 3 µm more height.
 `tb_cmfb.sch` shows the worst corner, and what the old compensation did there.
 
+On 2026-09-30 `M11`/`M12` went from `w=40u ng=16` to `w=20u ng=8` (*Sizing
+changed for layout*). At ~15 µA each the pair runs near weak inversion, so
+its gm hardly depends on W, while its gate and drain capacitance on `cm`,
+`pd` and `cmfb` halves and the non-dominant poles move up. In `tb_cmfb`
+(ff, −40 °C, 3.63 V, res_wcs; with `M6` already one block):
+
+| `M11`/`M12` | 50 mV `Vref` step, overshoot | `Vos`/`Vref` peak |
+|---|---|---|
+| `w=40u` | 56 % | +5.9 dB at 138 MHz |
+| `w=20u` | 30 % | +2.4 dB at 72 MHz |
+| `w=10u` (not used) | 18 % | +2.0 dB at 52 MHz |
+
+The loop is slower, still far below the bit rate. The phase margin itself was
+not measured again: the double-injection run is not a bench in this
+repository, overshoot and peaking are what the two benches here show.
+
+Since 2026-10-01 `Cc` is an NMOS from `cc_g` to Vss (`w=50u l=5u ng=5`)
+instead of a PMOS to Va, chosen for the layout (no NWell, can sit against
+the NMOS of the CMFB). The loop does not notice (29.1 % instead of 28.9 %,
++2.3 dB either way), and `cc_g` at 1.6–2.1 V keeps the NMOS well inverted.
+What it costs is supply rejection: above the loop bandwidth `Cc` holds the
+gate of `M2`, whose source is Va. Tied to Va it moved the gate with the
+source; tied to Vss it holds the gate still while Va moves, and the ripple
+lands on the 3.7 mA tail. 1 V AC on Va (and on the gate inputs the
+pre-driver pulls with it), in `tb_cmfb`'s corner:
+
+| | 1 MHz | 10 MHz | 100 MHz | 500 MHz |
+|---|---|---|---|---|
+| `Vod`, `Cc` PMOS to Va | −55 dB | −51 dB | −30 dB | −23 dB |
+| `Vod`, `Cc` NMOS to Vss | −54 dB | −37 dB | −6 dB | −10 dB |
+| `Vos`, `Cc` PMOS to Va | −61 dB | −43 dB | −13 dB | −8 dB |
+| `Vos`, `Cc` NMOS to Vss | −29 dB | −9 dB | +9 dB | −5 dB |
+
 ## Output crossing point
 
 `Out_p` and `Out_n` used to cross well below the middle of their swing — 9 to 14 %
@@ -216,6 +263,23 @@ top one loses more, the bottom pulls the common mode down.
 
 `Ctn1` and `Ctn2`, PMOS caps from `tail_n` to Va (95 µm² of gate together), hold
 `tail_n` through the edge, so the bottom slows down as much as the top does.
+(Since 2026-10-01 they are one device, `Ctn`, and an NMOS from `tail_n` to Vss,
+`w=30u l=5u ng=3`. As an NMOS its gate sits only ~0.2 V over threshold at
+`tail_n` (0.82 V at tt) and its capacitance drops with it: 393 fF at 0.8 V
+and 131 fF at 0.4 V for `w=20u`, where the PMOS to Va held 450 fF flat. It
+works anyway, better than the PMOS from 30u up: `Vos` pp on the CACE bench
+with `Cc` an NMOS too, PMOS `w=20u` / NMOS `20u` / `30u` / `40u` / no `Ctn`:
+
+| | PMOS 20u | NMOS 20u | NMOS 30u | NMOS 40u | none |
+|---|---|---|---|---|---|
+| tt, 27 °C, 3.3 V | 39.4 | 47.8 | 37.2 | 32.6 | 95.6 mV |
+| tt, −40 °C, 3.63 V | 110.2 | 112.6 | 105.6 | 101.1 | 142.0 mV |
+| ss, −40 °C, 3.63 V | 104.3 | 108.9 | 100.0 | 94.3 | 146.4 mV |
+| ff, −40 °C, 3.63 V | 111.7 | 113.2 | 107.1 | 103.2 | 133.9 mV |
+| ss, 125 °C, 2.97 V | 35.5 | 6.5 | 15.4 | 23.8 | 34.2 mV |
+
+30u is the smallest that is at least as good as the PMOS everywhere; \|Vod\|
+and the edges move by less than 3 mV and 1.5 ps.)
 `predriver.tb` (pre-driver + driver + ESD pad + 100 Ω), over tt, ss/ff at
 −40/125 °C and the skewed corners sf/fs:
 

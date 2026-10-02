@@ -121,3 +121,8 @@
 ## Schematic
 
 ![Schematic of lvds_tx](lvds_tx_schematic.svg)
+
+## Layout
+
+![Layout of lvds_tx with white background](lvds_tx_w.png)
+![Layout of lvds_tx with black background](lvds_tx_b.png)

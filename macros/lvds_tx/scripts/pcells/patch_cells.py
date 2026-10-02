@@ -107,14 +107,22 @@ def pad_guard_ring(path, side, delta=GATE_CONTACT_ROW):
     """
     cell = MagCell.read(path)
     _llx, lly, _urx, ury = bbox(cell)
-    width = _urx - _llx
     sign = -1 if side == "s" else 1
+
+    # A full-width bar spans the ring itself.  Measured against the ring's
+    # own width, not the cell's: the well and ThickGateOx margin around it
+    # is the same 0.3 um on every cell, and on a one-finger 0.8 um device
+    # (M10) that alone puts the bar at 78 % of the cell width.
+    taps = [r for layer in TAP_LAYERS for r in cell.layers.get(layer, [])]
+    if not taps:
+        return 0
+    width = max(r[2] for r in taps) - min(r[0] for r in taps)
 
     middle = (lly + ury) / 2.0
     edges = []
     for layer in TAP_LAYERS:
         for (rllx, rlly, rurx, rury) in cell.layers.get(layer, []):
-            if rurx - rllx < 0.8 * width:        # not the full-width bar
+            if rurx - rllx < 0.95 * width:       # not the full-width bar
                 continue
             if sign < 0 and rury < middle:
                 edges.append(rury)               # top edge of the bottom bar
@@ -171,6 +179,108 @@ def pad_guard_ring(path, side, delta=GATE_CONTACT_ROW):
 
     cell.write(path)
     return moved
+
+
+M2_GATE_RAIL = u(0.5)          # height of the metal2 rail m2_gate_rail draws
+
+
+def m2_gate_rail(path):
+    """Join the single gate contacts of a `conn_gates 0` device on metal2.
+
+    `conn_gates 0 polycov 50` leaves one short poly contact per finger, with
+    a wide metal1 gap between them through which source and drain reach the
+    guard ring.  The generator's own `viagate` would lengthen every contact
+    to the whole finger and close those gaps, and joins nothing on metal2.
+    So the via1 are drawn here, the way the generator draws them over a
+    `viagate 100` rail: a via1 area 4 units beyond the contact at either
+    side, metal1 grown 1 unit more; metal1 stays one rectangle per contact.
+    The metal2 rail is one plain rectangle of M2_GATE_RAIL over all of them,
+    centred on the vias -- wider than the generator's 0.29/0.2 um rail, and
+    with no notches to fill before connecting to it.  The cell has no other
+    metal2.  All contacts must sit in one row (`topc 0` or `botc 0`).
+    """
+    cell = MagCell.read(path)
+    pads = sorted(cell.layers.get("polycont", []))
+    rows = {(p[1], p[3]) for p in pads}
+    if len(pads) < 2 or len(rows) != 1:
+        raise SystemExit("%s: _m2rail needs one row of single gate contacts, "
+                         "found %d in %d rows" % (path, len(pads), len(rows)))
+    y0, y1 = rows.pop()
+    vy0, vy1 = y0 - 4, y1 + 4
+    for (x0, _a, x1, _b) in pads:
+        cell.paint("via1", x0, vy0, x1, vy1)
+        cell.paint("metal1", x0 - 10, vy0 - 1, x1 + 10, vy1 + 1)
+    centre = (vy0 + vy1) // 2
+    cell.paint("metal2", pads[0][0], centre - M2_GATE_RAIL // 2,
+               pads[-1][2], centre + M2_GATE_RAIL // 2)
+    cell.write(path)
+    return len(pads)
+
+
+M2_SPACE = u(0.21)              # M2.b
+
+
+def clip_gate_rail(path):
+    """Cut the metal2 gate rail back from the source/drain straps.
+
+    With `viasrc`/`viadrn 100` on a short finger the strap over the stripe
+    runs to within 0.15 um of the `viagate 100` rail (M2.b wants 0.21) --
+    the reason the straps are off by default.  Here every metal2 piece of
+    the rail that comes nearer than M2.b to a strap is cut back, or dropped
+    when nothing of it would be left; the via1 over the gate contacts is
+    never touched, so the rail still reaches the gate.  Distances are
+    euclidean, as in magic's `drc euclidean on` and the sign-off deck.
+    """
+    cell = MagCell.read(path)
+    contacts = cell.layers.get("polycont", [])
+    if not contacts:
+        return 0
+    band = (min(r[1] for r in contacts) - 20, max(r[3] for r in contacts) + 20)
+
+    def in_band(r):
+        return r[1] < band[1] and r[3] > band[0]
+
+    straps = [r for lay in ("metal2", "via1") for r in cell.layers.get(lay, [])
+              if not in_band(r)]
+    vias = [r for r in cell.layers.get("via1", []) if in_band(r)]
+
+    def gap(a, b):
+        dx = max(b[0] - a[2], a[0] - b[2], 0)
+        dy = max(b[1] - a[3], a[1] - b[3], 0)
+        return (dx * dx + dy * dy) ** 0.5
+
+    out, cut = [], 0
+    for r in cell.layers.get("metal2", []):
+        if not in_band(r) or all(gap(r, s) >= M2_SPACE for s in straps):
+            out.append(r)
+            continue
+        x0, y0, x1, y1 = r
+        for s in straps:
+            if gap((x0, y0, x1, y1), s) >= M2_SPACE:
+                continue
+            if x1 <= s[0]:                       # rail piece left of the strap
+                x1 = min(x1, s[0] - M2_SPACE)
+            elif x0 >= s[2]:
+                x0 = max(x0, s[2] + M2_SPACE)
+            else:
+                x1 = x0                          # straight under it: drop
+        cut += 1
+        if x1 > x0 and gap((x0, y0, x1, y1), min(straps, key=lambda s: gap((x0, y0, x1, y1), s))) >= M2_SPACE:
+            out.append((x0, y0, x1, y1))
+    if any(gap(v, s) < M2_SPACE for v in vias for s in straps):
+        raise SystemExit("%s: a gate via1 sits nearer than M2.b to a strap; "
+                         "cutting the rail cannot fix that" % path)
+    # What is left of the rail can fall under M2.d (0.144 um2) on a short
+    # finger.  Fill it out to its bounding box -- that grows it away from
+    # the strap only, and leaves no notches -- if the box keeps M2.b.
+    rail = [r for r in out if in_band(r)] + vias
+    box = (min(r[0] for r in rail), min(r[1] for r in rail),
+           max(r[2] for r in rail), max(r[3] for r in rail))
+    if all(gap(box, s) >= M2_SPACE for s in straps):
+        out = [r for r in out if not in_band(r)] + [box]
+    cell.layers["metal2"] = out
+    cell.write(path)
+    return cut
 
 
 def open_guard_ring(path, side):
@@ -273,6 +383,14 @@ def main(celldir):
                 n = pad_guard_ring(path, side)
                 print("patched %s: guard ring pushed %s by 0.19 um (%d shapes)"
                       % (cellname, side, n))
+        if dev.opts.get("_cliprail"):
+            n = clip_gate_rail(path)
+            print("patched %s: %d metal2 gate-rail pieces cut back from the "
+                  "straps" % (cellname, n))
+        if dev.opts.get("_m2rail"):
+            n = m2_gate_rail(path)
+            print("patched %s: %d gate contacts joined on metal2"
+                  % (cellname, n))
         if dev.opts.get("_open"):
             side = dev.opts["_open"]
             n = open_guard_ring(path, side)

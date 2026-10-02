@@ -72,7 +72,7 @@ xlabmag=1.0
 ylabmag=1.0
 legendmag=1.0
 node="x1.cmfb
-x1.cc_g"
+x1.x_cmfb.cc_g"
 color="4 7"
 dataset=-1
 unitx=1
@@ -93,15 +93,18 @@ Set to the corner where the loop has the least margin: ff, -40 C, Va 3.63 V, res
 For another one change .param vdd, the .lib sections and temp below; the graph
 y ranges are set for this corner.
 
-Compensation: Cc 50u x 5u (10 fingers) from cc_g to Va, Rc rppd 1u x 6u (1.6 kOhm)
+Compensation: Cc 50u x 5u (5 fingers of 10u, NMOS since 2026-10-01) from cc_g to Vss, Rc rppd 1u x 6u (1.6 kOhm)
 in series between cmfb and cc_g.  Rc puts a zero next to the unity-gain frequency;
 rppd rather than rhigh because rhigh drifts by 2x over corners and temperature, and
 above ~3 kOhm the zero stops helping.
 
-Expected here: overshoot 54 %, settled to +-2 mV 10 ns after the step, then flat;
-Vos/Vref peaks at +5.8 dB near 140 MHz.  Loop gain (broken at the gate of M2, not
-measurable from this bench): 32 deg phase margin in this corner, 32 deg worst over
-all 81 conditions (27 CACE x res bcs/typ/wcs).
+Expected here, with M11/M12 at 20u since 2026-09-30: overshoot 29-30 %, flat by
+100 ns; Vos/Vref peaks at +2.3 dB near 72 MHz.  Cc is five 10u fingers since
+2026-10-01, same W x L as the ten 5u fingers before, same response.  With M11/M12 at 40u it was 54 %,
+settled to +-2 mV 10 ns after the step, and +5.8 dB near 140 MHz.  Loop gain
+(broken at the gate of M2, not measurable from this bench), measured with the 40u
+pair: 32 deg phase margin in this corner, 32 deg worst over all 81 conditions
+(27 CACE x res bcs/typ/wcs).
 The previous compensation (Cc 40u x 5u straight on cmfb, no Rc) oscillates in this
 corner: the ringing grows to 150 mV pp by 150 ns and Vos/Vref peaks at +28 dB
 near 105 MHz.} -460 -1300 0 0 0.4 0.4 {}

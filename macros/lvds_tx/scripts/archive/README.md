@@ -14,6 +14,7 @@ it. Those are now in `scripts/pcells/` and `build/pcells/cells/`.
 |---|---|
 | `rebuild_stage.py` | 2026-09-29, one-off: `predriver_stage` rebuilt as two rows without guard rings, with a common NWell, one ThickGateOx and tap strips (`docs/layout.md`, *The stage: rows and tap strips*) |
 | `make_floorplan.py`, `build_placement.py`, `spacing.py`, `floorplan.json`, `*.mag` | the placement generator: floorplan rules, placer, measured spacing rules, stored positions, and the magic hierarchy it wrote |
+| `place_driver.py` | 2026-09-30: runs `plan_driver` alone with today's leaf cells (`build/pcells/cells/`) and puts the result into `layout/lvds_tx.gds` -- the Driver's instances only, plus `pd` moved with `Cc`. Without `--write` into `build/driver_regen/lvds_tx.gds`. New device cells first with `make layout-pcells ONLY=Driver` |
 | `run_all.sh`, `build_cells.sh`, `check_drc.tcl`, `save_gds.tcl` | the flow that drove it |
 | `merge_routed.py`, `check_untouched.sh`, `swap_cell.rb`, `verify_swap.rb` | how hand-routed cells and single device cells used to be carried across between the generator's GDS and the hand-edited one |
 | `route_predriver.py` | the pre-driver's scripted routing. It was DRC and LVS clean on this placement, and was switched off over the metal-stack question |

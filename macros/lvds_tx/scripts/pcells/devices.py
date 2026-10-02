@@ -41,6 +41,11 @@ MOS_MODELS = {"sg13_hv_nmos", "sg13_hv_pmos", "sg13_lv_nmos", "sg13_lv_pmos"}
 #
 #   _open <side>   cut the guard ring open on that side ("n" or "s"), so the
 #                  gate can leave the cell without crossing a tap ring.
+#   _cliprail      cut the `viagate 100` metal2 rail back to M2.b from the
+#                  `viasrc`/`viadrn` straps (they collide on short fingers).
+#   _m2rail        with `conn_gates 0`: a via1 on every single gate contact
+#                  and one metal2 rail joining them, the metal1 gaps between
+#                  the contacts left open.
 #   _keepname      apply the other keys without letting them into the cell
 #                  name.  True means the bare geometric name; a string
 #                  pins that exact name, which is what a cell already
@@ -71,6 +76,7 @@ MOS_MODELS = {"sg13_hv_nmos", "sg13_hv_pmos", "sg13_lv_nmos", "sg13_lv_pmos"}
 # ring is open at the top, the pair contacted at the top only with its ring
 # open at the bottom.  Placed 1.56 um into each other, the two open rings
 # meet and form one (docs/layout.md, *Placing by hand*).
+GATE_RAIL_M2 = {"conn_gates": 1, "polycov": 100, "viagate": 100, "topc": 0}
 GENCELL_OVERRIDES = {
     ("predriver", "Mref"): {"conn_gates": 1, "polycov": 100, "viagate": 100,
                             "_keepname": True},
@@ -81,6 +87,49 @@ GENCELL_OVERRIDES = {
     # only, where its diode and net1 are: with no gate rail on top, its
     # sources run straight up into the guard ring (Va) in metal1.
     ("predriver_comp", "Mldo"): {"topc": 0},
+    # The driver's long-channel devices are all gate capacitors with source,
+    # drain and bulk on their ring.  Instead of one metal1 pad per finger
+    # their gate gets a rail like Mref's, brought up to metal2 by a via1 on
+    # every finger, and contacted at the bottom only, so that source and
+    # drain run straight up into the ring in metal1.  Same cell size
+    # (2026-10-01, for the routing by hand).  Ctn is Ctn1 and Ctn2 in one
+    # since the same day, and Cc and Ctn are NMOS to Vss now instead of PMOS
+    # to Va (Ctn w=30u l=5u ng=3, Cc w=50u l=5u ng=5: the finger of Cop/Con).
+    ("Driver", "Cop"): GATE_RAIL_M2,
+    ("Driver", "Con"): GATE_RAIL_M2,
+    # Cc: one short gate contact per finger at the bottom, joined by a rail
+    # on metal2 (patch_cells.py: _m2rail), so that the metal1 gaps between
+    # the contacts stay open and source and drain can be tied to the guard
+    # ring in metal1 right there (2026-10-01, for the routing by hand).
+    ("cmfb_amp", "Cc"): {"conn_gates": 0, "polycov": 80, "topc": 0,
+                       "_m2rail": 1},
+    ("hbridge", "Ctn"): GATE_RAIL_M2,
+    # The CMFB pair: gate rail at the bottom only (2026-10-01, for the
+    # routing by hand); source and drain run up into the ring in metal1.
+    ("cmfb_amp", "M11"): {"topc": 0},
+    ("cmfb_amp", "M12"): {"topc": 0},
+    # ... and their tail the same way (M9, the same geometry, keeps both)
+    # M10: its right stripe (the generator's S) on metal2 with two via1;
+    # the metal2 gate rail below is cut back to M2.b from that strap.
+    ("cmfb_amp", "M10"): {"topc": 0, "viasrc": 100, "_cliprail": 1},
+    # The CMFB loads: gate rail on top only, source and drain run down into
+    # the ring in metal1.
+    ("cmfb_amp", "M13"): {"botc": 0},
+    ("cmfb_amp", "M14"): {"botc": 0},
+    # H-bridge (2026-10-01, for the routing by hand): no gate rail between
+    # the devices that share a tail, so tail_p (M5 -> M2) and tail_n
+    # (M1/M3 -> M6) run straight through. M5 keeps the bottom rail, facing
+    # the top rail of M1 (both In_p); M6 keeps the bottom one, towards M9.
+    # M4 has to match M5: the two share a guard ring, contact bar on
+    # contact bar, which only lines up between identical cells.
+    ("hbridge", "M5"): {"topc": 0},
+    ("hbridge", "M4"): {"topc": 0},
+    ("hbridge", "M1"): {"botc": 0},
+    ("hbridge", "M3"): {"botc": 0},
+    ("hbridge", "M6"): {"topc": 0},
+    # M2, the top tail: gate rail (cmfb) on top only, nothing between its
+    # drains (tail_p) and the sources of M5/M4 below.
+    ("hbridge", "M2"): {"botc": 0},
 }
 # Options for every device of a subcircuit; GENCELL_OVERRIDES still wins.
 #

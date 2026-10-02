@@ -13,6 +13,7 @@ Run inside the IIC-OSIC-TOOLS container, in `macros/lvds_tx`:
 make layout-view            # open layout/lvds_tx.gds in KLayout, edit mode
 make layout-pcells-check    # what would a PCell update change? writes nothing
 make layout-pcells          # regenerate the dev_* cells in layout/lvds_tx.gds
+make layout-pcells ONLY=Driver   # ... only those of one subcircuit
 make klayout-drc            # sign-off DRC of layout/lvds_tx.gds
 bash scripts/check_lvs.sh predriver_comp   # LVS of one cell, once it is routed
 ```
@@ -22,6 +23,19 @@ started in `predriver_comp`. `make klayout-drc` is clean.** Nothing is
 connected yet, so there is no LVS. The placement was produced by the
 generator that is now in `scripts/archive/`. Why every block sits where it
 does is in `scripts/archive/README.md`, *The floorplan*.
+
+2026-09-30: `M6` is one device (`w=99.2u ng=31 m=1`, 3.2 µm fingers) instead
+of two halves, and the Driver was placed anew from the generator's
+`plan_driver` (`scripts/archive/place_driver.py --write`): `M6` is one block
+on the axis, and everything from `M1` up is 1.6 µm higher. The pre-driver
+instance `pd` moved up with `Cc`; the `predriver` cell did not change. The
+same day `M11`/`M12` went to half the width (`w=20u ng=8`): the CMFB row
+`M11 M9 M10 M12` is now no wider than `M6` and sits right under it, and
+`Rp`/`Cxp`, `Cxn`/`Rn` stand on the bottom edge beside it, `Rc` on `Rn`.
+Then the cross caps `Cxp`/`Cxn` came out of the schematic (README, *Sizing
+changed for layout*), and with them out of the layout: `Rp` and `Rn` stand
+alone at the outer edges, the rest did not move.
+**57.5 × 62.9 µm** now. The picture below still shows the old placement.
 
 ![placement](lvds_tx/layout/placement_white.png)
 
@@ -34,7 +48,7 @@ does is in `scripts/archive/README.md`, *The floorplan*.
 2. **Never give a cell of your own a name starting with `dev_`.**
 
 And keep the instance names. Every instance of a device cell carries the
-name of its schematic device (`Mref`, `M6_0`, `Mldo`, …) as GDS property 61.
+name of its schematic device (`Mref`, `Cop_0`, `Mldo`, …) as GDS property 61.
 KLayout shows it under *Instance Properties → User Properties* and keeps it
 on copy and move. That property is how an update knows which device an
 instance is.
@@ -62,6 +76,12 @@ copy it read, and saving that copy would undo the update.
 | a device gone from the schematic | its instance is reported, not deleted. That is left to you |
 | everything else | untouched. Every cell that is not a device cell is compared before and after, and the file is written only if those comparisons match |
 
+`ONLY=<subckt>` (`--only` of `swap_pcells.py`) keeps all of that to one
+subcircuit: only its instances are re-pointed, only its device cells are
+replaced, added or deleted. A cell another subcircuit places too is left as
+it is and listed under *Nicht angefasst*, so every other subcircuit comes out
+unchanged.
+
 Before it writes, the update copies the file to
 `layout/backups/lvds_tx_VOR_pcells_<date>.gds`. If `lvds_tx.gds` was saved while
 the update ran, it stops without writing. `make layout-pcells-check` runs
@@ -74,16 +94,21 @@ cell open in xschem:
 
 | Cell | Blocks | Size | What it holds |
 |---|---|---|---|
-| `lvds_tx` | 2 | 57.5 × 61.1 µm | `Xpd`, `Xdrv` |
-| `Driver` | 25 | 57.5 × 57.7 µm | H-bridge, CMFB amplifier with `Cc`/`Rc`, tail and its `tail_n` caps `Ctn1`/`Ctn2`, damping caps. `Cop`/`Con` stand up beside the pre-driver |
+| `lvds_tx` | 2 | 50.7 × 69.5 µm | `Xpd`, `Xdrv`. Pins on the top edge: `Vss`, `Va` (metal3 rails, x −5.9…−2.9 / −2.6…0.4), `Vref` (metal4, x 12.4…13.4), `Iref_drv` (metal4, x 14.6…15.6), `D_n`, `Iref_pd`, `D_p` (metal2, x 18.4…19.9); on the bottom edge `Out_p`, `Out_n` (metal3, x 18.3…21.6 / 37.3…40.5). LVS clean since 2026-10-02: `bash scripts/check_lvs.sh lvds_tx`. DRC clean (sign-off deck without density, antenna clean) since 2026-10-02; metal density is left to the chip-level fill (M3 29 %, M4 3 %, TopMetal1 0 % against 35/35/25 %) |
+| `Driver` | 5 | being placed by hand | the load caps `Cop`/`Con`, the bias mirror `M9`, and the two blocks `x_hbridge` and `x_cmfb`. Supply rails on the left (metal3: Vss x −6.54…−3.54, Va x −3.24…−0.24); `cmfb` crosses `Iref` on metal4. Pins `Va`, `Vss`, `Out_p`, `Out_n`, `Iref` (metal3), `In_p`, `In_n`, `Vref` (metal2), not yet on the cell edge. LVS clean since 2026-10-01: `bash scripts/check_lvs.sh Driver` |
+| `hbridge` | 9 | 48.7 × 27.1 µm | the H-bridge, split out of `Driver` on 2026-10-01: switches `M5`/`M4` (top) and `M1`/`M3` (bottom), tail sources `M2` (gate `cmfb`) and `M6` (gate `Iref`), the `tail_n` cap `Ctn` (until 2026-10-01 `Ctn1`/`Ctn2`), sense resistors `Rp`/`Rn`. Pins `In_p`, `In_n`, `Iref`, `cmfb`, `Out_p`, `Out_n`, `cm`, `Va`, `Vss` (metal1). LVS clean since 2026-10-01: `bash scripts/check_lvs.sh hbridge` |
+| `cmfb_amp` | 7 | 28.8 × 20.1 µm | the CMFB amplifier, split out of `Driver` on 2026-10-01: pair `M11`/`M12`, loads `M13`/`M14`, tail `M10`, compensation `Cc`/`Rc`. Drawn mirrored to the schematic: `M12`/`M14` on the left, `M11`/`M13` (the diode) on the right. Pins on the bottom edge, left to right `Iref`, `Vss` (metal1), `Vref`, `cmfb`, `Va`, `cm` (metal2). LVS clean since 2026-10-01: `bash scripts/check_lvs.sh cmfb_amp` |
 | `predriver` | 4 | 41.9 × 28.2 µm | two comparators, the stage, `MRef` |
 | `predriver_stage` | 16 | 41.9 × 9.7 µm | the two three-inverter chains and the cross-coupling, as two rows without guard rings (*The stage: rows and tap strips*) |
 | `predriver_comp` | 5 | 12.9 × 15.8 µm | one differential comparator (`Mt` in two halves, `Mld|Mlo` one cell) |
 
 A device written `m=n` in the schematic is `n` instances, `<name>_0` to
 `<name>_<n-1>`. gencell does not strap the gates between the rows of an
-`m>1` device, so the rows are placed separately. `Driver` therefore has 25
-blocks for the schematic's 22 devices (`M6`, `Cop`, `Con` are `m=2`).
+`m>1` device, so the rows are placed separately. In the pre-driver that is
+`Mt` (`Mt_0`, `Mt_1`). `Driver` has no `m>1` device since 2026-10-01
+(`Cop`/`Con` are `w=20u ng=2` now): its 5 blocks are 3 devices and the
+instances `x_hbridge` (`hbridge`) and `x_cmfb` (`cmfb_amp`), both placed at
+(0, 0) so the blocks sit where they were drawn.
 
 ## Files
 
@@ -127,6 +152,46 @@ Per device (`GENCELL_OVERRIDES`):
   leaving a U. The well stays, and `B` moves onto what is left of the ring.
   A U is a weaker guard than a closed ring.
 * `_keepname`: apply the options without letting them into the cell name.
+* `GATE_RAIL_M2` (`conn_gates 1 polycov 100 viagate 100 topc 0`), on the
+  driver's gate capacitors `Cop`, `Con`, `Ctn` (and `Cc` for a few hours) since
+  2026-10-01: one gate rail over all fingers at the bottom, a via1 on
+  every finger and a metal2 rail over them (port `G`), instead of a metal1
+  pad per finger. Source and drain run up into the ring in metal1. Same
+  cell size. Fill the metal2 rail out to its bounding box before
+  connecting to it, as on every `viagate 100` rail.
+* `conn_gates 0 polycov 80 topc 0 _m2rail 1` on `Cc` since 2026-10-01:
+  one short gate contact per finger at the bottom (metal1 pad 3.99 ×
+  0.21 µm), via1 on each the way the generator draws them on a `viagate
+  100` rail, and one plain metal2 rectangle over all of them, 0.5 µm high
+  and centred on the vias (`patch_cells.py: m2_gate_rail`, `M2_GATE_RAIL`):
+  nothing to fill out before connecting to it. The metal1 gaps between the pads stay 1.39 µm wide,
+  with a source/drain stripe in the middle of each, 0.57 µm from the pads
+  on either side, so source and drain can be tied to the guard ring in
+  metal1 right there. (`polycov 50` gives 2.53 µm pads and 2.85 µm gaps.)
+  The generator's own `viagate` cannot do this: with it every contact
+  grows to the whole finger and the gaps shrink to 0.50 µm.
+* `topc 0` on the CMFB pair `M11`/`M12` and its tail `M10`, `botc 0` on the
+  loads `M13`/`M14`, since 2026-10-01: the metal2 gate rail is at the
+  bottom only (`M10`–`M12`) or at the top only (`M13`/`M14`). `M9`, the
+  same geometry as `M10`, keeps both. `M10` also has `viasrc 100
+  _cliprail 1`: its right stripe (the generator's `S`) comes up to metal2
+  on a 0.20 × 0.74 µm strap with two via1. That strap runs into the metal2
+  gate rail below (0.105 µm, M2.b wants 0.21), so `patch_cells.py:
+  clip_gate_rail` cuts the rail back from it, never over the gate via1,
+  and fills what is left out to its bounding box (0.58 × 0.29 µm, above
+  M2.d). `viasrc 80` gives one via1 without the patch. `patch_cells.py` finds the ring bar
+  to push back against the ring's own width since then; against the cell
+  width it missed the bar on a cell as small as `M10`.
+* In the H-bridge since 2026-10-01: `topc 0` on `M5`/`M4` and on the tail
+  `M6`, `botc 0` on `M1`/`M3`, each with one gate rail only. The metal2
+  gate rails of `M5`|`M1` (`In_p`) and `M4`|`M3` (`In_n`) face each other
+  across the PMOS/NMOS gap (rail to rail 2.18 µm, y 12.97–15.15 in
+  `hbridge`), to be joined on metal2 there. `M6` keeps its bottom rail,
+  towards `M9`; `M2` has `botc 0`, its rail (`cmfb`) on top only. `M4`
+  must have the same options as `M5`: they share a
+  guard ring, contact bar on contact bar, and the bars only line up
+  between identical cells (CntB.a1/b/h1 otherwise). The `hbridge` pins
+  `In_p`, `In_n`, `Iref` sit on the rails.
 
 Options are part of the cell name (`dev_n_w4_l0p45_ng6_opens_botc0`), so
 changing one gives the device a new cell. The update re-points its

@@ -2,15 +2,17 @@
 
 Plan zum Routen von `layout/lvds_tx.gds` in KLayout. Die
 Bilder sind waagerecht maßstäblich (1 Zeichen ≈ 1 µm), senkrecht gestaucht.
-Koordinaten in µm, global in `lvds_tx` (57,5 × 61,1 µm). Der Driver liegt bei
-(0, 0), Driver-lokal ist also global.
+Koordinaten in µm, global in `lvds_tx` (57,5 × 62,8 µm). Der Driver liegt bei
+(0, 0), Driver-lokal ist also global. Seit 2026-09-30 (`M6` ein Block, siehe
+Abschnitt 3) liegt der Predriver 1,60 µm höher als bis dahin, bei
+(9,36 / 34,62); die globalen y-Angaben in Abschnitt 1 sind noch die alten.
 
 **Alles sitzt auf Regelabstand** (`layout.md`, *Placing by hand*): benachbarte PMOS teilen sich
 n-Wanne und ThickGateOx (0,85 µm Überlappung), benachbarte NMOS ihr
 ThickGateOx (0,175 µm), zwischen PMOS und NMOS liegen 0,5 µm. Gleich lange
 Spiegelpaare teilen sich sogar den **Guard-Ring**: Kontaktbalken exakt auf
 Kontaktbalken (1,54 µm PMOS, 0,92 µm NMOS Überlappung) – `M5|M4`, `M1|M3`,
-`M6_0|M6_1`, `M9|M10`, die beiden `Mt`, `Mid|Mio`, `Mld|Mlo`, `Mpxn|Mpxp`,
+`M9|M10`, die beiden `Mt`, `Mid|Mio`, `Mld|Mlo`, `Mpxn|Mpxp`,
 `Mnxn|Mnxp`. Es gibt keine
 Verdrahtungskanäle mehr: Metal1 bleibt in den Devices, alles ab Metal2 läuft
 über die Devices.
@@ -22,14 +24,12 @@ Verdrahtungskanäle mehr: Metal1 bleibt in den Devices, alles ab Metal2 läuft
 | Metal1 | – | nur in den Devices, und als Brücke zwischen zwei Guard-Ringen (0,24–0,54 µm auseinander) |
 | Metal2 | waagerecht | Finger-Straps über jedem Device: Drain-Strap über der einen Hälfte, Source-Strap über der anderen; kurze Gate-Sprünge |
 | Metal3 | senkrecht | Device ↔ Device, Stammleitungen, Achse |
-| Metal4 | waagerecht | lange Querverbindungen, Busse, Kreuzkondensatoren |
+| Metal4 | waagerecht | lange Querverbindungen, Busse |
 | TopMetal1 | Kamm | Va / Vss, min. 1,64 µm breit und Abstand |
 
 * **Guard-Ringe:** alle PMOS-Ringe sind Va, alle NMOS-Ringe Vss. Zwei
   benachbarte Ringe dürfen also frei mit Metal1 überbrückt werden – so
   erreicht die Versorgung auch Devices in der Mitte eines Blocks.
-* **`Cxp`/`Cxn` (cap_cmomf) sind innen Metal1–Metal4.** Darüber nur
-  TopMetal1. `c1` (Out) zeigt zu den Schaltern, `c2` (In) nach oben.
 * **3,7-mA-Pfade** (`tail_p`, `tail_n`, `Out_p`, `Out_n`, Va/Vss am Driver):
   ≥ 4 µm Querschnitt, z. B. M3 + M4 übereinander. Faustwert ~1 mA/µm – das
   PDK-Regelwerk (`SG13CMOS5L_os_layout_rules.pdf`) nennt keine
@@ -60,8 +60,8 @@ Grenzen zwischen den Blöcken, über den Devices:
 ```
 
 **Im Predriver gebaut** (Abschnitt 4) liegen die drei Finger über seine
-volle Breite (global x 9,4–48,2): C1 Va y 58,1–61,1, C2 Vss y 42,1–48,6,
-C3 Va y 33,0–36,0 – breiter als oben skizziert, weil sie die
+volle Breite (global x 9,4–48,2): C1 Va y 59,7–62,7, C2 Vss y 43,7–50,2,
+C3 Va y 34,6–37,6 – breiter als oben skizziert, weil sie die
 TopVia1-Posts auf den Source-Straps überdecken müssen. Der Kamm in
 `lvds_tx` muss sie nur noch an die Stränge anschließen (C1/C3 nach Westen,
 C2 nach Osten); über `Cop`/`Con` hinweg ist dafür Platz.
@@ -131,7 +131,19 @@ Auf der Achse liegen damit drei M3-Bahnen nebeneinander (`Iref_pd` bis
 das 1,5 µm. Die beiden 1:15-Vorspiegel, die früher darüber saßen, sind jetzt
 ein eigenes Makro (`macros/iref_x15`) im Top-Level.
 
-## 3. `Driver` (57,5 × 33,9 µm, mit `Cop`/`Con` bis y 57,7)
+## 3. `Driver` (57,5 × 35,5 µm, mit `Cop`/`Con` bis y 59,2)
+
+**Stand 2026-10-01:** Der Driver wird von Hand neu platziert. In der Mitte
+stehen nur noch die H-Brücke `M5`/`M4`, `M1`/`M3` mit `M2` darüber und
+`M6` darunter; CMFB, `Ctn1`/`Ctn2` und `Cop`/`Con` liegen bis zum Einbau
+links außerhalb geparkt. `M11`/`M12` sind jetzt 4 × 5 µm (7,4 × 7,0 µm),
+`Cc` 5 × 10 µm (29,5 × 12,7 µm), `Cop`/`Con` je ein Device mit 2 × 10 µm
+(12,6 × 12,0 µm) statt `Cop_0`/`Cop_1` bzw. `Con_0`/`Con_1`, und `Ctn1`/`Ctn2`
+sind ein `Ctn`. Seit dem selben Tag sind `Cc` und `Ctn` NMOS nach Vss statt
+PMOS nach Va (`Cc` `w=50u l=5u ng=5`, `Ctn` `w=30u l=5u ng=3`): Source,
+Drain und Ring an Vss, keine NWell mehr. In Skizze und Netztabelle unten
+steht noch Va. Skizze und Koordinaten unten zeigen die
+Generator-Platzierung vom 2026-09-30.
 
 ```
 0    5    10   15   20   25   30   35   40   45   50   55  x/µm
@@ -152,38 +164,51 @@ ein eigenes Makro (`macros/iref_x15`) im Top-Level.
  +------------------------------------------------------+
 +------------+  +---+-----------------+---+ +-------------+
 |Ctn1 G=tail_n  |M13|        M2       |M14| |Ctn2 G=tail_n|
-+------------+  |D=G|      G=cmfb     |G=p| +-------------+
-                | pd|  D=tail_p S=Va  |D=c|      +-------+
-         Out_p  +---+-----------------+---+ Out_n|cf Rc g|
+|            |  |D=G|      G=cmfb     |G=p| +-------------+
++------------+  | pd|  D=tail_p S=Va  |D=c|
+         Out_p  +---+-----------------+---+ Out_n
+           ::  +-------------+-------------+ ::
+           ::  |      M5     |   M4 (m90)  | ::
+           ::  |    G=In_p   |    G=In_n   | ::
+           ::  |S=tail_p oben|S=tail_p oben| ::
+           ::  |D=Out_p unten|D=Out_n unten| ::
            ::  +-------------+-------------+ ::  +-------+
-+--+       ::  |      M5     |   M4 (m90)  | ::       +--+
-|  |       ::  |    G=In_p   |    G=In_n   | ::       |  |
-|R |       ::  |S=tail_p oben|S=tail_p oben| ::       |R |
-|p +-----+ ::  |D=Out_p unten|D=Out_n unten| :: +-----+n |
-|  | Cxp | ::  +-------------+-------------+ :: | Cxn |  |
-|  | c2^ | ::  |      M1     |   M3 (m90)  | :: |  ^c2|  |
-|  |  c1>| ::  |    G=In_p   |    G=In_n   | :: |<c1  |  |
-|  |     | ::  | D=Out_p oben| D=Out_n oben| :: |     |  |
-|  |     | ::  |S=tail_n unt.|S=tail_n unt.| :: |     |  |
-+--+-----+ ::  +-------------+-------------+ :: +-----+--+
-[----------- M6_0 ----------][----------- M6_1 ----------]
-   [-------- M11 --------]M9|M10[------- M12 --------]
+           ::  |      M1     |   M3 (m90)  | ::  |cf Rc g|
+           ::  |    G=In_p   |    G=In_n   | ::  +-------+
++--+       ::  | D=Out_p oben| D=Out_n oben| ::       +--+
+|  |       ::  |S=tail_n unt.|S=tail_n unt.| ::       |  |
+|R |       :: ++-------------+-------------+ ::       |R |
+|p |       :: |      M6 (31 x 3,2 um)      | ::       |n |
+|  |       :: |  G=Iref D=tail_n S=Vss     | ::       |  |
+|  |       :: +----------------------------+ ::       |  |
+|  |       :: [--- M11 --]M9|M10[-- M12 ---] ::       |  |
+|  |       ::                                ::       |  |
++--+       ::                                ::       +--+
 ======================= Vss (TM1) ========================
           Out_p                             Out_n
 ```
 
 Übereinander bzw. nebeneinander verschmolzen sind: `Cc` ↔ `M13`/`M2`/`M14`
-↔ `M5`/`M4` (PMOS), `M1`/`M3` ↔ `M6_0`/`M6_1` ↔ `M11`/`M9`/`M10`/`M12`
-(NMOS). `Rp`/`Cxp` und `Cxn`/`Rn` sitzen außen auf `M6`, `Cop`/`Con`
-(je 2 × 10 × 5 µm, hochkant) stehen oben in den Ecken neben dem Predriver. `M6` sind zwei Blöcke à 31
-Finger mit 1,6 µm, Stoß genau auf der Achse; `M9` und `M10` (je ein Finger
-0,8 µm) sitzen in der untersten Reihe direkt unter diesem Stoß. Zwischen `M5`/`M4`
-und `M1`/`M3` liegen 0,5 µm. `Rc` (rppd 1 × 6 µm, 1,6 kΩ, quer) liegt oben auf
-`Rn` in der freien Ecke rechts von `M4`/`M14`, x 48,6–57,5, y 18,4–21,4: R1
-links (x ≈ 49,8), R2 rechts (x ≈ 56,4), beide y ≈ 19,9. `cf` = `cmfb`, `g` =
-`cc_g`. `Ctn1` (x 0–13,8, y 18,4–27,0) und `Ctn2` (x 42,6–57,5, y 21,4–27,0) sind
-PMOS-Kondensatoren von `tail_n` nach Va in den beiden Ecken unter `Cc`, mit `Cc`
-verschmolzen. `Cop`/`Con` sind je zwei Hälften (10 × 5 µm) auf einem gemeinsamen Ring,
+↔ `M5`/`M4` (PMOS), `M1`/`M3` ↔ `M6` ↔ `M11`/`M9`/`M10`/`M12` (NMOS).
+`M6` ist seit 2026-09-30 ein Block (31 Finger mit 3,2 µm, x 14,2–43,3,
+y 4,5–9,7) auf der Achse. Darunter die CMFB-Reihe, ebenfalls seit
+2026-09-30 nicht breiter als `M6`: `M11` und `M12` (je 8 Finger, 12,9 µm
+breit) mit `M9` und `M10` (je ein Finger 0,8 µm) direkt unter der Mitte
+von `M6`, zusammen x 13,6–43,9, y 0–4,6. `Rp` und `Rn` stehen allein
+außen an der Unterkante (x 0,3–2,8 bzw. 54,8–57,2, y 0–10,0); die
+Kreuzkondensatoren `Cxp`/`Cxn`, die daneben standen, sind seit 2026-09-30
+aus dem Schaltplan entfernt. Zwischen `Rp` und `M11`/`M6`/`M1`/`M5` (ab
+x 13,6 bzw. 14,2) ist damit ein 11 µm breiter Streifen frei, bis hinunter
+zur Südkante – Platz für den `Out_p`-Stamm und `cm`, rechts gespiegelt. `Cop`/`Con`
+(je 2 × 10 × 5 µm, hochkant) stehen oben in den Ecken neben dem
+Predriver. Zwischen `M5`/`M4` und `M1`/`M3` liegen 0,5 µm. `Rc` (rppd
+1 × 6 µm, 1,6 kΩ, quer) liegt auf `Rn` rechts neben `M3`, x 48,9–57,2,
+y 10,5–13,0: R1 links (x ≈ 49,8), R2 rechts (x ≈ 56,4), beide y ≈ 11,8.
+`cf` = `cmfb`, `g` = `cc_g`. `Ctn1` (x 0–13,8, y 20,0–28,6) und `Ctn2`
+(x 42,6–57,5, y 23,0–28,6) sind PMOS-Kondensatoren von `tail_n` nach Va
+in den beiden Ecken unter `Cc` und hängen 0,85 µm in `Cc`; darunter sind
+die Ecken frei bis `Rp` (y 10,0) bzw. `Rc` (y 13,0).
+`Cop`/`Con` sind je zwei Hälften (10 × 5 µm) auf einem gemeinsamen Ring,
 beide Gates an `Out_p` bzw. `Out_n`.
 
 ### H-Brücke: so werden die Finger gestrapt
@@ -201,36 +226,46 @@ beide Gates an `Out_p` bzw. `Out_n`.
        | | | | | | | | | | | | | | |            x 21.5-27, verbinden die
        +===== Source-Strap M2 (tail_n) ===+     beiden Drain-Straps; x≈19 bleibt pd)
                    |
-                 tail_n  (M3 hinunter auf die Drain-Straps von M6_0/M6_1)
+                 tail_n  (M3 hinunter auf die Drain-Straps von M6)
 ```
 
 ### Netze im Driver
 
+**Stand der Wege:** geplant für die Platzierung bis 2026-09-29 (`M6` als
+`M6_0|M6_1`, Flanken auf `M6`). Seit `M6` ein Block ist, liegen alle
+y-Werte ab `M1` aufwärts 1,60 µm höher (auch in der Skizze oben zur
+H-Brücke) und, seit auch `M11`/`M12` kleiner sind, `Rp`/`Rn`/`Rc` 8,1 µm
+tiefer; `M11`/`M12` sind halb so breit, `Cxp`/`Cxn` entfallen (die Tabelle
+nennt sie nicht mehr). Neu zu planen sind vor allem `Out_p`/`Out_n` (Stamm
+neben `M6` statt über `M6_0`), `cm` (der Streifen neben `M6` ist jetzt
+frei), `tail_n` (Drain-Straps von `M6`), `Iref` (kein `M6`-Stoß mehr auf
+der Achse), `pd` und `cmfb`/`cc_g` (`Rc` tiefer).
+
 | Netz | verbindet | Weg | Breite |
 |---|---|---|---|
 | `tail_p` | `M2` D → `M5`/`M4` S | Drain-Strap über der unteren Hälfte von `M2`, Source-Straps über den oberen Hälften von `M5`/`M4`; M3-Stiche bei x ≈ 22–27 und 30,5–35,5 | ≥ 4 µm |
-| `Out_p` | `M5` D, `M1` D, `Rp` R1, `Cxp` c1, `Cop_0`/`Cop_1` G → Pin Süd | Drain-Straps unten in `M5` / oben in `M1`, M3-Stiche dazwischen bei x ≈ 21,5–27; Stamm M3 bei x ≈ 10–13,5 im Spalt zwischen `Cxp` und den Schaltern, über `M6_0` und `M11` bis zur Südkante, mit M4 gedoppelt, wo keine M4-Bahn quert; die Drain-Straps (M2) nach links bis zum Stamm verlängert; `Cxp` c1 (rechter Rand, x 9,0, y ≈ 11,1) liegt direkt am Stamm; bei y ≈ 17,2 M4 nach links auf `Rp` R1 (x ≈ 1,5) und von dort M3 bei x ≈ 3 hinauf, über `Ctn1` und das linke Ende von `Cc` hinweg (beide belegen nur Metal1), bis auf die Gate-Schienen von `Cop_0` (y ≈ 35,2) und `Cop_1` (y ≈ 46,4) | ≥ 4 µm |
+| `Out_p` | `M5` D, `M1` D, `Rp` R1, `Cop_0`/`Cop_1` G → Pin Süd | Drain-Straps unten in `M5` / oben in `M1`, M3-Stiche dazwischen bei x ≈ 21,5–27; Stamm M3 bei x ≈ 10–13,5 im Spalt zwischen `Rp` und den Schaltern, über `M6_0` und `M11` bis zur Südkante, mit M4 gedoppelt, wo keine M4-Bahn quert; die Drain-Straps (M2) nach links bis zum Stamm verlängert; bei y ≈ 17,2 M4 nach links auf `Rp` R1 (x ≈ 1,5) und von dort M3 bei x ≈ 3 hinauf, über `Ctn1` und das linke Ende von `Cc` hinweg (beide belegen nur Metal1), bis auf die Gate-Schienen von `Cop_0` (y ≈ 35,2) und `Cop_1` (y ≈ 46,4) | ≥ 4 µm |
 | `Out_n` | Spiegelbild, Stamm bei x ≈ 44–47,5, hinauf bei x ≈ 54,5 zu `Con` | der Weg hinauf kreuzt in M3 `Rc` zwischen seinen beiden Anschlüssen (dort kein Via), `Ctn2` und das rechte Ende von `Cc` | ≥ 4 µm |
 | `tail_n` | `M1`/`M3` S → `M6_0`/`M6_1` D, `Ctn1` G, `Ctn2` G | Source-Straps unten in `M1`/`M3`, M3 hinunter auf die Drain-Straps über der oberen Hälfte von `M6_0`/`M6_1` (liegen direkt darunter). Zu den Kondensatoren je eine M3-Bahn am Außenrand der Schalter: links bei x ≈ 14,1 (zwischen `Out_p`-Stamm und `M5`/`M1`) hinauf bis y ≈ 18,9 und per M2 auf die untere Gate-Schiene von `Ctn1`; rechts gespiegelt bei x ≈ 43,4 auf die von `Ctn2` (y ≈ 21,9). **Niederohmig** – die Kondensatoren wirken auf die 50-ps-Flanken | ≥ 4 µm, Äste ≥ 1 µm |
-| `In_p` | Stage → `M5` G, `M1` G, `Cxn` c2 | siehe Abschnitt 2 und Skizze; nach `Cxn` c2 (Oberkante, x ≈ 51,5, y 14,0) als M4 bei y ≈ 14,3 nach rechts | 0,3 µm |
-| `In_n` | Spiegelbild; nach `Cxp` c2 (x ≈ 6, y 14,0) als M4 bei y ≈ 15,0 | | 0,3 µm |
+| `In_p` | Stage → `M5` G, `M1` G | siehe Abschnitt 2 und Skizze | 0,3 µm |
+| `In_n` | Stage → `M4` G, `M3` G | Spiegelbild | 0,3 µm |
 | `Iref` | Achse → `M9` D+G, `M6_0`/`M6_1` G, `M10` G | M3 auf der Achse über den `M6`-Stoß bis in die unterste Reihe; `M9` (links der Achse) und `M10` (rechts) liegen Rand an Rand, ihre Gates per M2 verbunden; die untere Gate-Schiene von `M6_0`/`M6_1` liegt direkt über ihnen, per M2/M3-Stich an der Achse | 0,3 µm |
 | `Vref` | Achse → `M12` G | M3 auf der Achse bis y ≈ 3,8, M2 über `M10` hinweg nach rechts auf die obere Gate-Schiene von `M12` (ab x 31,0) | 0,3 µm |
 | `otail` | `M10` D → `M11` S, `M12` S | Source-Straps über den unteren Hälften von `M11`/`M12`; `M10` liegt direkt an `M12`, zu `M11` per M2 unter `M9` durch | 1 µm |
-| `cm` | `Rp` R2, `Rn` R2 → `M11` G | von `Rp` R2 (x ≈ 1,5, y ≈ 9,3) M3 hinunter; M4 waagerecht bei y ≈ 7,5 über `M6` hinweg bis unter `Rn` (x ≈ 56) – **unter `Cxp`/`Cxn` durch, nicht darüber** (MOM, M1–M4 belegt); links M3 weiter hinunter bis y ≈ 3,8, M2 nach rechts auf die obere Gate-Schiene von `M11` (ab x 2,6) | 0,3 µm |
+| `cm` | `Rp` R2, `Rn` R2 → `M11` G | von `Rp` R2 (x ≈ 1,5, y ≈ 9,3) M3 hinunter; M4 waagerecht bei y ≈ 7,5 über `M6` hinweg bis unter `Rn` (x ≈ 56); links M3 weiter hinunter bis y ≈ 3,8, M2 nach rechts auf die obere Gate-Schiene von `M11` (ab x 2,6) | 0,3 µm |
 | `pd` | `M11` D → `M13` D+G → `M14` G | Drain-Strap über der oberen Hälfte von `M11`, M3 senkrecht bei x ≈ 19 über `M6_0`, `M1` und `M5` hinweg bis auf `M13` (x 15,6–19,5, die Bahn endet direkt über ihm); von `M13` M4 bei y ≈ 23 über `M2` hinweg auf `M14` G | 0,3 µm |
 | `cmfb` | `M12` D → `M14` D → `M2` G, `Rc` R1 | Spiegelbild von `pd`: M3 bei x ≈ 38,5 von `M12` bis auf `M14` D; von `M14` D M2 waagerecht bei y ≈ 24 nach rechts über `Ctn2` hinweg (nur Metal1) und bei x ≈ 49,8 hinunter auf `Rc` R1 (y ≈ 19,9); y ≈ 24 statt tiefer, damit der `tail_n`-Anschluss von `Ctn2` (x ≈ 43,4, y ≈ 21,9) frei bleibt. `Cc` hängt nicht mehr an `cmfb`: keine Stiche mehr von `M2` G auf `Cc` | 0,3 µm |
 | `cc_g` | `Rc` R2 → `Cc` G | von `Rc` R2 (x ≈ 56,4, y ≈ 19,9) M2 senkrecht hinauf, über `Ctn2` hinweg, auf die untere Gate-Schiene von `Cc` (y ≈ 27,3), die über alle 10 Finger läuft; rechts neben dem `Out_n`-Aufstieg (M3, x ≈ 54,5) | 0,3 µm |
 | Va | alle PMOS-Ringe, `M2` S, `M13`/`M14` S, `Cc` S/D, `Ctn1`/`Ctn2` S/D | Finger C3 über `Cc`; Ring an Ring per M1 nach unten bis `M5`/`M4`; `M2`-Source-Strap mit 3–4 M3-Stichen über `Cc` hinweg an C3 | ≥ 4 µm für `M2` S |
 | Vss | alle NMOS-Ringe, `M6` S, `M9`/`M10` S, `Cop`/`Con`, Ringe von `Rp`/`Rn` | Ring an Ring per M1; `M6`-Source-Straps (untere Hälfte) per M3 über `M11`/`M12` hinweg auf den unteren Finger; `Cop`/`Con` vom Finger C2 darüber | ≥ 4 µm für `M6` S |
 
-## 4. `predriver` (38,8 × 28,0 µm, liegt bei x 9,4–48,2, y 33,0–61,1)
+## 4. `predriver` (38,8 × 28,0 µm, liegt bei x 9,4–48,2, y 34,6–62,8)
 
 `scripts/archive/route_predriver.py` hat diese Verdrahtung per Skript gezeichnet (DRC
 und LVS waren sauber), ist aber **archiviert**: sie nutzt Metal1 bis TopMetal1,
 und der Chipalooza-Slot führt seine Versorgungs-Straps senkrecht in Metal4
 über das ganze Projekt. Welche Lagen der Makro nutzen darf, wird zuerst
-geklärt. Koordinaten hier im `predriver`-Rahmen (global: x + 9,36, y + 33,02).
+geklärt. Koordinaten hier im `predriver`-Rahmen (global: x + 9,36, y + 34,62).
 
 ```
    D_n D_p Iref          Pins Nord (M3), x 17,13 / 17,83 / 18,53

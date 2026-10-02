@@ -15,6 +15,7 @@ paths:
   root: ..
   schematic: schematic/xschem
   netlist: netlist
+  layout: layout
   documentation: docs
 
 pins:
