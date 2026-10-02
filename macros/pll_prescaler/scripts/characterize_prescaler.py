@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Characterize the TSPC /2-/3 prescaler at the analog VCO PVT maxima."""
 
+import argparse
 import csv
 import re
 import subprocess
@@ -9,9 +10,13 @@ from pathlib import Path
 
 
 MACRO_ROOT = Path(__file__).resolve().parents[1]
-NETLIST = MACRO_ROOT / "netlist/schematic/pll_tspc_div23.spice"
-RESULTS = MACRO_ROOT / "info/pll_tspc_div23_pvt.csv"
+SCHEMATIC = MACRO_ROOT / "netlist/schematic/pll_tspc_div23.spice"
+PEX = MACRO_ROOT / (
+    "verification/signoff/pll_tspc_div23/"
+    "pll_tspc_div23_magic_pex_3.spice"
+)
 MODEL = Path("/foss/pdks/ihp-sg13cmos5l/libs.tech/ngspice/models/cornerMOSlv.lib")
+DIODE_MODEL = Path("/foss/pdks/ihp-sg13cmos5l/libs.tech/ngspice/models/diodes.lib")
 
 # Maximum measured buffered-VCO frequencies at VCTRL=0.95 V. These are the
 # most demanding characterized point for each process family.
@@ -24,7 +29,7 @@ CASES = (
 )
 
 
-def deck(corner, vdd, temp_c, frequency_hz, modulus):
+def deck(netlist, subcircuit, corner, vdd, temp_c, frequency_hz, modulus):
     period_ns = 1e9 / frequency_hz
     edge_ns = max(0.005, period_ns * 0.04)
     high_ns = period_ns / 2 - edge_ns
@@ -33,13 +38,14 @@ def deck(corner, vdd, temp_c, frequency_hz, modulus):
     request = vdd if modulus == 2 else 0
     return f"""\
 .lib {MODEL} {corner}
+.include {DIODE_MODEL}
 .temp {temp_c}
-.include {NETLIST}
+.include {netlist}
 VDD VDD 0 {vdd}
 VRESET RESET_B 0 pulse(0 {vdd} {start_ns - period_ns}n {edge_ns}n {edge_ns}n 100n 200n)
 VCLK CLK 0 pulse(0 {vdd} {start_ns}n {edge_ns}n {edge_ns}n {high_ns}n {period_ns}n)
 VREQUEST MODULUS_REQUEST 0 {request}
-XPRE CLK RESET_B MODULUS_REQUEST Q2 VDD 0 pll_tspc_div23
+XPRE CLK RESET_B MODULUS_REQUEST Q2 VDD 0 {subcircuit}
 CQ2 Q2 0 3f
 .control
 set noaskquit
@@ -56,11 +62,13 @@ quit
 """
 
 
-def simulate(case, modulus, directory):
+def simulate(case, modulus, directory, netlist, subcircuit):
     name, corner, vdd, temp_c, frequency_hz = case
     source = directory / f"{name}_div{modulus}.spice"
     log = source.with_suffix(".log")
-    source.write_text(deck(corner, vdd, temp_c, frequency_hz, modulus))
+    source.write_text(deck(
+        netlist, subcircuit, corner, vdd, temp_c, frequency_hz, modulus
+    ))
     subprocess.run(
         ["ngspice", "-b", "-o", str(log), str(source)],
         check=True,
@@ -99,27 +107,40 @@ def simulate(case, modulus, directory):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--pex", action="store_true",
+        help="characterize the signed-off full-RC extracted netlist",
+    )
+    args = parser.parse_args()
+    netlist = PEX if args.pex else SCHEMATIC
+    subcircuit = "pll_tspc_div23_pex" if args.pex else "pll_tspc_div23"
+    results = MACRO_ROOT / "info" / (
+        "pll_tspc_div23_pex_pvt.csv" if args.pex
+        else "pll_tspc_div23_pvt.csv"
+    )
+
     rows = []
     with tempfile.TemporaryDirectory(prefix="pll-prescaler-") as temporary:
         directory = Path(temporary)
         for case in CASES:
             for modulus in (2, 3):
-                row = simulate(case, modulus, directory)
+                row = simulate(case, modulus, directory, netlist, subcircuit)
                 rows.append(row)
                 print(
                     f"{row['result']} {row['corner']} "
                     f"{row['input_frequency_hz'] / 1e9:.3f} GHz /{row['modulus']}"
                 )
 
-    RESULTS.parent.mkdir(parents=True, exist_ok=True)
-    with RESULTS.open("w", newline="") as output:
+    results.parent.mkdir(parents=True, exist_ok=True)
+    with results.open("w", newline="") as output:
         writer = csv.DictWriter(output, fieldnames=rows[0].keys())
         writer.writeheader()
         writer.writerows(rows)
 
     if any(row["result"] != "PASS" for row in rows):
         raise SystemExit("Prescaler characterization failed")
-    print(f"Wrote {RESULTS}")
+    print(f"Wrote {results}")
 
 
 if __name__ == "__main__":

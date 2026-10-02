@@ -16,7 +16,10 @@ L = {}
 
 
 def rect(layer, a, b, c, d):
-    L.setdefault(layer, []).append((a, b, c, d))
+    # Magic drops (or misreads) unordered rects: one reversed VSS trunk
+    # rect silently vanished and floated the NMOS source. Normalize always.
+    L.setdefault(layer, []).append(
+        (min(a, c), min(b, d), max(a, c), max(b, d)))
 
 
 def rail(cols, center, offset):
@@ -117,22 +120,22 @@ pad("metal3", -51, YN + 70)
 
 # Supplies to tap rails (right-edge trunk like inverter), with landings.
 # VDD via on outer stripe (102) to clear the Y stub at x=0 (M2.b).
+# Trunk x 170..228 clears the PMOS gate M3 pad (271..329) by 43 (M3.b):
+# an earlier trunk at 226..284 overlapped it and shorted VDD to A.
+TX0, TX1, TXC = 170, 228, 199
 for p in [(102, YP + 80), (51, YN - 80)]:
     via23(*p, landing=True)
-via23(255, 1280 - 21, landing=True)
-via23(255, -680 + 21, landing=True)
-for x, y in [(255, 1280), (255, -680)]:
+via23(TXC, 1280 - 21, landing=True)
+via23(TXC, -680 + 21, landing=True)
+for x, y in [(TXC, 1280), (TXC, -680)]:
     rect("via1", x - 20, y - 20, x + 20, y + 20)
     rect("metal1", x - 29, y - 29, x + 29, y + 29)
-# VSS trunk bottom needs via2 to reach the M3 trunk (else source floats).
-rect("via2", 255 - 20, -680 - 20, 255 + 20, -680 + 20)
-rect("metal2", 255 - 29, -680 - 29, 255 + 29, -680 + 29)
-m3wire(226, YP + 80, 284, 1280)
-m3wire(226, YN - 80, 284, -680)
-# VDD trunk jogs to the outer-stripe via at x=102.
-m3wire(73, YP + 51, 284, YP + 109)
-# VSS trunk jog to the single-stripe via at x=51 (else source floats).
-m3wire(22, YN - 109, 284, YN - 51)
+m3wire(TX0, YP + 80, TX1, 1280)
+m3wire(TX0, YN - 80, TX1, -680)
+# Trunk jogs to the stripe vias. VDD jog covers the pad fully upward so no
+# M3.b sliver remains alongside the trunk.
+m3wire(73, YP + 51, TX1, YP + 130)
+m3wire(22, YN - 109, TX1, YN - 51)
 
 # Wells/taps.
 rect("nwell", -350, YP - 200, 350, YP + 758)

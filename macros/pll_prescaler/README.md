@@ -33,3 +33,12 @@ python3 macros/pll_prescaler/scripts/characterize_prescaler.py
 The sweep tests `/2` and `/3` at the maximum measured buffered-VCO frequency
 for SS, TT, FF, SF, and FS. Results are written to
 `info/pll_tspc_div23_pvt.csv`.
+
+After physical signoff, repeat the same sweep against the full-RC extracted
+netlist:
+
+```sh
+python3 macros/pll_prescaler/scripts/characterize_prescaler.py --pex
+```
+
+Extracted results are written to `info/pll_tspc_div23_pex_pvt.csv`.

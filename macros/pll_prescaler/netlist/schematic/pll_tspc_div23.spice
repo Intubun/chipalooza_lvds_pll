@@ -31,6 +31,11 @@ XP Y A VDD VDD sg13_lv_pmos w=1.2u l=0.13u ng=2 m=1
 XN Y A VSS VSS sg13_lv_nmos w=0.6u l=0.13u ng=1 m=1
 .ends prescaler_inv
 
+.subckt prescaler_antenna A VSS VDD
+XD0 A VDD dpantenna l=1.34u w=1.05u
+XD1 VSS A dantenna l=0.78u w=0.78u
+.ends prescaler_antenna
+
 * Y = A | (B & C). The first six devices form an AOI21 and the last two
 * restore polarity and full swing. Series devices are widened for equal drive.
 .subckt prescaler_ao21 A B C Y VDD VSS
@@ -58,4 +63,13 @@ XQ2B Q2 NQ2 VDD VSS prescaler_inv
 XFF1 NQ2 CLK Q1 RST RESET_B VDD VSS tspc_invff_r0
 XNEXT Q2 Q1 NMC D2 VDD VSS prescaler_ao21
 XFF2 D2 CLK Q2 RST RESET_B VDD VSS tspc_invff_r0
+XANT_CLK CLK VSS VDD prescaler_antenna
+XANT_RESET_B RESET_B VSS VDD prescaler_antenna
+XANT_MODULUS_REQUEST MODULUS_REQUEST VSS VDD prescaler_antenna
+XANT_Q2 Q2 VSS VDD prescaler_antenna
+XANT_NMC NMC VSS VDD prescaler_antenna
+XANT_NQ2 NQ2 VSS VDD prescaler_antenna
+XANT_Q1 Q1 VSS VDD prescaler_antenna
+XANT_D2 D2 VSS VDD prescaler_antenna
+XANT_RST RST VSS VDD prescaler_antenna
 .ends pll_tspc_div23

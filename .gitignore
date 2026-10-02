@@ -50,3 +50,4 @@ sim_build/
 /macros/counter/flow/final
 /macros/counter/fpga/*/build/
 tmp_pics/
+macros/pll_prescaler/verification/signoff/

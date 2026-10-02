@@ -1,0 +1,100 @@
+magic
+tech ihp-sg13cmos5l
+magscale 1 2
+timestamp 1594166272
+<< checkpaint >>
+rect -2048 -2056 2336 2834
+<< nwell >>
+rect -48 350 336 834
+<< pwell >>
+rect 44 56 252 280
+rect -26 -56 314 56
+<< psubdiff >>
+rect 0 16 288 30
+rect 0 -16 32 16
+rect 64 -16 128 16
+rect 160 -16 224 16
+rect 256 -16 288 16
+rect 0 -30 288 -16
+<< nsubdiff >>
+rect 0 772 288 786
+rect 0 740 32 772
+rect 64 740 128 772
+rect 160 740 224 772
+rect 256 740 288 772
+rect 0 726 288 740
+<< psubdiffcont >>
+rect 32 -16 64 16
+rect 128 -16 160 16
+rect 224 -16 256 16
+<< nsubdiffcont >>
+rect 32 740 64 772
+rect 128 740 160 772
+rect 224 740 256 772
+<< pdiode >>
+rect 43 526 253 680
+rect 43 494 86 526
+rect 118 494 154 526
+rect 186 494 253 526
+rect 43 458 253 494
+rect 43 426 86 458
+rect 118 426 154 458
+rect 186 426 253 458
+rect 43 412 253 426
+<< ndiode >>
+rect 70 226 226 254
+rect 70 194 98 226
+rect 130 194 166 226
+rect 198 194 226 226
+rect 70 158 226 194
+rect 70 126 98 158
+rect 130 126 166 158
+rect 198 126 226 158
+rect 70 98 226 126
+<< pdiodecont >>
+rect 86 494 118 526
+rect 154 494 186 526
+rect 86 426 118 458
+rect 154 426 186 458
+<< ndiodecont >>
+rect 98 194 130 226
+rect 166 194 198 226
+rect 98 126 130 158
+rect 166 126 198 158
+<< metal1 >>
+rect 0 772 288 800
+rect 0 740 32 772
+rect 64 740 128 772
+rect 160 740 224 772
+rect 256 740 288 772
+rect 0 712 288 740
+rect 76 526 196 536
+rect 76 494 86 526
+rect 118 494 154 526
+rect 186 494 196 526
+rect 76 458 196 494
+rect 76 426 86 458
+rect 118 426 154 458
+rect 186 426 196 458
+rect 76 416 196 426
+rect 76 232 126 416
+rect 76 226 210 232
+rect 81 114 210 226
+rect 0 16 288 44
+rect 0 -16 32 16
+rect 64 -16 128 16
+rect 160 -16 224 16
+rect 256 -16 288 16
+rect 0 -44 288 -16
+<< labels >>
+flabel metal1 s 76 226 126 482 0 FreeSans 800 0 0 0 A
+port 2 nsew
+flabel metal1 s 0 -44 288 44 0 FreeSans 400 0 0 0 VSS
+port 3 nsew
+flabel metal1 s 0 712 288 800 0 FreeSans 400 0 0 0 VDD
+port 4 nsew
+flabel comment s 139 458 139 458 0 FreeSans 400 0 0 0 dpant
+flabel comment s 148 176 148 176 0 FreeSans 400 0 0 0 dant
+<< properties >>
+string FIXED_BBOX 0 0 288 756
+<< end >>
