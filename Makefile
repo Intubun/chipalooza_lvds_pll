@@ -448,6 +448,18 @@ klayout-verify: ## Verify CELL cell with KLayout (usage: make klayout-verify [CE
 #	$(MAKE) klayout-pex CELL=$(CELL)
 .PHONY: klayout-verify
 
+check-drc: ## Top-level DRC with a summary by cell, Rahul's PLL listed but not counted (usage: make check-drc [ARGS="--with-pll --no-antenna --density"])
+	bash $(SCRIPTS_DIR)/verify/check_drc.sh $(ARGS)
+.PHONY: check-drc
+
+check-lvs: ## Top-level LVS against the top schematic, without the PLL (usage: make check-lvs [ARGS=--strict-ports])
+	bash $(SCRIPTS_DIR)/verify/check_lvs.sh $(ARGS)
+.PHONY: check-lvs
+
+check: ## Top-level DRC and LVS in one go (scripts/verify/check_all.sh)
+	bash $(SCRIPTS_DIR)/verify/check_all.sh $(ARGS)
+.PHONY: check
+
 klayout-verify-all: ## Verify the top-level cell with KLayout (DRC, LVS)
 	$(MAKE) klayout-verify CELL=$(TOP)
 .PHONY: klayout-verify-all
