@@ -37,14 +37,14 @@ is moved across. The four analog benches (`sim-all`) need nothing but the PDK.
 ## Where it sits in the project
 
 The top level instantiates `lvds_tx` as `xlvds` in
-`schematic/xschem/sg13cmos5l_chipalooza_analog_project.sch`:
+`schematic/xschem/slot_14.sch`:
 
 | macro pin | top level |
 |---|---|
-| `Out_p` / `Out_n` | `analog_pin[2]` / `analog_pin[3]`, two of the four dedicated pads |
+| `Out_p` / `Out_n` | `s14_an[1]` / `s14_an[0]`, two of the three dedicated pads of slot 14, each straight onto the pad (`pad`, not `padres`: a series resistor would eat the swing) |
 | `Va` / `Vss` | `vdd_3v3` / `vss_3v3` |
-| `Iref_pd`, `Iref_drv` | 30 uA each, from `xiref_pd` / `xiref_drv`: two instances of [`macros/iref_x15`](../iref_x15/README.md), the 1:15 pre-mirror that turns the 2 uA of `ibias[0]` / `ibias[1]` into 30 uA. It used to sit inside this macro. |
-| `Vref` | `analog_bus[1]`, the 1.2 V common-mode reference |
+| `Iref_pd`, `Iref_drv` | 30 uA each, from `xiref_pd` / `xiref_drv`: two instances of [`macros/iref_x15`](../iref_x15/README.md), the 1:15 pre-mirror that turns the 2 uA of `ibias0` / `ibias1` into 30 uA. It used to sit inside this macro. |
+| `Vref` | `analog_bus1`, the 1.2 V common-mode reference |
 | `D_p` / `D_n` | driven by `lvds_pattern`, the standard-cell PRBS-7 generator |
 
 With the pattern generator in place the top-level bench runs the whole chain: PRBS-7 at

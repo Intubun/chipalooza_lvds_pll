@@ -1,35 +1,50 @@
 # `lvds_pattern` — data source for the LVDS transmitter
 
-Nineteen `sg13cmos5l` standard cells and nothing else: a clock source select, a
-clock gate, a PRBS-7 generator and a complementary output pair. `D_p` / `D_n`
-drive the pre-driver of [`macros/lvds_tx/`](../lvds_tx/README.md).
+`sg13cmos5l` standard cells and nothing else: a clock gate, a PRBS-7 generator
+and a complementary output pair. `D_p` / `D_n` drive the pre-driver of
+[`macros/lvds_tx/`](../lvds_tx/README.md).
 
 ## Interface
 
 | pin | dir | meaning |
 |---|---|---|
-| `ref_clk` | in | reference clock |
-| `pll_clk` | in | clock from the PLL |
-| `clk_src` | in | `0` = `ref_clk`, `1` = `pll_clk` |
+| `ref_clk` | in | the bit clock, one bit per period |
 | `en` | in | `1` = clock runs, `0` = clock stopped **low** |
 | `reset` | in | active high, asynchronous, seeds the PRBS |
 | `mode` | in | `0` = gated clock straight to the pair, `1` = PRBS-7 |
 | `D_p`, `D_n` | out | complementary data pair to the pre-driver |
 | `VDD`, `VSS` | inout | 1.2 V core supply |
 
-**All-zero is a working setting**, which the harness requires: `clk_src` = 0
-selects the reference, `en` = 0 stops the clock, `reset` = 0 is *not* reset,
-`mode` = 0 is passthrough. The block then sits with `D_p` low and `D_n` high —
-a static, legal state for the driver, not a broken one.
+**All-zero is a working setting**, which the harness requires: `en` = 0 stops
+the clock, `reset` = 0 is *not* reset, `mode` = 0 is passthrough. The block then
+sits with `D_p` low and `D_n` high — a static, legal state for the driver, not a
+broken one.
+
+**No clock source select any more.** Until 2026-10-07 a `mux2_2` (`xcsel`) in
+front of the gate chose between `ref_clk` and `pll_clk` on `clk_src`. The PLL left
+the project that day, and the mux, both pins and their lines went with it
+(`scripts/drop_clk_select.py`); five `fill_2` and a `fill_1` hold its sites, and
+`ref_clk` runs on along its M2 onto the old mux output, the line to CLK of both
+`lgcp_1`. Every other pin kept its place on the symbol and in the layout.
+
+**Antenna diodes on `en` and `mode`.** At the top level both arrive over ~360 um
+of Metal3 from `dig_in` and end on one gate (`en`, the clock gate) or two (`mode`,
+the two output muxes): over the antenna ratio of 200 without a diode (`Ant.b`).
+Two `sg13cmos5l_antennanp` (`xant_en`, `xant_mode`) sit in the slot `xcsel` left,
+next to the fills, and lift the limit to 20000 (`Ant.e`) for every user of the
+block (`scripts/add_antenna_diodes.py`). A third (`xant_ref`) went onto `ref_clk`
+when the clock moved to pad 2 and its line to ~450 um of Metal4
+(`scripts/add_refclk_diode.py`); it also clamps the clock gates' input to the
+block's own 1.2 V rails, which the pad's secondary protection - diodes to the
+3.3 V IO ring - does not. `reset` stays under the limit without one.
 
 ## How it is built
 
 ```
-ref_clk ─┐
-         ├─ mux2_2 ─ lgcp_1 ─ buf_4 ─┬────────────────────────── gclk_b ─┐
-pll_clk ─┘  (clk_src)   (en)          │                                  │
-                                      └─ 7 × dfrbp ─ xnor2 feedback       ├─ mux2_2 ─┬─ inv_2 ─ inv_8 ─ buf_16 ─ D_p
-reset ─ inv_2 ─ reset_b ──────────────── to every flop         s6_n ──────┘  (mode)  └─ inv_2 ─ inv_8 ─ inv_16 ─ D_n
+ref_clk ─ lgcp_1 ─ buf_4 ─┬────────────────────────── gclk_b ─┐
+          (en)            │                                  │
+                          └─ 7 × dfrbp ─ xnor2 feedback       ├─ mux2_2 ─┬─ inv_2 ─ inv_8 ─ buf_16 ─ D_p
+reset ─ inv_2 ─ reset_b ──── to every flop         s6_n ──────┘  (mode)  └─ inv_2 ─ inv_8 ─ inv_16 ─ D_n
 ```
 
 **Clock gating** uses the PDK's own latch-based gate `sg13cmos5l_lgcp_1`, not an
@@ -144,8 +159,14 @@ the net list cannot drift: every pin of every cell is named exactly once in
 
 **Since `b6ddedf` the `.sch` is ahead of the table**: the decap cells and the
 output-flop changes (`sdfbbp_1`, then `dfrbp_2` with `xinvd`, 2026-10-02) were
-made in the `.sch` itself, so `make gen` would drop them. Bring `CELLS` up to
-the `.sch` before using it again.
+made in the `.sch` itself, so `make gen` would drop them - and the two antenna
+diodes (2026-10-07) as well. Bring `CELLS` up to the `.sch` before using it
+again. The benches, the symbol and the CACE template are still written by the
+scripts (`gen_tb`, `gen_tb_prbs`, `gen_sym`; `cace/gen_template.py`).
+
+The benches include `models/diodes_tt0.lib` from the repository root: the
+antenna diodes stall ngspice with the PDK's own diode model, see
+`scripts/sim/make_diode_models.py`.
 
 ## Running
 
@@ -156,9 +177,9 @@ make gen            # regenerate the schematic after editing the cell table
 ```
 
 The bench walks the whole interface: reset high, clock stopped, then
-passthrough of `pll_clk` at 1 GHz, then PRBS-7 at 1 Gb/s for a full 127-bit
-period, then `en` low to show the clock gate, then `clk_src` low to hand over to
-the 250 MHz reference. Current result at tt/27 °C, 1.2 V, 170 fF load:
+passthrough of `ref_clk` at 1 GHz, then PRBS-7 at 1 Gb/s for a full 127-bit
+period, then `en` low to show the clock gate. Current result at tt/27 °C,
+1.2 V, 170 fF load:
 
 ```
 bit rate             1.000 Gb/s
@@ -215,12 +236,11 @@ data path buys 63 ps of hold margin and costs 63 ps of the ~500 ps setup slack.
 
 ## Not done yet
 
-No layout, no LibreLane run, no STA. The flop chain closes timing at 1 GHz in
-simulation at the typical corner with no wire load; whether it still does over
-PVT with real routing is a question for the hardening flow, not for this
-schematic.
+No LibreLane run, no STA. The layout is placed and routed by hand, DRC and LVS
+clean; the timing figures above are from simulation, and the extracted block
+drives the post-layout LVDS bench at the top level
+(`testbenches/xschem/slot_14_tb_lvds_postlayout.sch`).
 
 The top level instantiates this macro as `xpat` and wires `D_p`/`D_n` straight
-into `lvds_tx`. `pll_clk` is tied to `ui_in[7]` there as a **placeholder**: a
-shared harness gpio cannot really carry 500 MHz…1 GHz, and that input becomes
-`pll_analog`'s output as soon as the PLL is placed at the top level.
+into `lvds_tx`. `ref_clk` comes from pad 2 through its secondary protection
+(`s14_an_2_esd`), `en` / `reset` / `mode` from `dig_in[1]` / `[2]` / `[3]`.

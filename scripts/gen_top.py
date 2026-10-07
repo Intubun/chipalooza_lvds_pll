@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
-"""Generate the top cell, its symbol and its transient bench.
+"""Generate the top cell, its symbol and its benches.
 
-The port list is exactly `verilog/rtl/user_project_wrapper_4a.v` from
-RTimothyEdwards/sg13cmos5l_ocd_chipalooza, with every bus expanded into
-individual pins. Four dedicated analog pads means slot s1 or s16 - per config.txt
-in that repository the only two that have four.
+The port list is the Chipalooza slot-14 frame (slot14_wrapper in
+RTimothyEdwards/sg13cmos5l_ocd_chipalooza), pin for pin, so this cell and
+layout/slot_14.gds compare by name in LVS.  Slot 14 has three dedicated analog
+pads, each an sg13cmos5l_IOPadAnalog with two core terminals: s14_an[i] is its
+`pad`, straight onto the pad, and s14_an_i_esd its `padres`, through the
+secondary protection (series resistor and diodes) - the one for gate inputs.
 
 Nets are joined by label rather than by drawn wire: every pin gets a stub and a
 lab_pin carrying the net name. That is what keeps a fifty-port frame generatable.
 """
 import io
 import os
+import re
 
-TOP = "sg13cmos5l_chipalooza_analog_project"
+TOP = "slot_14"
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def bus(name, hi, lo=0):
@@ -20,61 +24,56 @@ def bus(name, hi, lo=0):
     return ["%s[%d]" % (name, i) for i in range(hi, lo - 1, -1)]
 
 
-# (net, xschem pin symbol, side).  Order follows the wrapper declaration.
+# (net, xschem pin symbol, side).  The names are the frame's pin labels.
 PORTS = (
-    [(n, "iopin", "L") for n in ("vdd_3v3", "vdd_1v2", "vss_3v3", "vss_1v2", "vssio")]
-    + [("enable", "ipin", "L"), ("clk", "ipin", "L")]
+    [(n, "iopin", "L") for n in ("vdd_3v3", "vdd_1v2", "vss_3v3", "vss_1v2")]
+    + [("enable", "ipin", "L"), ("clk", "ipin", "L"), ("reset", "ipin", "L")]
     + [(n, "ipin", "L") for n in bus("dig_in", 23)]
+    + [(n, "ipin", "L") for n in ("ibias0", "ibias1", "vbias")]
     + [(n, "opin", "R") for n in bus("dig_out", 11)]
-    + [(n, "iopin", "R") for n in bus("analog_pin", 3)]
-    + [(n, "ipin", "L") for n in bus("ibias", 1)]
-    + [("vbias", "ipin", "L")]
-    + [(n, "iopin", "R") for n in bus("analog_bus", 3)]
+    + [(n, "iopin", "R") for n in bus("s14_an", 2)]
+    + [(n, "iopin", "R") for n in ("s14_an_2_esd", "s14_an_1_esd", "s14_an_0_esd")]
+    + [(n, "iopin", "R") for n in ("analog_bus0", "analog_bus1", "analog_bus2", "analog_bus3")]
 )
 
-# what the four dedicated pads carry
-PAD_USE = [("analog_pin[0]", "ref_clk - PLL reference, feeds lvds_pattern"),
-           ("analog_pin[1]", "PLL clock out - the PLL's TEST_CLK"),
-           ("analog_pin[2]", "LVDS out +"),
-           ("analog_pin[3]", "LVDS out -")]
+# what the three dedicated pads carry
+PAD_USE = [("s14_an[0]", "LVDS out -, pad 0 direct"),
+           ("s14_an[1]", "LVDS out +, pad 1 direct"),
+           ("s14_an_2_esd", "ref_clk in - pad 2 through its secondary protection"),
+           ("s14_an[2]", "ref_clk termination - pad 2 direct")]
 
-# Where every port in the left-hand column actually goes, so the sheet answers
-# "what is this pin wired to" without tracing a label across the drawing.  Read
-# off the netlist of the top cell; keep it in step when the wiring changes.
+# Where every port actually goes, so the sheet answers "what is this pin wired
+# to" without tracing a label across the drawing.  Read off the netlist of the
+# top cell; keep it in step when the wiring changes.
 NC = "not connected"
 PIN_USE = dict(
-    [("vdd_3v3", "xlvds.Va, Cd33 decoupling"),
-     ("vdd_1v2", "xpat.VDD, xpll.VDD, Cd12 decoupling"),
-     ("vss_3v3", "xlvds.Vss, Cd33 decoupling"),
-     ("vss_1v2", "xpat.VSS, xpll.VSS, Cd12 decoupling"),
-     ("vssio", NC),
+    [("vdd_3v3", "xlvds.Va, xiref_pd.Va, xiref_drv.Va, xdc33 decap row"),
+     ("vdd_1v2", "xpat.VDD, xdc12 decap row"),
+     ("vss_3v3", "xlvds.Vss, xiref_pd.Vss, xiref_drv.Vss, xdc33 decap row"),
+     ("vss_1v2", "xpat.VSS, xdc12 decap row"),
      ("enable", NC),
-     ("clk", NC + " - the reference comes in on analog_pin[0]"),
-     ("dig_in[18]", "xpll.TEST_DIV[1]"),
-     ("dig_in[17]", "xpll.TEST_DIV[0]"),
-     ("dig_in[6]", "xpll.RESET_N - active low"),
-     ("dig_in[5]", "xpll.ENABLE"),
-     ("dig_in[4]", NC + " - was the provisional pll_clk"),
+     ("clk", NC + " - the reference comes in on s14_an_2_esd"),
+     ("reset", NC + " - the PRBS reset is dig_in[2]"),
      ("dig_in[3]", "xpat.mode - 0 = clock passthrough, 1 = PRBS-7"),
-     ("dig_in[2]", "xpat.reset - active high, seeds the PRBS shift register"),
+     ("dig_in[2]", "xpat.reset - active high, seeds the PRBS shift register; DRST antenna diode"),
      ("dig_in[1]", "xpat.en - gates the pattern clock, not the output pair"),
-     ("dig_in[0]", "xpat.clk_src - 0 = ref_clk, 1 = pll_clk"),
-     ("ibias[1]", "xlvds.Iref_drv - 2 uA, mirrored 1:15 to the driver's 30 uA"),
-     ("ibias[0]", "xlvds.Iref_pd - 2 uA, mirrored 1:15 to the pre-driver's 30 uA"),
+     ("dig_in[0]", "xodt.EN - 1 = 50 ohm termination of ref_clk on"),
+     ("ibias0", "xiref_pd (1:15) -> xlvds.Iref_pd - 2 uA in, 30 uA out"),
+     ("ibias1", "xiref_drv (1:15) -> xlvds.Iref_drv - 2 uA in, 30 uA out"),
      ("vbias", NC),
-     ("analog_bus[0]", "xpll.IREF - 2 uA charge-pump reference"),
-     ("analog_bus[1]", "xlvds.Vref - 1.2 V common-mode reference")]
-    # DIV_RATIO is unsigned Q7.3, so bit 3 is the ones digit and bits 2..0 the eighths
-    + [("dig_in[%d]" % (b + 7), "xpll.DIV_RATIO[%d] - weight %s" % (b, w))
-       for b, w in ((9, "64"), (8, "32"), (7, "16"), (6, "8"), (5, "4"),
-                    (4, "2"), (3, "1"), (2, "1/2"), (1, "1/4"), (0, "1/8"))]
-    + [("dig_in[%d]" % b, NC) for b in range(23, 18, -1)]
+     ("analog_bus1", "xlvds.Vref - 1.2 V common-mode reference"),
+     ("s14_an_2_esd", "xpat.ref_clk"),
+     ("s14_an[0]", "xlvds.Out_n"),
+     ("s14_an[1]", "xlvds.Out_p")]
+    + [("dig_in[%d]" % b, NC) for b in range(23, 3, -1)]
     + [("dig_out[%d]" % b, NC) for b in range(12)]
-    + [("analog_bus[%d]" % b, NC) for b in (2, 3)])
+    + [(n, NC) for n in ("analog_bus0", "analog_bus2", "analog_bus3",
+                         "s14_an_0_esd", "s14_an_1_esd")]
+    + [("s14_an[2]", "xodt.PAD - the termination, on pad 2 itself")])
 
 # The port name that ipin.sym draws is 0.33 high and grows left from x = -18.75;
-# the widest one, analog_bus[0], measures 121 units, so it reaches x = -140.
-# Anchoring the pinout at -180 leaves 40 units of air between the two columns.
+# the widest one, s14_an_0_esd, reaches about x = -140.  Anchoring the pinout
+# at -180 leaves 40 units of air between the two columns.
 PINOUT_X = -180
 
 
@@ -87,40 +86,59 @@ def pin_label(net, y):
     joiner = "  " if dest.startswith(NC) else "  ->  "
     return "T {%s%s%s} %d %d 0 1 0.25 0.25 {}" % (net, joiner, dest, PINOUT_X, y - 8)
 
-# pin offsets read off each symbol
-PINS = {
-    "lvds_pattern": {"ref_clk": (-130, -100), "pll_clk": (-130, -80),
-                     "clk_src": (-130, -60), "en": (-130, -40),
-                     "reset": (-130, -20), "mode": (-130, 0),
-                     "D_p": (130, -100), "D_n": (130, -80),
-                     "VDD": (130, 80), "VSS": (130, 100)},
-    "lvds_tx": {"D_p": (-150, -50), "D_n": (-150, -30), "Iref_pd": (-150, -10),
-                "Iref_drv": (-150, 10), "Vref": (-150, 30),
-                "Va": (150, -50), "Out_p": (150, -30), "Out_n": (150, -10),
-                "Vss": (150, 10)},
-    "mos": {"D": (20, 30), "G": (-20, 0), "S": (20, -30), "B": (20, 0)},
-}
+
+def sym_offsets(path):
+    """pin name -> (x, y) of its centre, read off a symbol file"""
+    s = io.open(path, encoding="utf-8").read()
+    return dict((m.group(5), (int(round((float(m.group(1)) + float(m.group(3))) / 2)),
+                              int(round((float(m.group(2)) + float(m.group(4))) / 2))))
+                for m in re.finditer(r"^B 5 (\S+) (\S+) (\S+) (\S+) \{name=([^ }]+)", s, re.M))
+
+
+# pin offsets read off each macro's own symbol, so a moved pin cannot leave a
+# stub hanging in the air
+PINS = dict((cell, sym_offsets(os.path.join(HERE, "..", "macros", cell, "schematic",
+                                            "xschem", cell + ".sym")))
+            for cell in ("lvds_pattern", "lvds_tx", "iref_x15", "ref_odt"))
+PINS["mos"] = {"D": (20, 30), "G": (-20, 0), "S": (20, -30), "B": (20, 0)}
+PINS["dio"] = {"d1": (0, -30), "d0": (0, 30)}          # sg13cmos5l_pr/dantenna.sym: d1 cathode, d0 anode
+# decap rows in the layout - keep in step with N_LV / N_HV in scripts/top/route_top.py
+DECAP_LV, DECAP_HV = 83, 95
 
 CELLS = [
-    # reference from the dedicated pad; the PLL clock from a dig_in bit until the
-    # PLL is placed; the rest of the control from dig_in bits, which the
-    # housekeeping SPI routes individually to a pin, a constant or the sequencer.
-    ("xpat", "lvds_pattern.sym", "lvds_pattern", 900, -500, {
-        "ref_clk": "analog_pin[0]", "pll_clk": "dig_in[4]", "clk_src": "dig_in[0]",
+    # the reference from pad 2 through its secondary protection is the bit
+    # clock; the control from dig_in bits, which the housekeeping SPI routes
+    # individually to a pin, a constant or the sequencer.
+    ("xpat", "lvds_pattern.sym", "lvds_pattern", 1630, -980, {
+        "ref_clk": "s14_an_2_esd",
         "en": "dig_in[1]", "reset": "dig_in[2]", "mode": "dig_in[3]",
         "D_p": "core_p", "D_n": "core_n", "VDD": "vdd_1v2", "VSS": "vss_1v2"}, ""),
-    # bias straight off the harness, output pair onto two dedicated pads
-    ("xlvds", "lvds_tx.sym", "lvds_tx", 1700, -500, {
-        "D_p": "core_p", "D_n": "core_n", "Iref_pd": "ibias[0]",
-        "Iref_drv": "ibias[1]", "Vref": "analog_bus[1]", "Va": "vdd_3v3",
-        "Out_p": "analog_pin[2]", "Out_n": "analog_pin[3]", "Vss": "vss_3v3"}, ""),
-    # decoupling, one per supply domain.  The 3.3 V one has to be an HV device.
-    ("Cd12", "sg13cmos5l_pr/sg13_lv_pmos.sym", "mos", 2400, -800, {
-        "G": "vdd_1v2", "D": "vss_1v2", "S": "vss_1v2", "B": "vss_1v2"},
-     "l=10.0u w=10.0u ng=1 m=1 mm_ok=1 model=sg13_lv_pmos spiceprefix=X"),
-    ("Cd33", "sg13cmos5l_pr/sg13_hv_pmos.sym", "mos", 2400, -500, {
-        "G": "vdd_3v3", "D": "vss_3v3", "S": "vss_3v3", "B": "vss_3v3"},
-     "l=10.0u w=10.0u ng=1 m=1 mm_ok=1 model=sg13_hv_pmos spiceprefix=X"),
+    # the output pair straight onto pads 1 and 0, the bias through two 1:15 mirrors
+    ("xlvds", "lvds_tx.sym", "lvds_tx", 2040, -1030, {
+        "D_p": "core_p", "D_n": "core_n", "Iref_pd": "iref_pd_30u",
+        "Iref_drv": "iref_drv_30u", "Vref": "analog_bus1", "Va": "vdd_3v3",
+        "Out_p": "s14_an[1]", "Out_n": "s14_an[0]", "Vss": "vss_3v3"}, ""),
+    # the IDAC grid stops at 10 uA; the transmitter wants 30 uA per reference
+    ("xiref_pd", "iref_x15.sym", "iref_x15", 1900, -800, {
+        "IREF_IN": "ibias0", "IREF_OUT": "iref_pd_30u", "Va": "vdd_3v3", "Vss": "vss_3v3"}, ""),
+    ("xiref_drv", "iref_x15.sym", "iref_x15", 2250, -800, {
+        "IREF_IN": "ibias1", "IREF_OUT": "iref_drv_30u", "Va": "vdd_3v3", "Vss": "vss_3v3"}, ""),
+    # the switchable 50 ohm termination of ref_clk, on pad 2 itself (s14_an[2]):
+    # behind the secondary protection the ~520 ohm there would make it a divider
+    ("xodt", "ref_odt.sym", "ref_odt", 1630, -1250, {
+        "EN": "dig_in[0]", "PAD": "s14_an[2]", "VDD": "vdd_1v2", "VDDH": "vdd_3v3", "VSS": "vss_3v3"}, ""),
+    # reset is ~470 um of metal3 from dig_in[2] to a small gate and has no antenna
+    # diode inside lvds_pattern (en, mode and ref_clk do): this one sits under the
+    # line in the layout, 9 um before the pin (scripts/top/route_top.py)
+    ("DRST", "sg13cmos5l_pr/dantenna.sym", "dio", 1300, -960, {
+        "d1": "dig_in[2]", "d0": "vss_1v2"}, "model=dantenna l=0.78u w=0.78u spiceprefix=X"),
+    # decoupling, one row of decap cells per supply domain, laid under the edges
+    # of the TopMetal1 supply straps (scripts/top/route_top.py, which places
+    # exactly DECAP_LV / DECAP_HV of them).  The 3.3 V row has to be HV cells.
+    ("xdc12[%d:0]" % (DECAP_LV - 1), "sg13cmos5l_stdcells/sg13cmos5l_decap_8.sym", "decap",
+     2900, -840, {}, "VDD=vdd_1v2 VSS=vss_1v2 prefix=sg13cmos5l_"),
+    ("xdc33[%d:0]" % (DECAP_HV - 1), "sg13g2_hv_decap_8.sym", "decap",
+     2900, -730, {}, "VDD=vdd_3v3 VSS=vss_3v3 prefix=sg13g2_hv_"),
 ]
 
 HEADER = """v {xschem version=3.4.8RC file_version=1.3}
@@ -131,58 +149,54 @@ S {}
 F {}
 E {}"""
 
-NOTES = """T {Chipalooza 2026 - LVDS transmitter with PRBS-7 generator} 800 -1900 0 0 1 1 {}
-T {Port list is verilog/rtl/user_project_wrapper_4a.v from
-RTimothyEdwards/sg13cmos5l_ocd_chipalooza, every bus expanded into
-individual pins.  Four dedicated analog pads means slot s1 or s16 -
-per config.txt the only two that have four.
+NOTES = """T {Chipalooza 2026, slot 14 - LVDS transmitter with PRBS-7 generator} 800 -1900 0 0 1 1 {}
+T {Port list is the slot-14 frame (slot14_wrapper of
+RTimothyEdwards/sg13cmos5l_ocd_chipalooza), pin for pin, so this cell and
+layout/slot_14.gds compare by name in LVS.  Slot 14 has three dedicated
+analog pads, each an sg13cmos5l_IOPadAnalog with two core terminals:
+s14_an[i] is the pad itself (primary clamps only), s14_an_i_esd goes through
+its secondary protection (series resistor and diodes), the one for gates.
 
-  analog_pin[0]  ref_clk   PLL reference in, feeds lvds_pattern and the PLL
-  analog_pin[1]  pll_out   the PLL's TEST_CLK, brought off chip
-  analog_pin[2]  d_p       LVDS out +
-  analog_pin[3]  d_n       LVDS out -
+  s14_an[0]      d_n       LVDS out -   (Out_n is the upper one of the pair)
+  s14_an[1]      d_p       LVDS out +
+  s14_an_2_esd   ref_clk   reference in, feeds lvds_pattern - a gate input
+  s14_an[2]      odt       pad 2 itself: the switchable 50 ohm termination
+  s14_an_0_esd, s14_an_1_esd   not connected
 
-All four are sg13cmos5l_IOPadAnalog in config.txt, so each pad is one core
-signal carrying the pad name.  A different pad type changes that: an InOut
-pad becomes five core signals (_in, _out, _ena, _one, _zero).
-
-Not connected: dig_out[11:0], analog_bus[3:2], vssio, clk and enable - the
-reference arrives on its own dedicated pad instead of the shared clock pin.
-The harness already masks dig_in to zero for an unselected project
-(proj_dig_in is dig_in ANDed with 24 copies of select & dig_ena, in
-user_project_control.v), so
-dig_in[1] alone stops the pattern clock.  Note this drops the one case the
-gate used to cover: select and dig_ena high with enable low leaves dig_in[1]
-live, and the block then runs with the project enable deasserted.} 300 -1820 0 0 0.4 0.4 {}
+Not connected: dig_out[11:0], dig_in[23:4], analog_bus0/2/3, vbias, clk,
+enable and reset - the reference arrives on its own pad.  The harness masks
+dig_in to zero for an unselected project (proj_dig_in is dig_in ANDed with
+select & dig_ena in user_project_control.v), so dig_in[1] alone stops the
+pattern clock.} 300 -1820 0 0 0.4 0.4 {}
 T {dig_in map.  The housekeeping SPI routes every bit individually to a
 pin, a constant or the sequencer, so a configuration bit costs a register
 write and no pin.  Unselected holds every dig_in at zero, and all-zero
 leaves the clock stopped and the output pair static - a legal idle.
 
-  dig_in[0]     clk_src    0 = ref_clk, 1 = pll_clk
-  dig_in[1]     en         gates the pattern clock, not the output pair
+  dig_in[0]     odt        1 = 50 ohm termination of ref_clk on (xodt); 0 = off
+  dig_in[1]     en        gates the pattern clock, not the output pair
   dig_in[2]     reset      active high, seeds the PRBS shift register
                            Neither reaches the two output flops: they run on an
                            ungated clock with RESET_B tied high, so D_p and D_n
                            are complementary from the first edge after power-up
                            and the LVDS driver settles once, not at every enable.
   dig_in[3]     mode       0 = clock passthrough, 1 = PRBS-7
-  dig_in[4]     unused     carried the provisional pll_clk before the PLL was placed
-  dig_in[5]     PLL ENABLE
-  dig_in[6]     PLL RESET_N, active low
-  dig_in[16:7]  PLL DIV_RATIO[9:0], unsigned Q7.3
-  dig_in[18:17] PLL TEST_DIV[1:0]
-  dig_in[23:19] unused
+  dig_in[23:4]  unused
 
-The Q7.3 ratio costs 10 bits where the earlier split DIV_INT + DIV_FRAC cost
-23, so the PLL and the LVDS controls together now fit in 18 of the 24 bits
-and DIV_FRAC no longer has to be tied off.} 300 -1400 0 0 0.4 0.4 {}
-T {Two supply domains with separate grounds.  core_p / core_n cross from
-vss_1v2 into the pre-driver on vss_3v3 - the two grounds have to be tied
-together in the frame, check that before tapeout.
+The PLL that clocked lvds_pattern through pll_clk left the project on
+2026-10-07, and the pattern's clock source select (pll_clk, clk_src) with
+it; the PLL goes on as a project of its own.} 300 -1400 0 0 0.4 0.4 {}
+T {Two supply domains, one ground.  core_p / core_n cross from vss_1v2 into
+the pre-driver on vss_3v3.  The harness ties the two grounds
+(chipalooza_frame.v: assign vss3v3 = vss1v2), and every tap of either sits in
+the same substrate, so the layout extraction merges them as well; the LVS
+joins them in this schematic too (scripts/verify/check_lvs.sh).
 
-No ESD structure on the output pads, and analog_pin[0] runs straight into
-a standard-cell input with no receiver.  Both need fixing before tapeout.} 1450 -760 0 0 0.35 0.35 {}"""
+The output pads carry the primary clamps only: a series resistor in an
+LVDS output would eat the swing.} 1450 -560 0 0 0.35 0.35 {}
+T {Decoupling Capacitors} 2860 -990 0 0 0.25 0.25 {}
+T {DRST: antenna diode
+on the long reset line} 1180 -860 0 0 0.25 0.25 {}"""
 
 
 def gen_sch(path):
@@ -191,14 +205,23 @@ def gen_sch(path):
         for pin in sorted(conn):
             dx, dy = PINS[fam][pin]
             px, py = x + dx, y + dy
-            s = -1 if dx < 0 else 1
-            ex = px + s * 40
-            out.append("N %d %d %d %d {lab=%s}"
-                       % (min(px, ex), py, max(px, ex), py, conn[pin]))
             tag = pin.lower().replace("[", "").replace("]", "")
-            out.append("C {lab_pin.sym} %d %d 0 %d "
-                       "{name=l_%s_%s sig_type=std_logic lab=%s}"
-                       % (ex, py, 0 if s < 0 else 1, inst, tag, conn[pin]))
+            if fam != "mos" and abs(dy) > abs(dx):   # a macro pin on the top or bottom edge
+                s = -1 if dy < 0 else 1
+                ey = py + s * 40
+                out.append("N %d %d %d %d {lab=%s}"
+                           % (px, min(py, ey), px, max(py, ey), conn[pin]))
+                out.append("C {lab_pin.sym} %d %d %d 0 "
+                           "{name=l_%s_%s sig_type=std_logic lab=%s}"
+                           % (px, ey, 1 if s < 0 else 3, inst, tag, conn[pin]))
+            else:
+                s = -1 if dx < 0 else 1
+                ex = px + s * 40
+                out.append("N %d %d %d %d {lab=%s}"
+                           % (min(px, ex), py, max(px, ex), py, conn[pin]))
+                out.append("C {lab_pin.sym} %d %d 0 %d "
+                           "{name=l_%s_%s sig_type=std_logic lab=%s}"
+                           % (ex, py, 0 if s < 0 else 1, inst, tag, conn[pin]))
         props = "name=%s" % inst + (("\n" + extra) if extra else "")
         out.append("C {%s} %d %d 0 0 {%s}" % (sym, x, y, props))
 
@@ -320,126 +343,84 @@ def launchers(x, y, tb):
 TB_LVDS_DRIVE = {
     "vdd_3v3": ("v", "3.3", "gated 3.3 V"),
     "vdd_1v2": ("v", "1.2", "gated 1.2 V"),
-    "analog_bus[1]": ("v", "1.2", "LVDS common-mode reference, 1.2 V (the IDAC grid has no 1.25 V)"),
-    "ibias[0]": ("i", "-2u", "pre-driver reference, 2 uA"),
-    "ibias[1]": ("i", "-2u", "driver reference, 2 uA"),
-    "analog_pin[0]": ("v", "PULSE(0 1.2 0 50p 50p 0.9n 2n)", "ref_clk, 500 MHz"),
-    "dig_in[0]": ("v", "0", "clk_src = 0, take ref_clk"),
+    "iovdd": ("v", "3.3", "pad ring, 3.3 V - pad 2's IO cell"),
+    "analog_bus1": ("v", "1.2", "LVDS common-mode reference, 1.2 V (the IDAC grid has no 1.25 V)"),
+    "ibias0": ("i", "-2u", "pre-driver reference, 2 uA into the 1:15 mirror"),
+    "ibias1": ("i", "-2u", "driver reference, 2 uA into the 1:15 mirror"),
+    "dig_in[0]": ("v", "PWL(0 0 300n 0 300.1n 1.2)", "ODT: off, on from 300 ns"),
     "dig_in[1]": ("v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
-    "dig_in[2]": ("v", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset, high until 2 ns"),
+    "dig_in[2]": ("v", "PWL(0 1.2 2n 1.2 2.1n 0 400n 0 400.1n 1.2 402n 1.2 402.1n 0)",
+                  "reset until 2 ns, again at 400 ns"),
     "dig_in[3]": ("v", "1.2", "mode = 1, PRBS-7 throughout"),
-    # xpll is pll_cosim, so every one of these lands on an XSPICE
-    # adc_bridge, where an open node has no defined logic value.
-    # The loop is held off rather than left to guess.
-    #
-    # analog_bus[0], the charge-pump reference, is deliberately NOT driven
-    # here. It is a current mirror input, not a bridge, so open simply means
-    # unbiased - and biasing it lets VCTRL drift up until the ring oscillator
-    # starts, which cost this bench a factor of 30 in run time for a loop it
-    # does not measure. tb_pll is where the PLL gets its reference.
-    "dig_in[5]": ("v", "0", "PLL ENABLE = 0, the loop is not used here"),
-    "dig_in[6]": ("v", "0", "PLL RESET_N = 0, held in reset"),
-    "dig_in[7]": ("v", "0", "DIV_RATIO[0] = 0"),
-    "dig_in[8]": ("v", "0", "DIV_RATIO[1] = 0"),
-    "dig_in[9]": ("v", "0", "DIV_RATIO[2] = 0"),
-    "dig_in[10]": ("v", "0", "DIV_RATIO[3] = 0"),
-    "dig_in[11]": ("v", "0", "DIV_RATIO[4] = 0"),
-    "dig_in[12]": ("v", "0", "DIV_RATIO[5] = 0"),
-    "dig_in[13]": ("v", "0", "DIV_RATIO[6] = 0"),
-    "dig_in[14]": ("v", "0", "DIV_RATIO[7] = 0"),
-    "dig_in[15]": ("v", "0", "DIV_RATIO[8] = 0"),
-    "dig_in[16]": ("v", "0", "DIV_RATIO[9] = 0"),
-    "dig_in[17]": ("v", "0", "TEST_DIV[0] = 0"),
-    "dig_in[18]": ("v", "0", "TEST_DIV[1] = 0"),
 }
-TB_LVDS_GROUND = ("vss_3v3", "vss_1v2", "vssio")
-TB_LVDS_PADS = ("analog_pin[2]", "analog_pin[3]")     # the differential pair
+TB_LVDS_GROUND = ("vss_3v3", "vss_1v2")
+TB_LVDS_PADS = ("s14_an[1]", "s14_an[0]")     # the differential pair: d_p, d_n
 
-TB_LVDS_CONTROL = r'''
+# the three phases of the run (see LVDS_TITLE) and the windows each is measured in
+TB_LVDS_PHASES = [
+    ("a", 150, 295, "phase A - ODT off, EMF 1.2 V: pad 1.2 V, no pad current"),
+    ("b", 320, 395, "phase B - ODT on, EMF 1.2 V: pad halved to 0.6 V if the ODT is 50 ohm"),
+    ("c", 500, 695, "phase C - ODT on, EMF 2.4 V: pad 1.2 V, 24 mA while high"),
+]
+
+
+def tb_lvds_measures():
+    out = []
+    for k, t0, t1, what in TB_LVDS_PHASES:
+        w = "from=%dn to=%dn" % (t0, t1)
+        for name, fn, vec in (("pad_max", "MAX", "v(clk_pad)"), ("pad_min", "MIN", "v(clk_pad)"),
+                              ("ck_max", "MAX", "v(s14_an_2_esd)"), ("ck_min", "MIN", "v(s14_an_2_esd)"),
+                              ("ipad_max", "MAX", "i(Vpad2)"), ("ipad_avg", "AVG", "i(Vpad2)"),
+                              ("core_pp", "PP", "v(x1.core_p)"),
+                              ("vod_max", "MAX", "vod"), ("vod_min", "MIN", "vod"),
+                              ("vos_avg", "AVG", "v(vos)"), ("vos_pp", "PP", "v(vos)"),
+                              ("i_3v3", "AVG", "i(Vvdd_3v3)"), ("i_1v2", "AVG", "i(Vvdd_1v2)")):
+            out.append("meas tran %s_%s %s %s %s" % (name, k, fn, vec, w))
+    for k, t0, t1, what in TB_LVDS_PHASES:
+        out.append("echo === %s (%d-%d ns)" % (what, t0, t1))
+        out.append("print pad_max_%s pad_min_%s ck_max_%s ck_min_%s ipad_max_%s ipad_avg_%s"
+                   % ((k,) * 6))
+        out.append("print core_pp_%s vod_max_%s vod_min_%s vos_avg_%s vos_pp_%s i_3v3_%s i_1v2_%s"
+                   % ((k,) * 7))
+    return "\n".join(out)
+
+
+TB_LVDS_CONTROL = r"""
 .lib cornerMOSlv.lib mos_tt
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
-.lib cornerDIO.lib dio_tt
+.include ../../../models/diodes_tt0.lib
+.include sg13g2_esd.lib
 .include cap_cmomf.lib
 .include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
+.include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_io/spice/sg13cmos5l_io.spi
+* the substrate terminal of the pad cell's poly resistor
+.global sub!
+Vsub sub! 0 0
 .temp 27
-* gear2 collapses the timestep to 6e-24 s at 414 ns on vvdd_1v2#branch
-* once the PLL's XSPICE bridges are in the netlist, and the run stops
-* there whatever tstop says.  trap gets through the full span.
 .options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 * Without this the H-bridge cannot balance at t=0, cmfb runs to the rail and the
 * pair spends ~60 ns climbing back (tb_startup measures 61.3 ns).  The driver's
 * own benches place cmfb the same way and run no operating point.
 .ic v(x1.xlvds.xdrv.cmfb)=1.54
 .control
-* The top cell carries pll_cosim, whose RTL half only couples to the analog
-* loop once ngspice holds the auto-bridge templates.  Those are injected into
-* the netlist after xschem writes it, by scripts/pll/inject_cosim_bridges.py,
-* because the quotes their syntax needs would end xschem's value=... property
-* and silently take .endc with them.
-*
-* make sim-xschem netlists, injects, then simulates.  The Simulate arrow in
-* xschem does not netlist - it runs ngspice on whatever netlist is already
-* there, so it works after a make run and fails after xschem has written a
-* fresh one.  Without the bridges nothing couples and every waveform comes
-* out flat, so stop here rather than produce a plausible-looking lie.
-if $?auto_bridge_d_in = 0
-  echo
-  echo ERROR: d_cosim auto-bridges are not set, so the PLL is disconnected.
-  echo Fix: run make sim-xschem with the TB= name of this bench.
-  echo The Simulate arrow reuses that netlist afterwards and will work.
-  echo
-* quit 1 rather than quit: xschem runs ngspice in a terminal that falls back
-* to a shell only on a non-zero exit.  Quitting with zero closes the window
-* before the message above can be read.
-  quit 1
-end
-* xpll is pll_cosim: the PFD and both dividers are the RTL of
-* macros/pll_digital, through d_cosim.  The analog/digital bridges are
-* inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
-* cannot live here: xschem ends the value property at the first quote.
-* Build the shared object first: make pll-cosim-so.
-* save all over 120 ns at 5 ps writes a 292 MB rawfile; name what the
-* measurements, the wrdata and the four graph panels actually need.
-* In_p / In_n are the pre-driver pair inside xlvds - the last node before
-* the output stage, and where a common-mode problem shows up first.
-save d_p d_n vos x1.core_p x1.core_n x1.xpat.gclk_b i(Vvdd_3v3) i(Vvdd_1v2)
-+ x1.xlvds.In_p x1.xlvds.In_n
-* 500 Mb/s means 2 ns a bit, so a full PRBS-7 period is 254 ns.  600 ns gives
-* one settling stretch plus about 225 bits of settled data to measure on.
-tran 5p 600n 0 5p
+* save all over 700 ns at 5 ps writes a rawfile of several 100 MB; name what the
+* measurements, the wrdata and the graph panels actually need.  In_p / In_n are
+* the pre-driver pair inside xlvds, where a common-mode problem shows up first.
+save d_p d_n vos clk_pad s14_an_2_esd dig_in_0_ i(Vpad2) x1.core_p x1.core_n
++ i(Vvdd_3v3) i(Vvdd_1v2) i(Viovdd) x1.xlvds.In_p x1.xlvds.In_n
+tran 5p 700n 0 5p
 write @schname\\\\.raw
 
-* did the pattern generator actually get a clock?  A static pair means the
-* control path is broken, not the driver.
-meas tran clk_pp PP v(x1.xpat.gclk_b) from=150n to=595n
-meas tran core_pp PP v(x1.core_p) from=150n to=595n
-print clk_pp core_pp
-
-* TIA/EIA-644-A 4.1.1 and 4.1.2 on the settled pattern
 let vod = v(d_p)-v(d_n)
-meas tran vod_max MAX vod from=150n to=595n
-meas tran vod_min MIN vod from=150n to=595n
-meas tran vos_avg AVG v(vos) from=150n to=595n
-meas tran vos_max MAX v(vos) from=150n to=595n
-meas tran vos_min MIN v(vos) from=150n to=595n
-let vos_pp = vos_max - vos_min
-* the cold start, kept in the log so the settled number is not mistaken for it
-meas tran vos_pp_early PP v(vos) from=20n to=100n
-meas tran vos_pp_mid PP v(vos) from=100n to=150n
-print vod_max vod_min vos_avg vos_pp
-print vos_pp_early vos_pp_mid
-* print on a transient vector dumps every timepoint - measure instead
-meas tran i_3v3 AVG i(Vvdd_3v3) from=150n to=595n
-meas tran i_1v2 AVG i(Vvdd_1v2) from=150n to=595n
-print i_3v3 i_1v2
+%s
 
 set wr_vecnames
 set wr_singlescale
 wrdata ../plot_simulations/data/@schname\\\\.txt
-+ v(d_p) v(d_n) v(vos) vod v(x1.core_p) v(x1.core_n)
++ v(d_p) v(d_n) v(vos) vod v(x1.core_p) v(x1.core_n) v(clk_pad) v(s14_an_2_esd) i(Vpad2)
 .endc
-'''
+""" % tb_lvds_measures()
 
 
 def sym_pins(path):
@@ -630,43 +611,80 @@ def pad_network(pins, pads):
     return out
 
 
+# ref_clk comes in the way it does on the chip: a 50 ohm generator onto pad 2
+# itself (s14_an[2], where xodt hangs), through the pad's IO cell and its
+# secondary protection to s14_an_2_esd.  Two pulse sources in series make the
+# generator: the second one joins at 400 ns, which doubles the EMF - a generator
+# set to 1.2 V into 50 ohm.  Placed below the output termination, connected by
+# net labels only.
+REFCLK_X, REFCLK_Y = 500, 1000
+PAD2_PINS = {"vss": (7.5, -340), "vdd": (17.5, -330), "iovss": (27.5, -320),
+             "iovdd": (40, -310), "pad": (100, -350), "padres": (200, -350)}
+
+
+def refclk_path():
+    x, y = REFCLK_X, REFCLK_Y
+    out = []
+
+    def lab(px, py, net, name):
+        if net == "GND":
+            out.append("C {devices/gnd.sym} %g %g 0 0 {name=lgr_%s lab=GND}" % (px, py, name))
+        else:
+            out.append("C {lab_pin.sym} %g %g 0 0 {name=lr_%s sig_type=std_logic lab=%s}"
+                       % (px, py, name, net))
+
+    def vert(sym, cx, cy, name, value, top, bot):
+        out.append('C {%s} %d %d 0 0 {name=%s value="%s"}' % (sym, cx, cy, name, value))
+        lab(cx, cy - 30, top, name + "_t")
+        lab(cx, cy + 30, bot, name + "_b")
+
+    vert("devices/vsource.sym", x, y, "Vclk_a", "PULSE(0 1.2 0 50p 50p 0.9n 2n)", "clk_mid", "GND")
+    vert("devices/vsource.sym", x, y - 200, "Vclk_b", "PULSE(0 1.2 400n 50p 50p 0.9n 2n)",
+         "clk_gen", "clk_mid")
+    vert("res.sym", x + 300, y - 200, "Rgen", "50", "clk_gen", "clk_pad")
+    vert("devices/vsource.sym", x + 500, y - 200, "Vpad2", "0", "clk_pad", "s14_an[2]")
+    px, py = x + 800, y + 250
+    out.append("C {sg13cmos5l_io/sg13cmos5l_IOPadAnalog.sym} %d %d 0 0 {name=xpad2}" % (px, py))
+    for pin, net in (("vss", "GND"), ("vdd", "vdd_1v2"), ("iovss", "GND"),
+                     ("iovdd", "iovdd"), ("pad", "s14_an[2]"), ("padres", "s14_an_2_esd")):
+        dx, dy = PAD2_PINS[pin]
+        lab(px + dx, py + dy, net, "pad2_" + pin)
+    out.append("T {ref_clk: 50 ohm generator onto pad 2.  Vclk_b joins at 400 ns:\n"
+               "EMF 1.2 V before, 2.4 V after (1.2 V into 50 ohm).\n"
+               "Vpad2 is the ammeter: the current into the pad, i.e. into xodt.} "
+               "%d %d 0 0 0.35 0.35 {}" % (x - 100, y - 420))
+    out.append("T {pad 2: IOPadAnalog (PDK model) - pad = s14_an[2] with xodt,\n"
+               "padres = s14_an_2_esd, the ref_clk input of lvds_pattern} "
+               "%d %d 0 0 0.3 0.3 {}" % (px - 100, py + 60))
+    return out
+
+
 # the sources, split by what they are actually for
 TB_LVDS_GROUPS = [
-    ("supplies", ["vdd_3v3", "vdd_1v2"]),
-    ("bias", ["analog_bus[1]", "ibias[0]", "ibias[1]"]),
-    ("pattern control", ["dig_in[0]", "dig_in[1]",
-                         "dig_in[2]", "dig_in[3]"]),
-    ("clocks", ["analog_pin[0]"]),
-    ("PLL held off - see TB_LVDS_DRIVE",
-     ["dig_in[6]", "dig_in[5]"]
-     + ["dig_in[%d]" % (b + 7) for b in range(9, -1, -1)]
-     + ["dig_in[18]", "dig_in[17]"]),
+    ("supplies", ["vdd_3v3", "vdd_1v2", "iovdd"]),
+    ("bias", ["analog_bus1", "ibias0", "ibias1"]),
+    ("pattern control", ["dig_in[0]", "dig_in[1]", "dig_in[2]", "dig_in[3]"]),
 ]
 
-LVDS_TITLE = """LVDS bench for the top cell.
+LVDS_TITLE = """LVDS bench for the top cell - the schematic, and the ODT switched on and off.
 
-Reset, then clock passthrough of the 500 MHz reference on the dedicated
-pad, then PRBS-7 from 10 ns, through the pre-driver and the driver into
-49.9 + 49.9 ohm across the two output pads with the Vos tap.
+ref_clk comes from a 50 ohm generator onto pad 2 (s14_an[2]), through the pad's
+IO cell and its secondary protection to s14_an_2_esd.  xodt hangs on pad 2.
+The run has three phases:
 
-clk_src is 0 here on purpose: this bench characterises the transmitter,
-so the bit clock comes straight off analog_pin[0] and the PLL is left
-out of the measurement.  tb_pll is the one that runs through the loop.
+  A    0 - 300 ns   ODT off, EMF 1.2 V   pad 1.2 V, no current into the pad
+  B  300 - 400 ns   ODT on,  EMF 1.2 V   pad halved to 0.6 V: 50 ohm into 50 ohm
+                                        (too small for the clock - the pattern stalls)
+  C  400 - 700 ns   ODT on,  EMF 2.4 V   pad 1.2 V again, 24 mA while high;
+                                        reset at 400 ns, PRBS-7 runs again
 
-The port list is read out of the symbol when this bench is generated,
-so it survives rewiring of the top cell.  Any harness pin without a
-source in the stimulus column is left open on purpose - except the
-PLL's, which are driven even though the loop is unused here.  They
-land on an XSPICE adc_bridge, where an open node has no defined logic
-value, so ENABLE and RESET_N hold the loop off and every ratio bit
-carries its own source.
+PRBS-7 at 500 Mb/s through the pre-driver and the driver into 49.9 + 49.9 ohm
+across pads 1 and 0 with the Vos tap.  The log prints each phase: the clock at
+the pad and behind the protection, the pad current, Vod / Vos, the supplies.
 
-clk_pp and core_pp are checked first: if the gated clock inside the
-pattern generator is not moving, the control path is broken and the
-LVDS numbers below it mean nothing.
-
-No pad or ESD model - the driver was characterised with one, so the
-Vos figure here is not the compliance number."""
+Only pad 2 is modelled (its IO cell is what joins s14_an[2] to s14_an_2_esd);
+the outputs see an ideal 100 ohm.  Pads, bond wires, package and line on all
+three: slot_14_tb_lvds_pads (layout wiring) and slot_14_tb_lvds_pex."""
 
 
 def gen_tb_lvds(path, symbol):
@@ -678,16 +696,16 @@ def gen_tb_lvds(path, symbol):
     out += dut_stubs(pins, TB_LVDS_GROUND, skip=TB_LVDS_PADS)
     out.append("C {%s.sym} 0 0 0 0 {name=x1}" % TOP)
     out += pad_network(pins, TB_LVDS_PADS)
-    # the top panel spans the whole run so the cold start stays visible, the two
-    # below it are zoomed onto a few settled bits
+    out += refclk_path()
+    # the three full-run panels share their window and stay locked together; the
+    # zooms below them sit on a few bits of phase A and of phase C
     out += view_panels(
-        [(["d_p", "d_n", "vos"], [4, 5, 8], 0.9, 1.6, 0.0, 6.0e-7),
-         (["x1.xpat.gclk_b", "x1.core_p", "x1.core_n"], [4, 7, 5],
-          -0.2, 1.4, 3.00e-7, 3.10e-7),
-         (["d_p", "d_n", "vod"], [4, 5, 7], -0.5, 1.6, 3.00e-7, 3.10e-7),
-         # the pre-driver output is full-swing on the 3.3 V rail
-         (["x1.xlvds.In_p", "x1.xlvds.In_n"], [4, 5],
-          -0.2, 3.5, 3.00e-7, 3.10e-7)],
+        [(["dig_in_0_", "clk_pad", "s14_an_2_esd"], [8, 4, 7], -0.2, 1.6, 0.0, 7.0e-7),
+         (["i(vpad2)"], [4], -0.01, 0.03, 0.0, 7.0e-7),
+         (["d_p", "d_n", "vos"], [4, 5, 8], 0.9, 1.6, 0.0, 7.0e-7),
+         (["clk_pad", "s14_an_2_esd", "x1.core_p"], [4, 7, 5], -0.2, 1.6, 2.50e-7, 2.60e-7),
+         (["clk_pad", "s14_an_2_esd", "x1.core_p"], [4, 7, 5], -0.2, 1.6, 6.50e-7, 6.60e-7),
+         (["d_p", "d_n", "vod"], [4, 5, 7], -0.5, 1.6, 6.50e-7, 6.60e-7)],
         TOP + "_tb_lvds")
     out.append(code_block(DOC_X, DOC_CODE_Y, TB_LVDS_CONTROL))
     io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
@@ -697,56 +715,28 @@ def gen_tb_lvds(path, symbol):
 TB_SOURCES = [
     ("vdd_3v3", "v", "3.3", "gated 3.3 V"),
     ("vdd_1v2", "v", "1.2", "gated 1.2 V"),
-    ("analog_bus[1]", "v", "1.2", "LVDS common-mode reference, 1.2 V"),
-    ("analog_pin[0]", "v", "PULSE(0 1.2 0 50p 50p 1.9n 4n)", "ref_clk, 250 MHz"),
-    ("dig_in[0]", "v", "0", "clk_src = 0, take ref_clk"),
+    ("analog_bus1", "v", "1.2", "LVDS common-mode reference, 1.2 V"),
+    ("s14_an_2_esd", "v", "PULSE(0 1.2 0 50p 50p 1.9n 4n)", "ref_clk, 250 MHz"),
+    ("dig_in[0]", "v", "0", "ODT off"),
     ("dig_in[1]", "v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
     ("dig_in[2]", "v", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset, high until 2 ns"),
     ("dig_in[3]", "v", "PWL(0 0 10n 0 10.1n 1.2)", "mode -> PRBS-7 at 10 ns"),
-    ("ibias[0]", "i", "-2u", "pre-driver reference, 2 uA"),
-    ("ibias[1]", "i", "-2u", "driver reference, 2 uA"),
+    ("ibias0", "i", "-2u", "pre-driver reference, 2 uA"),
+    ("ibias1", "i", "-2u", "driver reference, 2 uA"),
 ]
 
-TB_CONTROL = r'''
+TB_CONTROL = r"""
 .lib cornerMOSlv.lib mos_tt
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
-.lib cornerDIO.lib dio_tt
+.include ../../../models/diodes_tt0.lib
+.include sg13g2_esd.lib
 .include cap_cmomf.lib
 .include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
 .temp 27
-* gear2 collapses the timestep to 6e-24 s at 414 ns on vvdd_1v2#branch
-* once the PLL's XSPICE bridges are in the netlist, and the run stops
-* there whatever tstop says.  trap gets through the full span.
 .options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
+.ic v(x1.xlvds.xdrv.cmfb)=1.54
 .control
-* The top cell carries pll_cosim, whose RTL half only couples to the analog
-* loop once ngspice holds the auto-bridge templates.  Those are injected into
-* the netlist after xschem writes it, by scripts/pll/inject_cosim_bridges.py,
-* because the quotes their syntax needs would end xschem's value=... property
-* and silently take .endc with them.
-*
-* make sim-xschem netlists, injects, then simulates.  The Simulate arrow in
-* xschem does not netlist - it runs ngspice on whatever netlist is already
-* there, so it works after a make run and fails after xschem has written a
-* fresh one.  Without the bridges nothing couples and every waveform comes
-* out flat, so stop here rather than produce a plausible-looking lie.
-if $?auto_bridge_d_in = 0
-  echo
-  echo ERROR: d_cosim auto-bridges are not set, so the PLL is disconnected.
-  echo Fix: run make sim-xschem with the TB= name of this bench.
-  echo The Simulate arrow reuses that netlist afterwards and will work.
-  echo
-* quit 1 rather than quit: xschem runs ngspice in a terminal that falls back
-* to a shell only on a non-zero exit.  Quitting with zero closes the window
-* before the message above can be read.
-  quit 1
-end
-* xpll is pll_cosim: the PFD and both dividers are the RTL of
-* macros/pll_digital, through d_cosim.  The analog/digital bridges are
-* inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
-* cannot live here: xschem ends the value property at the first quote.
-* Build the shared object first: make pll-cosim-so.
 save all
 op
 remzerovec
@@ -769,19 +759,18 @@ set wr_singlescale
 wrdata ../plot_simulations/data/@schname\\\\.txt
 + v(d_p) v(d_n) v(vos) vod v(x1.core_p) v(x1.core_n)
 .endc
-'''
+"""
 
 
 def gen_tb(path):
     out = [HEADER]
     out.append("T {Top-level transient bench.\n\n"
-               "  analog_pin[0]  250 MHz reference on the dedicated pad\n"
-               "  dig_in[0]      clk_src = 0, the bit clock is the reference\n"
+               "  s14_an_2_esd   250 MHz reference on pad 2, the bit clock\n"
                "  dig_in[1]      en, low until 3 ns\n"
                "  dig_in[2]      reset, high until 2 ns\n"
                "  dig_in[3]      mode, PRBS-7 from 10 ns\n"
-               "  ibias[1:0]     30 uA each, vbias 1.25 V\n\n"
-               "Load is 49.9 + 49.9 ohm across analog_pin[2] / analog_pin[3] with the\n"
+               "  ibias0/1       2 uA each into the two 1:15 mirrors\n\n"
+               "Load is 49.9 + 49.9 ohm across s14_an[1] / s14_an[0] with the\n"
                "Vos tap.  No pad or ESD model, so the Vos figure is not the compliance\n"
                "number - the driver was characterised with one.} -1700 -2100 0 0 0.45 0.45 {}")
     y = -1900
@@ -803,7 +792,7 @@ def gen_tb(path):
     n = max(len(left), len(right))
     w, top = 220, -10 * n - 40
     ix, iy = 0, 0
-    grounded = {"vss_3v3", "vss_1v2", "vssio"}
+    grounded = {"vss_3v3", "vss_1v2"}
     for i, (net, sym, side) in enumerate(left):
         py = iy + top + 30 + i * 20
         tag = net.replace("[", "_").replace("]", "")
@@ -822,10 +811,10 @@ def gen_tb(path):
                    % (ix + w + 60, py, tag, net))
     out.append("C {%s.sym} %d %d 0 0 {name=x1}" % (TOP, ix, iy))
 
-    # ngspice's frontend reads [ ] as vector indexing, so v(analog_pin[2]) will not
+    # ngspice's frontend reads [ ] as vector indexing, so v(s14_an[1]) will not
     # parse.  A 0 V source per pad gives the net a plain name to measure on, and
     # its branch current is the pad current for free.
-    for x, pad, name in ((700, "analog_pin[3]", "d_n"), (900, "analog_pin[2]", "d_p")):
+    for x, pad, name in ((700, "s14_an[0]", "d_n"), (900, "s14_an[1]", "d_p")):
         out.append("N %d -960 %d -930 {lab=%s}" % (x, x, pad))
         out.append("C {lab_pin.sym} %d -960 1 0 {name=lpad_%s sig_type=std_logic lab=%s}"
                    % (x, name, pad))
@@ -850,299 +839,12 @@ def gen_tb(path):
     io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
 
 
-# ---------------------------------------------------- the PLL bench family
-# VCO = REF * DIV_RATIO and pll_clk = VCO / 2 (clock_output_divider.v always
-# halves), so the line rate is REF * DIV_RATIO / 2.  DIV_RATIO is an unsigned
-# Q7.3 word: div_ratio[9:3] is the integer part, div_ratio[2:0] the eighths
-# (pll_digital.v), and fractional_divider.v requires the integer part >= 4.
-#
-# The ring oscillator runs from 322 MHz (vctrl 0.50) to 4.05 GHz (vctrl 0.95)
-# at tt/1.2 V/27 C and does not start below 0.50 V, per
-# info/ring_oscillator_buffered_pvt.csv, so every combination below lands
-# between 0.7 and 2.1 GHz - clear of both ends of the tuning curve.
-#
-# info/pll_integer_characterization.csv measures lock at 2.75 us typical,
-# 2.25 us fast and 4.50 us slow.  A bench therefore has to run well past 1 us
-# before it asks what the output frequency is.
-# Historical caveat, measured 2026-09-01: the legacy fixed-ratio pll.sch view
-# ignores DIV_RATIO.  Its DIV_RATIO[9:0] and TEST_DIV[1:0] pins connect to
-# nothing, and its XSPICE model divides by a hard-wired 20.  The generated top
-# benches do not use that view: the top instantiates pll_cosim, whose analog
-# loop is transistor-level and whose PFD and dividers are macros/pll_digital
-# RTL through d_cosim.  The combinations below are therefore genuinely
-# programmable and exercise the requested ratio and test-divider setting.
-PLL_TSTOP = 6.0e-6
-PLL_VCO_MIN, PLL_VCO_MAX = 0.7e9, 2.1e9
-
-PLL_COMBOS = [
-    # name, ref_hz, ratio, test_div, why this combination is in the set
-    ("ref250_r4", 250e6, 4.0, 0,
-     "baseline - the operating point the rest of the project assumes"),
-    ("ref125_r8", 125e6, 8.0, 1,
-     "same 1 GHz VCO as the baseline at half the compare frequency"),
-    ("ref25_r40", 25e6, 40.0, 3,
-     "same 1 GHz VCO again at a tenth of the compare frequency - a row of "
-     "pll_integer_characterization.csv"),
-    ("ref100_r20", 100e6, 20.0, 2,
-     "2 GHz VCO, the fast end - the other characterised row"),
-    ("ref250_r4p5", 250e6, 4.5, 0,
-     "fractional-N, code 36: one eighth bit, N/N+1 alternates every other cycle"),
-    ("ref200_r4p375", 200e6, 4.375, 1,
-     "fractional-N, code 35: three eighth bits, and the slow end at 875 MHz"),
-]
-
-
-def pll_combo(name, ref_hz, ratio, test_div, why):
-    """everything a bench needs, derived once so deck and prose cannot disagree"""
-    code = int(round(ratio * 8))
-    assert abs(code / 8.0 - ratio) < 1e-9, "%s: ratio is not a whole eighth" % name
-    assert code >> 3 >= 4, "%s: fractional_divider.v wants integer_div >= 4" % name
-    assert code < 1024, "%s: DIV_RATIO is 10 bits" % name
-    vco = ref_hz * ratio
-    assert PLL_VCO_MIN <= vco <= PLL_VCO_MAX, \
-        "%s: %.3f GHz is outside the characterised VCO band" % (name, vco / 1e9)
-    return dict(
-        name=name, ref=ref_hz, ratio=ratio, code=code, why=why,
-        integer=code >> 3, frac=code & 7,
-        vco=vco, pll_clk=vco / 2.0, test_div=test_div,
-        test_clk=vco / 2.0 ** (1 + test_div),
-        # 40 points per VCO period is plenty for an edge-triggered loop, and it
-        # keeps a 6 us run near the point count of the old 1 us / 5 ps deck
-        maxstep=1.0 / (40.0 * vco),
-        # the pattern generator stays off until the loop has locked
-        pattern_on=0.75 * PLL_TSTOP)
-
-
-def eng(x, unit=""):
-    for scale, suffix in ((1e9, "G"), (1e6, "M"), (1e3, "k"), (1.0, "")):
-        if abs(x) >= scale:
-            return ("%.6g %s%s" % (x / scale, suffix, unit)).strip()
-    return ("%.6g %s" % (x, unit)).strip()
-
-
-def pll_drive(c):
-    """every source, with all ten DIV_RATIO bits driven to a real level"""
-    ref_ns = 1e9 / c["ref"]
-    on = c["pattern_on"] * 1e6
-    d = {
-        "vdd_3v3": ("v", "3.3", "gated 3.3 V"),
-        "vdd_1v2": ("v", "1.2", "gated 1.2 V"),
-        "analog_bus[1]": ("v", "1.2", "LVDS common-mode reference, 1.2 V"),
-        "ibias[0]": ("i", "-2u", "pre-driver reference, 2 uA"),
-        "ibias[1]": ("i", "-2u", "driver reference, 2 uA"),
-        "analog_bus[0]": ("i", "-2u",
-                          "PLL charge-pump reference - 2 uA, not the "
-                          "transmitter's 30 uA"),
-        "analog_pin[0]": ("v", "PULSE(0 1.2 0 50p 50p %.4fn %.4fn)"
-                          % (ref_ns / 2 - 0.05, ref_ns),
-                          "REF_CLK, %s" % eng(c["ref"], "Hz")),
-        "dig_in[0]": ("v", "1.2", "clk_src = 1, pattern generator off the PLL"),
-        "dig_in[1]": ("v", "PWL(0 0 %.3fu 0 %.3fu 1.2)" % (on, on + 0.001),
-                      "pattern en, held off until the loop has locked"),
-        "dig_in[2]": ("v", "PWL(0 1.2 %.3fu 1.2 %.3fu 0)" % (on - 0.01, on - 0.009),
-                      "PRBS reset, released just before en"),
-        "dig_in[3]": ("v", "1.2", "mode = 1, PRBS-7"),
-        "dig_in[5]": ("v", "PWL(0 0 2n 0 2.1n 1.2)", "PLL ENABLE"),
-        "dig_in[6]": ("v", "PWL(0 0 1n 0 1.1n 1.2)", "PLL RESET_N, active low"),
-    }
-    # DIV_RATIO[9:0] on dig_in[16:7].  Every bit gets a source: an undriven bit
-    # floats into the XSPICE adc_bridge and the divide ratio becomes a guess.
-    for b in range(10):
-        weight = "integer %d" % (2 ** (b - 3)) if b >= 3 else "1/%d" % (2 ** (3 - b))
-        d["dig_in[%d]" % (b + 7)] = (
-            "v", "1.2" if c["code"] >> b & 1 else "0",
-            "DIV_RATIO[%d] = %d   weight %s" % (b, c["code"] >> b & 1, weight))
-    # TEST_DIV[1:0] on dig_in[18:17]
-    for b in range(2):
-        d["dig_in[%d]" % (b + 17)] = (
-            "v", "1.2" if c["test_div"] >> b & 1 else "0",
-            "TEST_DIV[%d] = %d" % (b, c["test_div"] >> b & 1))
-    return d
-
-
-def pll_groups(c):
-    return [
-        ("supplies", ["vdd_3v3", "vdd_1v2"]),
-        ("bias", ["analog_bus[1]", "ibias[0]", "ibias[1]", "analog_bus[0]"]),
-        ("PLL control", ["dig_in[6]", "dig_in[5]"]),
-        ("DIV_RATIO = %g   code %d = %s"
-         % (c["ratio"], c["code"], format(c["code"], "010b")),
-         ["dig_in[%d]" % (b + 7) for b in range(9, -1, -1)]),
-        ("TEST_DIV = %d   TEST_CLK = VCO/%d"
-         % (c["test_div"], 2 ** (1 + c["test_div"])),
-         ["dig_in[18]", "dig_in[17]"]),
-        ("pattern control", ["dig_in[0]", "dig_in[1]", "dig_in[2]", "dig_in[3]"]),
-        ("reference clock", ["analog_pin[0]"]),
-    ]
-
-
-PLL_TITLE_FMT = """PLL bench %(name)s: %(ref)s reference in, PRBS-7 at %(rate)s out.
-
-  %(why)s
-
-  VCO      = REF * DIV_RATIO   = %(vco)s
-  pll_clk  = VCO / 2           = %(fpll)s   <- the line rate
-  test_clk = VCO / %(td)-2d          = %(ftest)s   <- on analog_pin[1]
-
-  DIV_RATIO = %(ratio)g, code %(code)d = %(bits)s
-              integer part %(int)d in div_ratio[9:3], %(frac)d/8 in div_ratio[2:0]
-
-  1 ns       PLL RESET_N released
-  2 ns       PLL ENABLE
-  %(on).2f us    PRBS reset released, then the pattern generator enabled
-
-The run is %(tstop).0f us because the loop needs it: pll_integer_characterization.csv
-measures lock at 2.75 us typical and 4.50 us slow, so the earlier 1 us bench was
-reading a frequency the loop had not settled to yet.
-
-f_pll is averaged over ~%(ncyc)d cycles late in the run rather than across two
-adjacent edges.  fractional_divider.v is a plain N/N+1 accumulator with no
-delta-sigma, so at a fractional ratio the instantaneous period alternates and
-only the average over a whole accumulator cycle is the number worth reading.
-
-Every DIV_RATIO and TEST_DIV bit carries its own source, including the zeros.
-
-No pad or ESD model, so the Vos figure here is not the compliance number."""
-
-
-def pll_title(c):
-    return PLL_TITLE_FMT % dict(
-        name=c["name"], ref=eng(c["ref"], "Hz"), rate=eng(c["pll_clk"], "b/s"),
-        why=c["why"], vco=eng(c["vco"], "Hz"), fpll=eng(c["pll_clk"], "Hz"),
-        td=2 ** (1 + c["test_div"]), ftest=eng(c["test_clk"], "Hz"),
-        ratio=c["ratio"], code=c["code"], bits=format(c["code"], "010b"),
-        int=c["integer"], frac=c["frac"],
-        on=c["pattern_on"] * 1e6, tstop=PLL_TSTOP * 1e6,
-        ncyc=int(0.20 * PLL_TSTOP * c["pll_clk"]))
-
-
-PLL_CONTROL_FMT = r'''
-.lib cornerMOSlv.lib mos_tt
-.lib cornerMOShv.lib mos_tt
-.lib cornerRES.lib res_typ
-.lib cornerDIO.lib dio_tt
-.include cap_cmomf.lib
-.include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
-.temp 27
-.ic v(x1.xlvds.xdrv.cmfb)=1.54
-* gear2 collapses the timestep once the PLL XSPICE bridges are in the netlist,
-* and the run then stops early whatever tstop says.  trap gets through.
-.options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
-.control
-* The top cell carries pll_cosim, whose RTL half only couples to the analog
-* loop once ngspice holds the auto-bridge templates.  Those are injected into
-* the netlist after xschem writes it, by scripts/pll/inject_cosim_bridges.py,
-* because the quotes their syntax needs would end xschem's value=... property
-* and silently take .endc with them.
-*
-* make sim-xschem netlists, injects, then simulates.  The Simulate arrow in
-* xschem does not netlist - it runs ngspice on whatever netlist is already
-* there, so it works after a make run and fails after xschem has written a
-* fresh one.  Without the bridges nothing couples and every waveform comes
-* out flat, so stop here rather than produce a plausible-looking lie.
-if $?auto_bridge_d_in = 0
-  echo
-  echo ERROR: d_cosim auto-bridges are not set, so the PLL is disconnected.
-  echo Fix: run make sim-xschem with the TB= name of this bench.
-  echo The Simulate arrow reuses that netlist afterwards and will work.
-  echo
-* quit 1 rather than quit: xschem runs ngspice in a terminal that falls back
-* to a shell only on a non-zero exit.  Quitting with zero closes the window
-* before the message above can be read.
-  quit 1
-end
-* xpll is pll_cosim: the PFD and both dividers are the RTL of
-* macros/pll_digital, through d_cosim.  The analog/digital bridges are
-* inserted into the netlist by scripts/pll/inject_cosim_bridges.py - they
-* cannot live here: xschem ends the value property at the first quote.
-* Build the shared object first: make pll-cosim-so.
-save d_p d_n vos x1.core_p x1.core_n x1.pll_clk
-+ x1.xpll.x_analog.VCTRL x1.xpll.VCO_CLK x1.xpll.FB_CLK x1.xpll.UP x1.xpll.DOWN
-+ x1.xlvds.In_p x1.xlvds.In_n
-tran %(step).4g %(tstop).4g 0 %(step).4g
-write @schname\\\\.raw
-
-* First: does the loop do anything at all?  VCTRL has to move and the VCO has
-* to oscillate before any number below means anything.
-meas tran vctrl_min MIN v(x1.xpll.x_analog.VCTRL) from=50n to=%(tend).4g
-meas tran vctrl_max MAX v(x1.xpll.x_analog.VCTRL) from=50n to=%(tend).4g
-meas tran vctrl_end AVG v(x1.xpll.x_analog.VCTRL) from=%(tsettle).4g to=%(tend).4g
-meas tran vco_pp PP v(x1.xpll.VCO_CLK) from=%(tsettle).4g to=%(tend).4g
-* FB_CLK used to be measurable because the XSPICE divider drove it through a
-* dac_bridge.  Under d_cosim it is a digital output that no analog node
-* consumes, so it carries no voltage waveform - and f_pll answers the question
-* it was there to answer.
-print vctrl_min vctrl_max vctrl_end vco_pp
-
-* Second: is pll_clk on target?  Averaged over %(ncyc)d cycles, because the
-* N/N+1 divider makes any single period the wrong thing to measure.
-meas tran t1 WHEN v(x1.pll_clk)=0.6 RISE=%(k1)d
-meas tran t2 WHEN v(x1.pll_clk)=0.6 RISE=%(k2)d
-let f_pll = %(ncyc)d/(t2-t1)
-let f_pll_target = %(fpll).8g
-let f_pll_err_ppm = 1e6*(f_pll-f_pll_target)/f_pll_target
-print f_pll f_pll_target f_pll_err_ppm
-
-* Third: what leaves the transmitter once the pattern generator runs
-let vod = v(d_p)-v(d_n)
-meas tran vod_max MAX vod from=%(tpat).4g to=%(tend).4g
-meas tran vod_min MIN vod from=%(tpat).4g to=%(tend).4g
-meas tran vos_avg AVG v(vos) from=%(tpat).4g to=%(tend).4g
-meas tran vos_max MAX v(vos) from=%(tpat).4g to=%(tend).4g
-meas tran vos_min MIN v(vos) from=%(tpat).4g to=%(tend).4g
-let vos_pp = vos_max - vos_min
-meas tran core_pp PP v(x1.core_p) from=%(tpat).4g to=%(tend).4g
-print vod_max vod_min vos_avg vos_pp core_pp
-
-set wr_vecnames
-set wr_singlescale
-wrdata ../plot_simulations/data/@schname\\\\.txt
-+ v(d_p) v(d_n) v(vos) vod v(x1.pll_clk) v(x1.xpll.x_analog.VCTRL)
-.endc
-'''
-
-
-def pll_control(c):
-    t = PLL_TSTOP
-    k1, k2 = int(0.75 * t * c["pll_clk"]), int(0.95 * t * c["pll_clk"])
-    return PLL_CONTROL_FMT % dict(
-        step=c["maxstep"], tstop=t, tend=t - 50e-9, tsettle=t - 550e-9,
-        tpat=c["pattern_on"] + 100e-9, k1=k1, k2=k2, ncyc=k2 - k1,
-        fpll=c["pll_clk"])
-
-
-def gen_tb_pll(path, symbol, c):
-    pins = sym_pins(symbol)
-    drive, groups = pll_drive(c), pll_groups(c)
-    covered = [n for _, names in groups for n in names]
-    assert sorted(covered) == sorted(drive), "groups and drive disagree"
-    out = [HEADER, title_block(DOC_X, DOC_TITLE_Y, pll_title(c))]
-    out += stim_groups(groups, drive)
-    out += dut_stubs(pins, TB_LVDS_GROUND, skip=TB_LVDS_PADS)
-    out.append("C {%s.sym} 0 0 0 0 {name=x1}" % TOP)
-    out += pad_network(pins, TB_LVDS_PADS)
-    # the loop first, the bit clock second, the transmitter last - reading the
-    # panels top to bottom is reading the signal path
-    zoom = c["pattern_on"] + 300e-9
-    out += view_panels(
-        [(["x1.xpll.x_analog.VCTRL"], [8], 0.0, 1.3, 0.0, PLL_TSTOP),
-         (["x1.pll_clk", "x1.core_p"], [4, 7], -0.2, 1.4, zoom, zoom + 10e-9),
-         (["d_p", "d_n", "vos"], [4, 5, 8], 0.9, 1.6, zoom, zoom + 10e-9),
-         # the pre-driver output is full-swing on the 3.3 V rail
-         (["x1.xlvds.In_p", "x1.xlvds.In_n"], [4, 5],
-          -0.2, 3.5, zoom, zoom + 10e-9)],
-        os.path.basename(path)[:-4])
-    out.append(code_block(DOC_X, DOC_CODE_Y, pll_control(c)))
-    io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
-
-
 if __name__ == "__main__":
     import sys
-    here = os.path.dirname(os.path.abspath(__file__))
-    sch = os.path.join(here, "..", "schematic", "xschem")
-    tb = os.path.join(here, "..", "testbenches", "xschem")
+    sch = os.path.join(HERE, "..", "schematic", "xschem")
+    tb = os.path.join(HERE, "..", "testbenches", "xschem")
     sym = os.path.join(sch, TOP + ".sym")
-    # The top cell is edited by hand in xschem, so regenerating it would throw
+    # The top cell may be edited by hand in xschem, so regenerating it would throw
     # that work away.  It only happens when asked for explicitly.
     if "--schematic" in sys.argv:
         gen_sch(os.path.join(sch, TOP + ".sch"))
@@ -1153,15 +855,5 @@ if __name__ == "__main__":
     else:
         print("top cell left alone - pass --schematic to regenerate it")
     gen_tb_lvds(os.path.join(tb, TOP + "_tb_lvds.sch"), sym)
-    # The first combination keeps the historical name so make sim-xschem
-    # TB=<top>_tb_pll and everything that cites it still resolve; the rest of
-    # the family is <top>_tb_pll_<name>.sch.
-    for i, spec in enumerate(PLL_COMBOS):
-        c = pll_combo(*spec)
-        leaf = TOP + "_tb_pll.sch" if i == 0 else TOP + "_tb_pll_%s.sch" % c["name"]
-        gen_tb_pll(os.path.join(tb, leaf), sym, c)
-        print("  %-34s REF %-9s ratio %-7g VCO %-9s line %s"
-              % (leaf, eng(c["ref"], "Hz"), c["ratio"],
-                 eng(c["vco"], "Hz"), eng(c["pll_clk"], "b/s")))
-    print("wrote %s_tb_lvds.sch and %d PLL benches from the %d pins of %s.sym"
-          % (TOP, len(PLL_COMBOS), len(sym_pins(sym)), TOP))
+    print("wrote %s_tb_lvds.sch from the %d pins of %s.sym"
+          % (TOP, len(sym_pins(sym)), TOP))

@@ -8,8 +8,8 @@ E {}
 T {lvds_pattern PRBS-7 timing bench.
 
 PRBS-7 from the first clock, 1 Gb/s, 160 ns - a full 127-bit period with
-margin.  mode and clk_src are static, so nothing moves the data path timing
-during the run.
+margin.  mode is static, so nothing moves the data path timing during the
+run.
 
 scripts/check_timing.py reads the export and reports the bit rate, the
 clock-to-output spread, the data valid window that follows from it, the
@@ -27,50 +27,36 @@ L 3 -30 -1120 -30 -880 {}
 T {supply} -30 -1175 0 0 0.4 0.4 {}
 N 150 -740 150 -710 {lab=ref_clk}
 C {devices/lab_wire.sym} 150 -740 0 0 {name=lv_ref_clk sig_type=std_logic lab=ref_clk}
-C {devices/vsource.sym} 150 -680 0 0 {name=Vref_clk value="0"}
+C {devices/vsource.sym} 150 -680 0 0 {name=Vref_clk value="PULSE(0 1.2 0 30p 30p 470p 1n)"}
 N 150 -650 150 -620 {lab=GND}
 C {devices/gnd.sym} 150 -620 0 0 {name=lg_ref_clk lab=GND}
-N 150 -540 150 -510 {lab=pll_clk}
-C {devices/lab_wire.sym} 150 -540 0 0 {name=lv_pll_clk sig_type=std_logic lab=pll_clk}
-C {devices/vsource.sym} 150 -480 0 0 {name=Vpll_clk value="PULSE(0 1.2 0 30p 30p 470p 1n)"}
-N 150 -450 150 -420 {lab=GND}
-C {devices/gnd.sym} 150 -420 0 0 {name=lg_pll_clk lab=GND}
 L 3 -30 -800 330 -800 {}
-L 3 330 -800 330 -360 {}
-L 3 -30 -360 330 -360 {}
-L 3 -30 -800 -30 -360 {}
-T {clocks} -30 -855 0 0 0.4 0.4 {}
-N 150 -220 150 -190 {lab=clk_src}
-C {devices/lab_wire.sym} 150 -220 0 0 {name=lv_clk_src sig_type=std_logic lab=clk_src}
-C {devices/vsource.sym} 150 -160 0 0 {name=Vclk_src value="1.2"}
+L 3 330 -800 330 -560 {}
+L 3 -30 -560 330 -560 {}
+L 3 -30 -800 -30 -560 {}
+T {clock} -30 -855 0 0 0.4 0.4 {}
+N 150 -420 150 -390 {lab=en}
+C {devices/lab_wire.sym} 150 -420 0 0 {name=lv_en sig_type=std_logic lab=en}
+C {devices/vsource.sym} 150 -360 0 0 {name=Ven value="PWL(0 0 3n 0 3.1n 1.2)"}
+N 150 -330 150 -300 {lab=GND}
+C {devices/gnd.sym} 150 -300 0 0 {name=lg_en lab=GND}
+N 150 -220 150 -190 {lab=reset}
+C {devices/lab_wire.sym} 150 -220 0 0 {name=lv_reset sig_type=std_logic lab=reset}
+C {devices/vsource.sym} 150 -160 0 0 {name=Vreset value="PWL(0 1.2 2n 1.2 2.1n 0)"}
 N 150 -130 150 -100 {lab=GND}
-C {devices/gnd.sym} 150 -100 0 0 {name=lg_clk_src lab=GND}
-N 150 -20 150 10 {lab=en}
-C {devices/lab_wire.sym} 150 -20 0 0 {name=lv_en sig_type=std_logic lab=en}
-C {devices/vsource.sym} 150 40 0 0 {name=Ven value="PWL(0 0 3n 0 3.1n 1.2)"}
+C {devices/gnd.sym} 150 -100 0 0 {name=lg_reset lab=GND}
+N 150 -20 150 10 {lab=mode}
+C {devices/lab_wire.sym} 150 -20 0 0 {name=lv_mode sig_type=std_logic lab=mode}
+C {devices/vsource.sym} 150 40 0 0 {name=Vmode value="1.2"}
 N 150 70 150 100 {lab=GND}
-C {devices/gnd.sym} 150 100 0 0 {name=lg_en lab=GND}
-N 150 180 150 210 {lab=reset}
-C {devices/lab_wire.sym} 150 180 0 0 {name=lv_reset sig_type=std_logic lab=reset}
-C {devices/vsource.sym} 150 240 0 0 {name=Vreset value="PWL(0 1.2 2n 1.2 2.1n 0)"}
-N 150 270 150 300 {lab=GND}
-C {devices/gnd.sym} 150 300 0 0 {name=lg_reset lab=GND}
-N 150 380 150 410 {lab=mode}
-C {devices/lab_wire.sym} 150 380 0 0 {name=lv_mode sig_type=std_logic lab=mode}
-C {devices/vsource.sym} 150 440 0 0 {name=Vmode value="1.2"}
-N 150 470 150 500 {lab=GND}
-C {devices/gnd.sym} 150 500 0 0 {name=lg_mode lab=GND}
-L 3 -30 -280 330 -280 {}
-L 3 330 -280 330 560 {}
-L 3 -30 560 330 560 {}
-L 3 -30 -280 -30 560 {}
-T {control} -30 -335 0 0 0.4 0.4 {}
+C {devices/gnd.sym} 150 100 0 0 {name=lg_mode lab=GND}
+L 3 -30 -480 330 -480 {}
+L 3 330 -480 330 160 {}
+L 3 -30 160 330 160 {}
+L 3 -30 -480 -30 160 {}
+T {control} -30 -535 0 0 0.4 0.4 {}
 N 530 -100 590 -100 {lab=ref_clk}
 C {devices/lab_wire.sym} 530 -100 0 0 {name=lx_ref_clk sig_type=std_logic lab=ref_clk}
-N 530 -80 590 -80 {lab=pll_clk}
-C {devices/lab_wire.sym} 530 -80 0 0 {name=lx_pll_clk sig_type=std_logic lab=pll_clk}
-N 530 -60 590 -60 {lab=clk_src}
-C {devices/lab_wire.sym} 530 -60 0 0 {name=lx_clk_src sig_type=std_logic lab=clk_src}
 N 530 -40 590 -40 {lab=en}
 C {devices/lab_wire.sym} 530 -40 0 0 {name=lx_en sig_type=std_logic lab=en}
 N 530 -20 590 -20 {lab=reset}
@@ -189,6 +175,8 @@ C {devices/code_shown.sym} -1500 -800 0 0 {name=NGSPICE
 only_toplevel=true
 value="
 .include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
+* the antenna diodes of antennanp: the PDK model with tt = 0 (scripts/sim/make_diode_models.py)
+.include ../../../../../models/diodes_tt0.lib
 .lib cornerMOSlv.lib mos_tt
 .temp 27
 .options savecurrents klu reltol=1e-3

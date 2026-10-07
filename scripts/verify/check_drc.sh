@@ -1,5 +1,5 @@
 #!/bin/bash
-# Top-level DRC (KLayout, IHP deck) of layout/sg13cmos5l_chipalooza_analog_project.gds.
+# Top-level DRC (KLayout, IHP deck) of layout/slot_14.gds.
 #
 #   bash scripts/verify/check_drc.sh                # in the container, from anywhere
 #   bash scripts/verify/check_drc.sh --with-pll     # count Rahul's PLL cells too
@@ -17,7 +17,7 @@
 # the fill the harness adds.
 #
 # No `set -u`: sak-pdk-script.sh reads unset variables.
-TOP=sg13cmos5l_chipalooza_analog_project
+TOP=slot_14
 cd "$(dirname "$0")/../.." || exit 1
 source /foss/tools/sak/sak-pdk-script.sh ihp-sg13cmos5l >/dev/null 2>&1
 ANT=--antenna

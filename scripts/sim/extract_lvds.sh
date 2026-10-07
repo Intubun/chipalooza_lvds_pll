@@ -1,6 +1,6 @@
 #!/bin/bash
 # Post-layout netlists of lvds_tx and lvds_pattern for
-# testbenches/xschem/sg13cmos5l_chipalooza_analog_project_tb_lvds_postlayout.sch
+# testbenches/xschem/slot_14_tb_lvds_postlayout.sch
 #
 #   bash scripts/sim/extract_lvds.sh        # in the container; or: make extract-lvds
 #

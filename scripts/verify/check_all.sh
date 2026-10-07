@@ -10,7 +10,7 @@ DRC_ARGS=(); LVS_ARGS=()
 for a in "$@"; do
     case $a in
         --with-pll|--no-antenna|--density) DRC_ARGS+=("$a") ;;
-        --strict-ports) LVS_ARGS+=("$a") ;;
+        --strict-ports|--ignore-ports) LVS_ARGS+=("$a") ;;
         *) DRC_ARGS+=("$a"); LVS_ARGS+=("$a") ;;
     esac
 done

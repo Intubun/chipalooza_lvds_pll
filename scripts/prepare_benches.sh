@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-# Netlist every top-level bench and inject the d_cosim auto-bridges, so that
-# xschem's Simulate arrow works on any of them.
+# Netlist every top-level bench, so that xschem's Simulate arrow works on any of
+# them.
 #
 # The arrow does not netlist - proc simulate in xschem.tcl only computes the
 # netlist path and runs ngspice on whatever is already there. So a bench is
-# ready for the arrow once its netlist exists and carries the bridges, and it
-# stops being ready the moment xschem writes a fresh netlist over it (the
-# Netlist button, or a schematic edit followed by one). Re-run this then.
+# ready for the arrow once its netlist exists. (Until 2026-10-07 this also
+# injected the PLL's d_cosim auto-bridges; the PLL has left the project.)
 #
-# make sim-xschem does the same two steps for a single bench before simulating.
+# make sim-xschem netlists a single bench the same way before simulating.
 #
 # Usage: prepare_benches.sh <repo_root> [bench.sch ...]
 set -euo pipefail
@@ -18,7 +17,6 @@ shift || true
 
 TB_DIR="$ROOT/testbenches/xschem"
 SIM_DIR="$TB_DIR/simulations"
-INJECT="$ROOT/scripts/pll/inject_cosim_bridges.py"
 
 mkdir -p "$SIM_DIR"
 
@@ -46,16 +44,8 @@ for sch in "${BENCHES[@]}"; do
     fail=$((fail + 1))
     continue
   fi
-
-  python3 "$INJECT" "$spice" >/dev/null
-  n=$(grep -c '^pre_set' "$spice" || true)
-  if [ "$n" -eq 2 ]; then
-    printf '  %-58s ready\n' "$name"
-    ok=$((ok + 1))
-  else
-    printf '  %-58s BRIDGES MISSING (%s)\n' "$name" "$n"
-    fail=$((fail + 1))
-  fi
+  printf '  %-58s ready\n' "$name"
+  ok=$((ok + 1))
 done
 
 echo "  ---"

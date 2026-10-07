@@ -39,40 +39,9 @@ if {![llength [info commands pin_netlist_dir]]} {
 pin_netlist_dir [file dirname [info script]]
 
 set load_file_postprocess {pin_netlist_dir [xschem get current_dirname]}
-# The top cell carries pll_cosim, whose RTL half only couples to the analog loop
-# once ngspice holds the d_cosim auto-bridge templates.  Those cannot live in the
-# schematic: xschem ends a value property at the first quote, and the pre_set
-# syntax needs quotes of its own - the rest of the control block, .endc included,
-# is dropped without a word.  So the netlist is patched right after it is written.
-#
-# netlist_postprocess is xschem's own hook for exactly this (eval_netlist_postprocess
-# in xschem.tcl).  It fires however the netlist was produced - the Netlist button,
-# the menu, or a script - which is what makes the Simulate arrow reliable: the
-# arrow does not netlist, it runs ngspice on whatever is on disk, and pressing
-# Netlist first used to wipe the bridges out again.
-#
-# Deliberately not done by overriding sim(spice,*,cmd): xschem sources this file
-# before its own Tcl, so creating sim entries here makes it skip building the
-# simulator table altogether ("simulator for spice is not configured"), and its
-# commands are dispatched through Tcl exec, where ; and && are not operators.
-set COSIM_INJECT [file normalize [file join [file dirname [info script]] .. .. \
-                  scripts pll inject_cosim_bridges.py]]
-
-proc cosim_inject_after_netlist {} {
-  global netlist_dir COSIM_INJECT
-  if {[xschem get netlist_type] ne {spice}} return
-  if {![info exists netlist_dir]} return
-  set stem [file tail [file rootname [xschem get schname]]]
-  set spice [file join $netlist_dir $stem.spice]
-  if {![file exists $spice]} return
-  # through python3, not the shebang: a Windows checkout gives the script CRLF
-  # line ends, and "#!/usr/bin/env python3\r" finds no interpreter
-  if {[catch {exec python3 $COSIM_INJECT $spice} res]} {
-    puts "cosim bridge injection failed: $res"
-  }
-}
-
-set netlist_postprocess {cosim_inject_after_netlist}
+# Until 2026-10-07 the top cell carried pll_cosim, and a netlist_postprocess hook
+# here injected its d_cosim auto-bridges (scripts/pll/inject_cosim_bridges.py).
+# The PLL has left the project, so the netlists are used as xschem writes them.
 
 
 

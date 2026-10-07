@@ -7,15 +7,15 @@ F {}
 E {}
 T {lvds_pattern - data source for the LVDS transmitter, sg13cmos5l standard cells only
 
-  clk_src   0 = ref_clk, 1 = pll_clk
+  ref_clk   the bit clock, one bit per period
   en        1 = clock runs, 0 = clock stopped low (latch-based gate, no runt pulse)
   reset     active high, asynchronous, seeds the PRBS - shift register only
   mode      0 = gated clock straight to the pair, 1 = PRBS-7
 
 D_p / D_n drive the pre-driver of macros/lvds_tx.} 90 -1280 0 0 0.6 0.6 {}
-T {Clock source select, then the PDK's latch-based clock gate.  GCLK is
-held low while en is 0, so en may change at any point in the cycle
-without producing a runt pulse.} 200 -700 0 0 0.35 0.35 {}
+T {The PDK's latch-based clock gate.  GCLK is held low while en is 0, so
+en may change at any point in the cycle without producing a runt pulse.
+(The clock source select, ref_clk or pll_clk, went with the PLL, 2026-10-07.)} 200 -720 0 0 0.35 0.35 {}
 T {PRBS-7, x^7 + x^6 + 1.  The seven flops hold the COMPLEMENT of the LFSR word:
 dfrbp resets Q to 0, and an all-zero complement is the all-ones seed that
 serdes_dig.v uses.  That is why the feedback gate is an XNOR and not an XOR, and
@@ -50,15 +50,14 @@ drive 1 only, its Q rises ~50 ps slower than it falls, and D_p/D_n came out
 15 ps apart (28 ps extracted, with unequal Q loads) - enough to dent Vos of the
 driver (lvds_tx README).  The inverter is in the D path only, not between clock
 and output.} 2400 40 0 0 0.35 0.35 {}
-N 200 -620 360 -620 {lab=ref_clk}
-N 200 -580 360 -580 {lab=pll_clk}
-N 200 -540 360 -540 {lab=clk_src}
+N 200 -620 440 -620 {lab=ref_clk}
+N 440 -620 440 -600 {lab=ref_clk}
 N 200 -500 600 -500 {lab=en}
 N 600 -590 600 -500 {lab=en}
 N 600 -590 660 -590 {lab=en}
-N 440 -600 620 -600 {lab=clk_sel}
-N 620 -610 620 -600 {lab=clk_sel}
-N 620 -610 660 -610 {lab=clk_sel}
+N 440 -600 620 -600 {lab=ref_clk}
+N 620 -610 620 -600 {lab=ref_clk}
+N 620 -610 660 -610 {lab=ref_clk}
 N 840 -610 1010 -610 {lab=gclk}
 N 1090 -320 1090 -220 {lab=gclk_b}
 N 2110 -220 2760 -220 {lab=gclk_b}
@@ -69,7 +68,7 @@ N 1210 -220 1210 -120 {lab=gclk_b}
 N 1510 -220 1510 -120 {lab=gclk_b}
 N 1810 -220 1810 -120 {lab=gclk_b}
 N 2110 -220 2110 -120 {lab=gclk_b}
-N 620 -790 660 -790 {lab=clk_sel}
+N 620 -790 660 -790 {lab=ref_clk}
 N 600 -770 660 -770 {lab=VDD}
 N 840 -790 1010 -790 {lab=gclk_free}
 N 1090 -790 1150 -790 {lab=gclk_free_b}
@@ -173,10 +172,10 @@ N 2700 -80 2760 -80 {lab=VDD}
 N 2110 -80 2110 20 {lab=reset_b}
 N 1090 -320 3110 -320 {lab=gclk_b}
 N 3060 -620 3060 -500 {lab=gclk_bn}
-C {devices/lab_wire.sym} 530 -600 0 0 {name=lw0 sig_type=std_logic lab=clk_sel}
+C {devices/lab_wire.sym} 530 -600 0 0 {name=lw0 sig_type=std_logic lab=ref_clk}
 C {devices/lab_wire.sym} 930 -610 0 0 {name=lw1 sig_type=std_logic lab=gclk}
 C {devices/lab_wire.sym} 1090 -400 0 0 {name=lw2 sig_type=std_logic lab=gclk_b}
-C {devices/lab_wire.sym} 620 -790 0 0 {name=lw3 sig_type=std_logic lab=clk_sel}
+C {devices/lab_wire.sym} 620 -790 0 0 {name=lw3 sig_type=std_logic lab=ref_clk}
 C {devices/lab_wire.sym} 600 -770 0 0 {name=lw4 sig_type=std_logic lab=VDD}
 C {devices/lab_wire.sym} 930 -790 0 0 {name=lw5 sig_type=std_logic lab=gclk_free}
 C {devices/lab_wire.sym} 1150 -790 0 0 {name=lw6 sig_type=std_logic lab=gclk_free_b}
@@ -216,8 +215,6 @@ C {devices/lab_wire.sym} 3770 -300 0 0 {name=lw40 sig_type=std_logic lab=dn2}
 C {devices/lab_wire.sym} 1320 -900 0 0 {name=lw41 sig_type=std_logic lab=VDD}
 C {devices/lab_wire.sym} 1320 400 0 0 {name=lw42 sig_type=std_logic lab=VSS}
 C {devices/ipin.sym} 200 -620 2 1 {name=p_ref_clk lab=ref_clk}
-C {devices/ipin.sym} 200 -580 2 1 {name=p_pll_clk lab=pll_clk}
-C {devices/ipin.sym} 200 -540 2 1 {name=p_clk_src lab=clk_src}
 C {devices/ipin.sym} 200 -500 2 1 {name=p_en lab=en}
 C {devices/ipin.sym} 0 -450 2 1 {name=p_reset lab=reset}
 C {devices/ipin.sym} 2900 -700 2 1 {name=p_mode lab=mode}
@@ -225,7 +222,6 @@ C {devices/opin.sym} 4100 -600 2 0 {name=p_D_p lab=D_p}
 C {devices/opin.sym} 4100 -300 2 0 {name=p_D_n lab=D_n}
 C {devices/iopin.sym} 1200 -900 2 0 {name=p_VDD lab=VDD}
 C {devices/iopin.sym} 1200 400 2 0 {name=p_VSS lab=VSS}
-C {sg13cmos5l_stdcells/sg13cmos5l_mux2_2.sym} 400 -600 0 0 {name=xcsel}
 C {sg13cmos5l_stdcells/sg13cmos5l_lgcp_1.sym} 750 -600 0 0 {name=xicg}
 C {sg13cmos5l_stdcells/sg13cmos5l_buf_4.sym} 1050 -610 0 0 {name=xclkb}
 C {sg13cmos5l_stdcells/sg13cmos5l_lgcp_1.sym} 750 -780 0 0 {name=xicg2}
@@ -298,3 +294,17 @@ C {devices/lab_wire.sym} 2440 -80 0 0 {name=lw48 sig_type=std_logic lab=VDD}
 C {devices/lab_wire.sym} 2740 -130 1 0 {name=lw49 sig_type=std_logic lab=s6_i}
 C {devices/lab_pin.sym} 2660 -170 0 0 {name=p40 sig_type=std_logic lab=s6}
 C {sg13cmos5l_stdcells/sg13cmos5l_inv_1.sym} 2700 -170 0 0 {name=xinvd}
+T {Antenna diodes: at the top level en and mode run ~360 um of metal3 from
+dig_in onto one or two gates (Ant.b, ratio over 200).  One antennanp each,
+inside the block, lifts the limit to 20000 (Ant.e).} -400 420 0 0 0.3 0.3 {}
+C {sg13cmos5l_stdcells/sg13cmos5l_antennanp.sym} -130 520 0 0 {name=xant_en VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+N -260 520 -220 520 {lab=en}
+C {devices/lab_pin.sym} -260 520 0 0 {name=p_ant_en sig_type=std_logic lab=en}
+C {sg13cmos5l_stdcells/sg13cmos5l_antennanp.sym} -130 580 0 0 {name=xant_mode VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+N -260 580 -220 580 {lab=mode}
+C {devices/lab_pin.sym} -260 580 0 0 {name=p_ant_mode sig_type=std_logic lab=mode}
+T {ref_clk too: ~450 um of metal4 from pad 2, and its pad clamps to the 3.3 V
+ring only - this pair clamps the clock gates' input to the block's own rails.} -400 620 0 0 0.3 0.3 {}
+C {sg13cmos5l_stdcells/sg13cmos5l_antennanp.sym} -130 700 0 0 {name=xant_ref VDD=VDD VSS=VSS prefix=sg13cmos5l_ }
+N -260 700 -220 700 {lab=ref_clk}
+C {devices/lab_pin.sym} -260 700 0 0 {name=p_ant_ref sig_type=std_logic lab=ref_clk}

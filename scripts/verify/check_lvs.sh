@@ -1,34 +1,32 @@
 #!/bin/bash
-# Top-level LVS (KLayout, IHP deck) of layout/sg13cmos5l_chipalooza_analog_project.gds
-# against the top schematic - without Rahul's PLL for now (prepare_lvs.py).
+# Top-level LVS (KLayout, IHP deck) of layout/slot_14.gds against the top schematic.
 #
 #   bash scripts/verify/check_lvs.sh                  # in the container, from anywhere
-#   bash scripts/verify/check_lvs.sh --strict-ports   # also compare the top-level pin names
+#   bash scripts/verify/check_lvs.sh --ignore-ports   # leave the top-level pin names out
 #   bash scripts/verify/check_lvs.sh <gds>            # another copy of the top layout
 #
 # Results in build/verify/lvs/: reference.cdl, layout.gds (the copies that were
 # compared), <top>.lvsdb (open it in KLayout: Tools > Netlist Browser), lvs.log.
 # The summary goes to stdout; exit status 0 only when the netlists match.
 #
-# By default the top-level pin NAMES are not compared (--ignore_top_ports_mismatch):
-# the slot-14 frame calls them s14_an[0..2], ibias0, analog_bus1, ..., the schematic
-# still has the template's analog_pin[0..3], ibias[0], analog_bus[1], ...  The
-# circuit behind the pins is compared either way.  --strict-ports compares the names
-# too, once the schematic follows the frame.
+# The schematic carries the slot-14 frame pin for pin (scripts/gen_top.py), so the
+# top-level pin names are compared too.  --ignore-ports leaves them out
+# (--ignore_top_ports_mismatch) - the circuit behind the pins is compared either way.
 #
 # Taps are not extracted as devices (--disable_tap_extraction): no schematic here
-# draws them.  Floating metal (the flags doodle) is purged (--purge_nets).
+# draws them.  Floating metal is purged (--purge_nets).
 #
 # No `set -u`: sak-pdk-script.sh reads unset variables.
-TOP=sg13cmos5l_chipalooza_analog_project
+TOP=slot_14
 cd "$(dirname "$0")/../.." || exit 1
 source /foss/tools/sak/sak-pdk-script.sh ihp-sg13cmos5l >/dev/null 2>&1
-PORTS=--ignore_top_ports_mismatch
+PORTS=
 GDS=layout/$TOP.gds
 while [ $# -gt 0 ]; do
     case $1 in
-        --strict-ports) PORTS= ;;
-        -h|--help) sed -n 2,22p "$0"; exit 0 ;;
+        --ignore-ports) PORTS=--ignore_top_ports_mismatch ;;
+        --strict-ports) PORTS= ;;      # the default since 2026-10-07
+        -h|--help) sed -n 2,18p "$0"; exit 0 ;;
         *) GDS=$1 ;;
     esac
     shift
@@ -49,7 +47,36 @@ fi
 python3 scripts/verify/prepare_lvs.py "$RUN" "$RUN/schematic.cdl" "$GDS" \
     "$PDK_ROOT/$PDK/libs.ref/sg13cmos5l_stdcell/cdl/sg13cmos5l_stdcell.cdl" || exit 2
 
-python3 "$PDK_ROOT/$PDK/libs.tech/klayout/tech/lvs/run_lvs.py" \
+# vss_1v2 and vss_3v3 are one net: every tap of either ground sits in the same
+# p-substrate, so the extraction merges them, and the harness ties them on purpose
+# (chipalooza_frame.v: assign vss3v3 = vss1v2, a 0-ohm resistor in its schematic).
+# The schematic keeps both frame pins, so the deck has to be told: a copy of it
+# joins the listed nets of the reference right after reading it.  Both pins stay
+# pins, so the strict port check still sees both names.
+DECK=build/verify/lvs_deck
+rm -rf "$DECK" && cp -rL "$PDK_ROOT/$PDK/libs.tech/klayout/tech/lvs" "$DECK"    # -L: it links into ihp-sg13g2
+python3 - "$DECK/sg13cmos5l.lvs" <<'EOF'
+import sys
+p = sys.argv[1]
+s = open(p).read()
+anchor = '    schematic($schematic, reader)\n'
+assert s.count(anchor) == 1, "deck changed - no unique schematic() call to hook into"
+hook = anchor + '''    (ENV["LVS_JOIN_NETS"] || "").split(";").each do |spec|
+      cname, a, b = spec.split(",")
+      c = schematic.circuit_by_name(cname) || schematic.circuit_by_name(cname.upcase)
+      na = c && (c.net_by_name(a) || c.net_by_name(a.upcase))
+      nb = c && (c.net_by_name(b) || c.net_by_name(b.upcase))
+      if na && nb
+        c.join_nets(na, nb)
+        logger.info("Joined #{a} and #{b} in the reference #{cname} (LVS_JOIN_NETS)")
+      else
+        error("LVS_JOIN_NETS: #{spec} not found in the reference")
+      end
+    end
+'''
+open(p, "w").write(s.replace(anchor, hook))
+EOF
+LVS_JOIN_NETS="$TOP,vss_1v2,vss_3v3" python3 "$DECK/run_lvs.py" \
     --layout="$RUN/layout.gds" --netlist="$RUN/reference.cdl" --topcell=$TOP \
     --run_dir="$RUN" --run_mode=deep --disable_tap_extraction --purge_nets \
     $PORTS > "$RUN/lvs.log" 2>&1

@@ -53,6 +53,7 @@ source [file dirname [info script]]/../../macros/pll_digital/schematic/xschem/xs
 source [file dirname [info script]]/../../macros/lvds_tx/schematic/xschem/xschemrc
 source [file dirname [info script]]/../../macros/lvds_pattern/schematic/xschem/xschemrc
 source [file dirname [info script]]/../../macros/iref_x15/schematic/xschem/xschemrc
+source [file dirname [info script]]/../../macros/ref_odt/schematic/xschem/xschemrc
 
 # Pin the netlist directory to the simulations folder of the loaded schematic
 if {![llength [info commands pin_netlist_dir]]} {

@@ -4,7 +4,7 @@
 MAKEFILE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 # Variables
-TOP = sg13cmos5l_chipalooza_analog_project
+TOP = slot_14
 
 .DEFAULT_GOAL := help
 
@@ -98,7 +98,7 @@ TB ?= $(CELL)_tb_tran
 # Override with: make <target> SCRIPT=<scriptname>
 SCRIPT ?= plot_$(CELL)
 
-sim-xschem: $(PLL_COSIM_SO) ## Run TB simulation with Xschem in batch mode (usage: make sim-xschem [TB=<testbenchname>])
+sim-xschem: ## Run TB simulation with Xschem in batch mode (usage: make sim-xschem [TB=<testbenchname>])
 	mkdir -p $(XSCHEM_TB_DIR)/simulations
 	mkdir -p $(SIM_PLOT_DIR)/data
 	rm -f $(XSCHEM_TB_DIR)/simulations/$(TB).spice
@@ -118,14 +118,6 @@ sim-xschem: $(PLL_COSIM_SO) ## Run TB simulation with Xschem in batch mode (usag
 	@if grep -q 'IS MISSING' $(XSCHEM_TB_DIR)/simulations/$(TB).spice; then \
 		echo "ERROR: $(TB).spice has unresolved symbols - is the PDK selected?"; exit 1; \
 	fi
-#	ngspice 47 rejects a bracketed net name inside an XSPICE port list: after
-#	subcircuit expansion the PLL's PFD reads `A_REF [ analog_pin[0] ] ...` and
-#	the parser calls that an array of arrays.  That is handled at the source:
-#	testbenches/xschem/xschemrc sets bus_replacement_char, so xschem renames the
-#	nets while it netlists.  The arrow inside xschem therefore gets exactly the
-#	same treatment as this target - rewriting it again here with sed would give
-#	the two paths different net names.
-	python3 $(SCRIPTS_DIR)/pll/inject_cosim_bridges.py $(XSCHEM_TB_DIR)/simulations/$(TB).spice
 	cd $(XSCHEM_TB_DIR)/simulations && ngspice -b $(TB).spice
 .PHONY: sim-xschem
 
@@ -134,10 +126,9 @@ sim-view-xschem: ## Plot Xschem simulation results (usage: make sim-view-xschem 
 .PHONY: sim-view-xschem
 
 
-# The top cell instantiates pll_cosim, whose PFD and dividers are the RTL of
-# macros/pll_digital run through ngspice's d_cosim.  Every top-level bench
-# therefore needs the compiled shared object next to the netlist, including the
-# LVDS-only ones - they carry the top cell and so they carry the PLL.
+# pll_cosim - the analog loop of macros/pll_analog with the RTL of macros/pll_digital
+# run through d_cosim - was part of the top cell until 2026-10-07, when the PLL left
+# the project.  The shared object stays buildable for the PLL macros themselves.
 PLL_RTL_DIR  := $(MACROS_DIR)/pll_digital/rtl
 PLL_RTL_SRCS := $(PLL_RTL_DIR)/pll_digital.v $(PLL_RTL_DIR)/pfd.v                 $(PLL_RTL_DIR)/fractional_divider.v $(PLL_RTL_DIR)/clock_output_divider.v
 PLL_COSIM_SO := $(XSCHEM_TB_DIR)/simulations/pll_digital_cosim.so
@@ -151,11 +142,7 @@ $(PLL_COSIM_SO): $(PLL_RTL_SRCS)
 	$(SCRIPTS_DIR)/pll/check_cosim_ports.sh $(XSCHEM_TB_DIR)/simulations/pll_digital_obj_dir
 	mv $(XSCHEM_TB_DIR)/simulations/pll_digital.so $@
 
-# The PLL bench family from scripts/gen_top.py: <TOP>_tb_pll.sch is the baseline
-# combination and <TOP>_tb_pll_<name>.sch is one per reference / DIV_RATIO pair.
-PLL_TBS := $(notdir $(basename $(wildcard $(XSCHEM_TB_DIR)/$(TOP)_tb_pll*.sch)))
-
-sim-prepare: $(PLL_COSIM_SO) ## Netlist every top-level bench and inject the d_cosim bridges, so the xschem Simulate arrow works
+sim-prepare: ## Netlist every top-level bench, so the xschem Simulate arrow works
 	@$(SCRIPTS_DIR)/prepare_benches.sh $(abspath .)
 .PHONY: sim-prepare
 
@@ -173,13 +160,23 @@ sim-lvds-postlayout: extract-lvds ## Post-layout LVDS bench in batch mode: extra
 	cd $(XSCHEM_TB_DIR)/simulations && ngspice -b $(TOP)_tb_lvds_postlayout.spice
 .PHONY: sim-lvds-postlayout
 
-list-pll-sweep: ## List the generated PLL combination benches
-	@for tb in $(PLL_TBS); do echo "  $$tb"; done
-.PHONY: list-pll-sweep
+extract-top: ## Extract the whole slot (hierarchical, coupling C) into netlist/pex/slot_14_pex.spice and slot_14_wires.spice, for the pad and PEX benches
+	bash $(SCRIPTS_DIR)/sim/extract_top.sh
+.PHONY: extract-top
 
-sim-pll-sweep: ## Run every PLL combination bench in turn (long - see the note in the README)
-	@for tb in $(PLL_TBS); do 		echo "======================================================== $$tb"; 		$(MAKE) --no-print-directory sim-xschem TB=$$tb || echo "FAILED: $$tb"; 	done
-.PHONY: sim-pll-sweep
+sim-lvds: ## Bench 1, schematic: the whole slot from its schematics, ideal sources, no pads; PRBS-7 at 500 Mb/s into 100 ohm
+	$(MAKE) sim-xschem TB=$(TOP)_tb_lvds
+.PHONY: sim-lvds
+
+sim-lvds-pads: extract-top ## Bench 2, pads + wiring: IHP pads, bond wire, package, line, receiver; the top-level wiring as laid out, the blocks as schematics; ODT off and on
+	python3 $(SCRIPTS_DIR)/sim/gen_tb_lvds_pads.py
+	$(MAKE) sim-xschem TB=$(TOP)_tb_lvds_pads
+.PHONY: sim-lvds-pads
+
+sim-lvds-pex: extract-top ## Bench 3, PEX: the same surroundings as bench 2, the whole slot as laid out (every block extracted); ODT off
+	python3 $(SCRIPTS_DIR)/sim/gen_tb_lvds_pads.py
+	$(MAKE) sim-xschem TB=$(TOP)_tb_lvds_pex
+.PHONY: sim-lvds-pex
 
 sim-all: ## Simulate the macro
 	$(MAKE) sim-xschem TB=$(TOP)_tb_tran
@@ -261,53 +258,13 @@ lib: ## Generate a Liberty timing library for the TOP cell
 
 
 # Verilog Target
-verilog: ## Generate a Verilog stub of the TOP cell from Magic or KLayout PEX netlist pins
+verilog: ## Generate a Verilog stub of the TOP cell from its xschem symbol (the slot-14 frame pins)
+# Not from a PEX netlist any more: vss_1v2 and vss_3v3 share the substrate, so
+# the extraction keeps one of the two ports.  The symbol has all 56 frame pins,
+# with directions, and the top-level LVS checks those names in the layout.
 	rm -rf $(VH_DIR)
 	mkdir -p $(VH_DIR)
-	@pex_netlist=""; \
-	for f in \
-		$(NET_PEX_DIR)/$(TOP)_magic_pex_1.spice \
-		$(NET_PEX_DIR)/$(TOP)_magic_pex_2.spice \
-		$(NET_PEX_DIR)/$(TOP)_magic_pex_3.spice \
-		$(NET_PEX_DIR)/$(TOP)_klayout_pex_1.spice \
-		$(NET_PEX_DIR)/$(TOP)_klayout_pex_2.spice \
-		$(NET_PEX_DIR)/$(TOP)_klayout_pex_3.spice; do \
-		if [ -f "$$f" ]; then \
-			pex_netlist="$$f"; \
-			break; \
-		fi; \
-	done; \
-	if [ -z "$$pex_netlist" ]; then \
-		echo "ERROR: No PEX netlist found for $(TOP). Expected one of:"; \
-		echo "  $(NET_PEX_DIR)/$(TOP)_magic_pex_{1,2,3}.spice"; \
-		echo "  $(NET_PEX_DIR)/$(TOP)_klayout_pex_{1,2,3}.spice"; \
-		echo "Run 'make magic-pex' or 'make klayout-pex' first."; \
-		exit 1; \
-	fi; \
-	echo "Reading pins from $$pex_netlist..."; \
-	pex_pins=$$(awk '/^\.subckt $(TOP)_pex/{sub(/^\.subckt [^ ]+ /,"");p=$$0;next} p&&/^[+]/{sub(/^[+] */,"");p=p" "$$0;next} p{exit} END{print p}' "$$pex_netlist"); \
-	power_pins=$$(echo "$$pex_pins" | tr ' ' '\n' | grep -E '^(VDD|VSS|VPWR|VDPWR|VAPWR|VGND|VNB|VPB)$$' | sort -u | tr '\n' ' '); \
-	signal_pins=$$(echo "$$pex_pins" | tr ' ' '\n' | grep -vE '^(VDD|VSS|VPWR|VDPWR|VAPWR|VGND|VNB|VPB)$$' | grep -v '^$$' | sort | tr '\n' ' '); \
-	{ \
-		echo 'module $(TOP) ('; \
-		if [ -n "$$(echo $$power_pins | xargs)" ]; then \
-			echo '`ifdef USE_POWER_PINS'; \
-			for p in $$power_pins; do echo "    inout $$p,"; done; \
-			echo '`endif'; \
-		fi; \
-		echo "$$signal_pins" | tr ' ' '\n' | grep -v '^$$' | awk ' \
-			{ name=$$0; idx=-1; base=name; \
-			  if (name ~ /\[[0-9]+\]$$/) { p=index(name,"["); base=substr(name,1,p-1); idx=substr(name,p+1,length(name)-p-1)+0; } \
-			  if (!(base in lo)) { order[++n]=base; lo[base]=idx; hi[base]=idx; } \
-			  if (idx>=0) { if (lo[base]<0 || idx<lo[base]) lo[base]=idx; if (idx>hi[base]) hi[base]=idx; } } \
-			END { for (i=1;i<=n;i++) { b=order[i]; \
-			  t="inout"; if (b ~ /^di_/) t="input"; else if (b ~ /^do_/) t="output"; \
-			  if (lo[b]<0) line="    " t " " b; else line="    " t " [" hi[b] ":" lo[b] "] " b; \
-			  printf "%s%s\n", line, (i<n ? "," : ""); } } \
-		'; \
-		echo ');'; \
-		echo 'endmodule'; \
-	} > $(VH_DIR)/$(TOP).vh
+	python3 $(SCRIPTS_DIR)/gen_verilog_stub.py $(XSCHEM_SCH_DIR)/$(TOP).sym $(TOP) $(VH_DIR)/$(TOP).vh
 .PHONY: verilog
 # ================================================================================================
 
@@ -462,11 +419,11 @@ klayout-verify: ## Verify CELL cell with KLayout (usage: make klayout-verify [CE
 #	$(MAKE) klayout-pex CELL=$(CELL)
 .PHONY: klayout-verify
 
-check-drc: ## Top-level DRC with a summary by cell, Rahul's PLL listed but not counted (usage: make check-drc [ARGS="--with-pll --no-antenna --density"])
+check-drc: ## Top-level DRC with a summary by cell (usage: make check-drc [ARGS="--no-antenna --density"])
 	bash $(SCRIPTS_DIR)/verify/check_drc.sh $(ARGS)
 .PHONY: check-drc
 
-check-lvs: ## Top-level LVS against the top schematic, without the PLL (usage: make check-lvs [ARGS=--strict-ports])
+check-lvs: ## Top-level LVS against the top schematic, pin names included (usage: make check-lvs [ARGS=--ignore-ports])
 	bash $(SCRIPTS_DIR)/verify/check_lvs.sh $(ARGS)
 .PHONY: check-lvs
 

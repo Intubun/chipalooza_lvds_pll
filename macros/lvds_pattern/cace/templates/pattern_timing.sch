@@ -14,16 +14,6 @@ N -700 -280 -700 -260 {lab=ref_clk}
 C {devices/vsource.sym} -700 -240 0 0 {name=VREF value="PULSE(0 CACE\{vdd\} 0 CACE\{tedge\} CACE\{tedge\} 'CACE\{period\}/2-CACE\{tedge\}' CACE\{period\})" savecurrent=false}
 N -700 -220 -700 -200 {lab=GND}
 C {devices/gnd.sym} -700 -200 0 0 {name=gVREF lab=GND}
-C {devices/lab_pin.sym} -700 -120 0 0 {name=lpll_clk_-700_-120 sig_type=std_logic lab=pll_clk}
-N -700 -120 -700 -100 {lab=pll_clk}
-C {devices/vsource.sym} -700 -80 0 0 {name=VPLL value="0" savecurrent=false}
-N -700 -60 -700 -40 {lab=GND}
-C {devices/gnd.sym} -700 -40 0 0 {name=gVPLL lab=GND}
-C {devices/lab_pin.sym} -700 40 0 0 {name=lclk_src_-700_40 sig_type=std_logic lab=clk_src}
-N -700 40 -700 60 {lab=clk_src}
-C {devices/vsource.sym} -700 80 0 0 {name=VSRC value="0" savecurrent=false}
-N -700 100 -700 120 {lab=GND}
-C {devices/gnd.sym} -700 120 0 0 {name=gVSRC lab=GND}
 C {devices/lab_pin.sym} -700 200 0 0 {name=len_-700_200 sig_type=std_logic lab=en}
 N -700 200 -700 220 {lab=en}
 C {devices/vsource.sym} -700 240 0 0 {name=VEN value="PWL(0 0 CACE\{t_en\} 0 'CACE\{t_en\}+CACE\{tedge\}' CACE\{vdd\})" savecurrent=false}
@@ -42,10 +32,6 @@ C {devices/gnd.sym} -700 600 0 0 {name=gVMODE lab=GND}
 C {lvds_pattern.sym} 0 0 0 0 {name=x1}
 N -190 -100 -130 -100 {lab=ref_clk}
 C {devices/lab_pin.sym} -190 -100 0 0 {name=lref_clk_-190_-100 sig_type=std_logic lab=ref_clk}
-N -190 -80 -130 -80 {lab=pll_clk}
-C {devices/lab_pin.sym} -190 -80 0 0 {name=lpll_clk_-190_-80 sig_type=std_logic lab=pll_clk}
-N -190 -60 -130 -60 {lab=clk_src}
-C {devices/lab_pin.sym} -190 -60 0 0 {name=lclk_src_-190_-60 sig_type=std_logic lab=clk_src}
 N -190 -40 -130 -40 {lab=en}
 C {devices/lab_pin.sym} -190 -40 0 0 {name=len_-190_-40 sig_type=std_logic lab=en}
 N -190 -20 -130 -20 {lab=reset}
@@ -77,6 +63,8 @@ value="
 * Corner and temperature are conditions, so one template covers the grid.
 .lib cornerMOSlv.lib mos_CACE\{corner\}
 .include CACE\{PDK_ROOT\}/CACE\{PDK\}/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
+* the antenna diodes of antennanp: the PDK model with tt = 0 (scripts/sim/make_diode_models.py)
+.include CACE\{root\}/../../models/diodes_tt0.lib
 
 * schematic, extracted layout or R-C extracted, whichever CACE was asked for
 .include CACE\{DUT_path\}

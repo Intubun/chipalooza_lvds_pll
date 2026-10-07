@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write testbenches/xschem/sg13cmos5l_chipalooza_analog_project_tb_lvds_postlayout.sch
+"""Write testbenches/xschem/slot_14_tb_lvds_postlayout.sch
 
 The LVDS path after layout: lvds_pattern and lvds_tx from their magic
 extraction with coupling C (scripts/sim/extract_lvds.sh, symbols
@@ -12,7 +12,7 @@ from the xschem Simulate button without the d_cosim set-up.
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-NAME = "sg13cmos5l_chipalooza_analog_project_tb_lvds_postlayout"
+NAME = "slot_14_tb_lvds_postlayout"
 OUT = os.path.join(HERE, "..", "..", "testbenches", "xschem", NAME + ".sch")
 
 L = ["v {xschem version=3.4.8RC file_version=1.3}", "G {}", "K {}", "V {}", "S {}", "F {}", "E {}"]
@@ -71,8 +71,6 @@ for i, (name, val, net, kind, note) in enumerate([
 text(-1000, -560, "pattern control", 0.4)
 for i, (name, val, net, note) in enumerate([
         ("Vref_clk", "PULSE(0 1.2 0 25p 25p 1n 2n)", "ref_clk", "ref_clk, 500 MHz"),
-        ("Vpll_clk", "0", "pll_clk", "pll_clk unused"),
-        ("Vclk_src", "0", "clk_src", "clk_src = 0: take ref_clk"),
         ("Ven", "1.2", "en", "en = 1: clock runs"),
         ("Vreset", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset", "reset until 2 ns"),
         ("Vmode", "1.2", "mode", "mode = 1: PRBS-7")]):
@@ -83,7 +81,7 @@ for i, (name, val, net, note) in enumerate([
 # ---- DUT ----------------------------------------------------------------------
 XP, YP = 0, -200          # lvds_pattern_pex
 L.append("C {lvds_pattern_pex.sym} %g %g 0 0 {name=xpat}" % (XP, YP))
-for net, dy in (("ref_clk", -100), ("pll_clk", -80), ("clk_src", -60), ("en", -40), ("reset", -20), ("mode", 0)):
+for net, dy in (("ref_clk", -100), ("en", -40), ("reset", -20), ("mode", 0)):
     pin(XP - 130, YP + dy, net)
 for net, dy in (("vdd_1v2", 80), ("GND", 100)):
     pin(XP + 130, YP + dy, net, right=True)
@@ -177,7 +175,8 @@ value="
 .lib cornerMOSlv.lib mos_tt
 .lib cornerMOShv.lib mos_tt
 .lib cornerRES.lib res_typ
-.lib cornerDIO.lib dio_tt
+.include ../../../models/diodes_tt0.lib
+.include sg13g2_esd.lib
 .include cap_cmomf.lib
 * the two extracted blocks (make extract-lvds); the paths are relative to
 * testbenches/xschem/simulations, where xschem runs ngspice

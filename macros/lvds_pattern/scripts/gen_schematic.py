@@ -17,7 +17,7 @@ import os
 # --------------------------------------------------------------- cell placement
 # (instance, standard cell, family, x, y)
 CELLS = [
-    ("xcsel", "mux2_2", "mux2", 400, -600),     # clock source select
+    # (xcsel, a mux2_2 choosing ref_clk or pll_clk, went with the PLL, 2026-10-07)
     ("xicg", "lgcp_1", "lgcp", 750, -600),      # latch-based clock gate
     ("xclkb", "buf_4", "buf", 1050, -610),      # clock buffer to the register
     # the same gate and buffer again with the enable tied high: the output
@@ -71,16 +71,12 @@ def lab(net, x, y):
     LABELS.append((net, x, y))
 
 
-# --- clock source select, gate, buffer ---------------------------------------
-PORTS += [("ref_clk", "ipin", 200, -620, 1), ("pll_clk", "ipin", 200, -580, 1),
-          ("clk_src", "ipin", 200, -540, 1), ("en", "ipin", 200, -500, 1)]
-w("ref_clk", (200, -620), (360, -620))
-w("pll_clk", (200, -580), (360, -580))
-w("clk_src", (200, -540), (360, -540))
+# --- clock gate, buffer --------------------------------------------------------
+PORTS += [("ref_clk", "ipin", 200, -620, 1), ("en", "ipin", 200, -500, 1)]
+w("ref_clk", (200, -620), (440, -620), (440, -600), (620, -600), (620, -610), (660, -610))
 w("en", (200, -500), (600, -500), (600, -590), (660, -590))
-w("clk_sel", (440, -600), (620, -600), (620, -610), (660, -610))
 w("gclk", (840, -610), (1010, -610))
-lab("clk_sel", 530, -600)
+lab("ref_clk", 530, -600)
 lab("gclk", 930, -610)
 
 # --- the gated clock: down to the register trunk, and across to the mode mux ---
@@ -95,8 +91,8 @@ lab("gclk_b", 1090, -400)
 # Only the two output flops hang off this.  The shift register stays on the gated
 # clock, so en still stops the pattern; the output pair just keeps holding the
 # last complementary value instead of drifting to a common level.
-w("clk_sel", (620, -790), (660, -790))
-lab("clk_sel", 620, -790)
+w("ref_clk", (620, -790), (660, -790))
+lab("ref_clk", 620, -790)
 w("VDD", (600, -770), (660, -770))
 lab("VDD", 600, -770)
 w("gclk_free", (840, -790), (1010, -790))
@@ -215,15 +211,15 @@ E {}"""
 
 NOTES = """T {lvds_pattern - data source for the LVDS transmitter, sg13cmos5l standard cells only
 
-  clk_src   0 = ref_clk, 1 = pll_clk
+  ref_clk   the bit clock, one bit per period
   en        1 = clock runs, 0 = clock stopped low (latch-based gate, no runt pulse)
   reset     active high, asynchronous, seeds the PRBS - shift register only
   mode      0 = gated clock straight to the pair, 1 = PRBS-7
 
 D_p / D_n drive the pre-driver of macros/lvds_tx.} 150 -1000 0 0 0.6 0.6 {}
-T {Clock source select, then the PDK's latch-based clock gate.  GCLK is
-held low while en is 0, so en may change at any point in the cycle
-without producing a runt pulse.} 200 -700 0 0 0.35 0.35 {}
+T {The PDK's latch-based clock gate.  GCLK is held low while en is 0, so
+en may change at any point in the cycle without producing a runt pulse.
+(The clock source select, ref_clk or pll_clk, went with the PLL, 2026-10-07.)} 200 -720 0 0 0.35 0.35 {}
 T {PRBS-7, x^7 + x^6 + 1.  The seven flops hold the COMPLEMENT of the LFSR word:
 dfrbp resets Q to 0, and an all-zero complement is the all-ones seed that
 serdes_dig.v uses.  That is why the feedback gate is an XNOR and not an XOR, and
@@ -274,10 +270,13 @@ def gen_sch(path):
     io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
 
 
-SYM_PINS = [("ref_clk", "in"), ("pll_clk", "in"), ("clk_src", "in"),
-            ("en", "in"), ("reset", "in"), ("mode", "in"),
+SYM_PINS = [("ref_clk", "in"), ("en", "in"), ("reset", "in"), ("mode", "in"),
             ("D_p", "out"), ("D_n", "out"),
             ("VDD", "inout"), ("VSS", "inout")]
+# Slot of each input on the left edge, 20 apart from the top.  Slots 1 and 2
+# held pll_clk and clk_src until 2026-10-07; they stay empty so that every
+# other pin keeps its place and no instance of the symbol has to be redrawn.
+IN_SLOT = {"ref_clk": 0, "en": 3, "reset": 4, "mode": 5}
 
 
 def gen_sym(path):
@@ -299,8 +298,8 @@ def gen_sym(path):
         out.append("T {%s} %d %d 0 %d 0.2 0.2 {}"
                    % (name, x - sgn * 5, y - 4, 0 if x < 0 else 1))
 
-    for i, (name, d) in enumerate([p for p in SYM_PINS if p[1] == "in"]):
-        emit(name, d, -w_, top + 20 + i * 20)
+    for name, d in [p for p in SYM_PINS if p[1] == "in"]:
+        emit(name, d, -w_, top + 20 + IN_SLOT[name] * 20)
     for i, (name, d) in enumerate([p for p in SYM_PINS if p[1] == "out"]):
         emit(name, d, w_, top + 20 + i * 20)
     for i, (name, d) in enumerate([p for p in SYM_PINS if p[1] == "inout"]):
@@ -387,8 +386,8 @@ VIEW_TOP = -1750
 # the sources, split by what they are for; both benches drive the same nets
 TB_GROUPS = [
     ("supply", ["VDD"]),
-    ("clocks", ["ref_clk", "pll_clk"]),
-    ("control", ["clk_src", "en", "reset", "mode"]),
+    ("clock", ["ref_clk"]),
+    ("control", ["en", "reset", "mode"]),
 ]
 
 
@@ -436,7 +435,7 @@ def stim_groups(sources):
 
 def dut_and_load():
     """the block under test with a labelled stub per pin, and its load"""
-    ports = [("ref_clk", -110, -100), ("pll_clk", -110, -80), ("clk_src", -110, -60),
+    ports = [("ref_clk", -110, -100),
              ("en", -110, -40), ("reset", -110, -20), ("mode", -110, 0),
              ("D_p", 110, -100), ("D_n", 110, -80),
              ("VDD", 110, 80), ("VSS", 110, 100)]
@@ -480,9 +479,7 @@ def view_panels(tb):
 # ---------------------------------------------------------------- testbench
 TB_SOURCES = [
     ("VDD", "1.2"),
-    ("ref_clk", "PULSE(0 1.2 0 50p 50p 1.9n 4n)"),
-    ("pll_clk", "PULSE(0 1.2 0 30p 30p 470p 1n)"),
-    ("clk_src", "PWL(0 1.2 160n 1.2 160.1n 0)"),
+    ("ref_clk", "PULSE(0 1.2 0 30p 30p 470p 1n)"),
     ("en", "PWL(0 0 3n 0 3.1n 1.2 150n 1.2 150.1n 0 155n 0 155.1n 1.2)"),
     ("reset", "PWL(0 1.2 2n 1.2 2.1n 0)"),
     ("mode", "PWL(0 0 12n 0 12.1n 1.2)"),
@@ -490,6 +487,8 @@ TB_SOURCES = [
 
 TB_CONTROL = r'''
 .include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
+* the antenna diodes of antennanp: the PDK model with tt = 0 (scripts/sim/make_diode_models.py)
+.include ../../../../../models/diodes_tt0.lib
 .lib cornerMOSlv.lib mos_tt
 .temp 27
 .options savecurrents klu reltol=1e-3
@@ -527,10 +526,9 @@ wrdata ../plot_simulations/data/@schname\\\\.txt
 TB_TITLE = """lvds_pattern transient bench.
 
   0...2 ns     reset high, clock stopped
-  3 ns         en high, clock passthrough of pll_clk at 1 GHz
+  3 ns         en high, clock passthrough of ref_clk at 1 GHz
   12 ns        mode high, PRBS-7 at 1 Gb/s
   150...155 ns en low, the clock gate stops the pattern
-  160 ns       clk_src low, the 250 MHz reference takes over
 
 scripts/check_timing.py re-runs the polynomial over the exported
 data and counts the bits that do not match."""
@@ -551,9 +549,7 @@ def gen_tb(path):
 # the mode and source changes moving anything around.
 TB_PRBS_SOURCES = [
     ("VDD", "1.2"),
-    ("ref_clk", "0"),                                   # unused here
-    ("pll_clk", "PULSE(0 1.2 0 30p 30p 470p 1n)"),      # 1 GHz
-    ("clk_src", "1.2"),                                 # take the fast clock
+    ("ref_clk", "PULSE(0 1.2 0 30p 30p 470p 1n)"),      # 1 GHz
     ("en", "PWL(0 0 3n 0 3.1n 1.2)"),
     ("reset", "PWL(0 1.2 2n 1.2 2.1n 0)"),
     ("mode", "1.2"),                                    # PRBS-7 throughout
@@ -561,6 +557,8 @@ TB_PRBS_SOURCES = [
 
 TB_PRBS_CONTROL = r'''
 .include /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
+* the antenna diodes of antennanp: the PDK model with tt = 0 (scripts/sim/make_diode_models.py)
+.include ../../../../../models/diodes_tt0.lib
 .lib cornerMOSlv.lib mos_tt
 .temp 27
 .options savecurrents klu reltol=1e-3
@@ -585,8 +583,8 @@ wrdata ../plot_simulations/data/@schname\\\\.txt
 TB_PRBS_TITLE = """lvds_pattern PRBS-7 timing bench.
 
 PRBS-7 from the first clock, 1 Gb/s, 160 ns - a full 127-bit period with
-margin.  mode and clk_src are static, so nothing moves the data path timing
-during the run.
+margin.  mode is static, so nothing moves the data path timing during the
+run.
 
 scripts/check_timing.py reads the export and reports the bit rate, the
 clock-to-output spread, the data valid window that follows from it, the

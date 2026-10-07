@@ -61,6 +61,8 @@ def code(name, x, y, body):
 SETUP = r"""* Corner and temperature are conditions, so one template covers the grid.
 .lib cornerMOSlv.lib mos_CACE\{corner\}
 .include CACE\{PDK_ROOT\}/CACE\{PDK\}/libs.ref/sg13cmos5l_stdcell/spice/sg13cmos5l_stdcell.spice
+* the antenna diodes of antennanp: the PDK model with tt = 0 (scripts/sim/make_diode_models.py)
+.include CACE\{root\}/../../models/diodes_tt0.lib
 
 * schematic, extracted layout or R-C extracted, whichever CACE was asked for
 .include CACE\{DUT_path\}
@@ -109,8 +111,6 @@ def main():
                    r"PULSE(0 CACE\{vdd\} 0 CACE\{tedge\} CACE\{tedge\} "
                    r"'CACE\{period\}/2-CACE\{tedge\}' CACE\{period\})",
                    -700, -240)
-    out += vsource("VPLL", "pll_clk", "0", -700, -80)
-    out += vsource("VSRC", "clk_src", "0", -700, 80)
     out += vsource("VEN", "en",
                    r"PWL(0 0 CACE\{t_en\} 0 'CACE\{t_en\}+CACE\{tedge\}' CACE\{vdd\})",
                    -700, 240)
@@ -121,8 +121,7 @@ def main():
     out += vsource("VMODE", "mode", r"CACE\{vdd\}", -700, 560)
 
     out.append("C {lvds_pattern.sym} 0 0 0 0 {name=x1}")
-    for pin, py in (("ref_clk", -100), ("pll_clk", -80), ("clk_src", -60),
-                    ("en", -40), ("reset", -20), ("mode", 0)):
+    for pin, py in (("ref_clk", -100), ("en", -40), ("reset", -20), ("mode", 0)):
         out.append("N -190 %d -130 %d {lab=%s}" % (py, py, pin))
         out.append(lab(pin, -190, py))
     out.append("N 130 80 190 80 {lab=VDD}")

@@ -1,6 +1,6 @@
 # lvds_pattern
 
-- Description: PRBS-7 pattern generator and clock multiplexer for the Chipalooza 2026 LVDS transmitter, built only from IHP standard cells. Selects between the reference and the PLL clock, generates x^7 + x^6 + 1 or passes the clock through, and hands the transmitter a complementary pair that is registered after the inversion so both edges leave on the same clock.
+- Description: PRBS-7 pattern generator for the Chipalooza 2026 LVDS transmitter, built only from IHP standard cells. Gates the reference clock, generates x^7 + x^6 + 1 or passes the clock through, and hands the transmitter a complementary pair that is registered after the inversion so both edges leave on the same clock.
 - PDK: ihp-sg13cmos5l
 
 ## Authorship
@@ -14,15 +14,7 @@
 ## Pins
 
 - ref_clk
-  + Description: Reference clock from the pad
-  + Type: signal
-  + Direction: input
-- pll_clk
-  + Description: Bit clock from the PLL
-  + Type: signal
-  + Direction: input
-- clk_src
-  + Description: Clock select. 0 takes ref_clk, 1 takes pll_clk.
+  + Description: Bit clock from the pad, one bit per period
   + Type: signal
   + Direction: input
 - en

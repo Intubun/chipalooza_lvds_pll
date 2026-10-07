@@ -1,0 +1,666 @@
+* slot_14 - the top-level wiring as laid out, the blocks from their schematics
+* written by scripts/sim/pex_top.py from a magic extraction of layout/slot_14.gds
+* metal islands that only coupling capacitance reaches would leave the operating
+* point singular
+.option rshunt=1e12
+
+.subckt slot_14_wires vdd_3v3 vdd_1v2 vss_3v3 vss_1v2 enable clk reset dig_in_23_ dig_in_22_ dig_in_21_ dig_in_20_ dig_in_19_ dig_in_18_ dig_in_17_ dig_in_16_ dig_in_15_ dig_in_14_ dig_in_13_ dig_in_12_ dig_in_11_ dig_in_10_ dig_in_9_ dig_in_8_ dig_in_7_ dig_in_6_ dig_in_5_ dig_in_4_ dig_in_3_ dig_in_2_ dig_in_1_ dig_in_0_ ibias0 ibias1 vbias dig_out_11_ dig_out_10_ dig_out_9_ dig_out_8_ dig_out_7_ dig_out_6_ dig_out_5_ dig_out_4_ dig_out_3_ dig_out_2_ dig_out_1_ dig_out_0_ s14_an_2_ s14_an_1_ s14_an_0_ s14_an_2_esd s14_an_1_esd s14_an_0_esd analog_bus0 analog_bus1 analog_bus2 analog_bus3
+Rjoin_vss_1v2 vss_1v2 vss_3v3 1m
+Xsg13g2_hv_decap_8_49 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_16 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_27 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_38 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_17 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_28 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_39 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+xlvds core_p core_n iref_pd_30u iref_drv_30u analog_bus1 vdd_3v3 s14_an_1_ s14_an_0_ vss_3v3 lvds_tx
+Xsg13g2_hv_decap_8_18 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_29 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_19 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+xiref_pd ibias0 iref_pd_30u vdd_3v3 vss_3v3 iref_x15
+Xsg13cmos5l_decap_8_80 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_81 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_70 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+xpat s14_an_2_esd dig_in_1_ dig_in_2_ dig_in_3_ core_p core_n vdd_1v2 vss_3v3 lvds_pattern
+Xsg13cmos5l_decap_8_71 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_60 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_82 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_72 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_61 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_50 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+xodt dig_in_0_ s14_an_2_ vdd_1v2 vdd_3v3 vss_3v3 ref_odt
+Xsg13cmos5l_decap_8_73 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_62 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_51 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_40 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_74 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_63 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_52 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_41 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_30 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_75 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_64 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_53 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_42 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_31 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_20 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+xiref_drv ibias1 iref_drv_30u vdd_3v3 vss_3v3 iref_x15
+Xsg13cmos5l_decap_8_76 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_65 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_54 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_43 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_32 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_21 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_10 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_77 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_66 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_55 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_44 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_33 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_22 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_11 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_0 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_78 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_67 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_56 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_45 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_34 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_23 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_12 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_1 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_35 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_79 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_68 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_57 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_46 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_24 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_13 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_2 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_36 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_69 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_58 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_47 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_25 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_14 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_3 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_59 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_48 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_37 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_26 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_15 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_4 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13g2_hv_decap_8_90 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13cmos5l_decap_8_49 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_38 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_27 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_16 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13g2_hv_decap_8_80 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_91 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13cmos5l_decap_8_5 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_39 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_28 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_17 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13g2_hv_decap_8_81 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_92 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_70 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13cmos5l_decap_8_6 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13g2_hv_decap_8_0 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_60 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13cmos5l_decap_8_29 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_18 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_7 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13g2_hv_decap_8_82 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_93 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_71 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_1 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13cmos5l_decap_8_19 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13g2_hv_decap_8_83 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_94 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_72 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_50 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_61 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13cmos5l_decap_8_8 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13g2_hv_decap_8_2 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13cmos5l_decap_8_9 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13g2_hv_decap_8_84 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_73 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_51 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_62 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_40 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_3 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_74 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_85 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_52 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_63 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_30 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_41 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_4 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_75 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_86 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_53 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_64 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_20 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_31 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_42 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_5 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_76 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_87 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_54 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_65 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_10 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_21 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_32 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_43 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_6 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_77 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_88 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_55 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_66 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_11 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_22 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_33 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_44 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_7 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_78 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_89 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_56 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_67 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_12 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_23 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_34 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_45 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_8 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_79 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_57 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_68 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_13 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_24 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_35 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_46 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_9 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_58 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_69 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_14 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_25 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_36 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_47 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_48 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_59 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_15 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_26 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_37 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+XDRST vss_3v3 dig_in_2_ dantenna l=0.78u w=0.78u
+C0 analog_bus3 vss_3v3 0.15943f
+C1 vdd_3v3 iref_pd_30u 0.65766f
+C2 vdd_1v2 vss_3v3 0.11364f
+C3 vss_3v3 s14_an_2_esd 0.02187f
+C4 s14_an_0_ s14_an_2_esd 0.63473f
+C5 ibias1 dig_in_2_ 0.15868f
+C6 vdd_1v2 ibias1 0.41576f
+C7 dig_in_0_ vss_3v3 0.14344f
+C8 vdd_1v2 vss_3v3 0.11364f
+C9 dig_in_18_ dig_in_17_ 0.23029f
+C10 iref_pd_30u analog_bus1 0.34352f
+C11 vdd_3v3 dig_in_2_ 1.03663f
+C12 vdd_3v3 vdd_1v2 4.212f
+C13 dig_in_11_ dig_in_10_ 0.23029f
+C14 ibias0 vss_3v3 0.15943f
+C15 core_n iref_pd_30u 0.21208f
+C16 vss_3v3 iref_pd_30u 0.04401f
+C17 vdd_1v2 vss_3v3 0.11364f
+C18 dig_out_7_ dig_out_6_ 0.23029f
+C19 ibias1 dig_in_1_ 0.1612f
+C20 analog_bus2 vss_3v3 0.15943f
+C21 vss_3v3 analog_bus1 0.15943f
+C22 dig_in_2_ analog_bus1 0.16379f
+C23 dig_in_2_ s14_an_2_esd 0.22358f
+C24 vdd_1v2 analog_bus1 2.47032f
+C25 vdd_1v2 vss_3v3 0.05645f
+C26 vdd_3v3 dig_in_1_ 1.14673f
+C27 iref_drv_30u ibias0 0.06001f
+C28 vdd_3v3 vss_3v3 0.79662f
+C29 dig_in_2_ dig_in_3_ 5.16924f
+C30 dig_in_19_ dig_in_18_ 0.23029f
+C31 dig_in_5_ dig_in_3_ 0.01052f
+C32 vdd_1v2 dig_in_3_ 0.07119f
+C33 vdd_1v2 vss_3v3 0.01201f
+C34 dig_in_12_ dig_in_11_ 0.23029f
+C35 vss_3v3 dig_in_0_ 0.05435f
+C36 vss_3v3 s14_an_2_esd 0.02432f
+C37 dig_in_5_ dig_in_4_ 0.23029f
+C38 analog_bus1 dig_in_1_ 0.1663f
+C39 dig_out_8_ dig_out_7_ 0.23029f
+C40 s14_an_1_ s14_an_2_esd 0.59514f
+C41 dig_out_1_ dig_out_0_ 0.23029f
+C42 vbias vss_3v3 0.15943f
+C43 core_p iref_pd_30u 0.15231f
+C44 vss_3v3 analog_bus0 0.15943f
+C45 dig_in_3_ dig_in_1_ 5.08747f
+C46 vdd_3v3 ibias1 3.83551f
+C47 ibias1 vss_3v3 0.15943f
+C48 dig_out_11_ dig_in_0_ 0.06459f
+C49 vss_3v3 dig_in_0_ 0.1083f
+C50 dig_in_20_ dig_in_19_ 0.23029f
+C51 dig_in_7_ dig_in_3_ 0.01052f
+C52 reset dig_in_23_ 0.23029f
+C53 dig_in_13_ dig_in_12_ 0.23029f
+C54 ibias1 analog_bus1 2.72433f
+C55 dig_in_6_ dig_in_5_ 0.23029f
+C56 ibias0 dig_in_2_ 0.15872f
+C57 vdd_1v2 ibias0 0.74604f
+C58 enable reset 0.22207f
+C59 dig_out_9_ dig_out_8_ 0.23029f
+C60 vss_3v3 vdd_1v2 0.11364f
+C61 dig_out_2_ dig_out_1_ 0.23029f
+C62 vdd_1v2 vss_3v3 0.11364f
+C63 clk enable 0.23029f
+C64 vdd_3v3 analog_bus1 2.13188f
+C65 vdd_3v3 s14_an_2_esd 0.03304f
+C66 ibias1 dig_in_3_ 0.16317f
+C67 ibias0 dig_in_1_ 0.16124f
+C68 vdd_3v3 dig_in_3_ 1.20477f
+C69 s14_an_2_ s14_an_2_esd 0.70873f
+C70 vdd_3v3 vss_3v3 -0.01154f
+C71 dig_in_21_ dig_in_20_ 0.23029f
+C72 vss_3v3 dig_in_0_ 0.02879f
+C73 dig_in_14_ dig_in_13_ 0.23029f
+C74 core_n analog_bus1 0.01127f
+C75 ibias0 vss_3v3 0.15943f
+C76 dig_in_7_ dig_in_6_ 0.23029f
+C77 iref_drv_30u iref_pd_30u 0.28896f
+C78 iref_pd_30u vss_3v3 0.02239f
+C79 dig_out_10_ dig_out_9_ 0.23029f
+C80 vdd_1v2 vss_3v3 0.11364f
+C81 dig_out_3_ dig_out_2_ 0.23029f
+C82 analog_bus3 vss_3v3 0.15943f
+C83 vdd_3v3 vss_3v3 0.79665f
+C84 analog_bus1 dig_in_3_ 0.20333f
+C85 vss_3v3 analog_bus1 0.15943f
+C86 ibias1 ibias0 7.87938f
+C87 iref_drv_30u vdd_1v2 0.05512f
+C88 vdd_1v2 dig_in_0_ 2.0035f
+C89 dig_in_22_ dig_in_21_ 0.23029f
+C90 vss_3v3 s14_an_2_esd 0.02129f
+C91 dig_in_4_ dig_in_3_ 0.24082f
+C92 dig_in_15_ dig_in_14_ 0.23029f
+C93 vdd_3v3 ibias0 4.08992f
+C94 dig_in_8_ dig_in_7_ 0.23029f
+C95 dig_out_11_ dig_out_10_ 0.23029f
+C96 clk vss_3v3 0.01706f
+C97 dig_out_4_ dig_out_3_ 0.23029f
+C98 analog_bus2 vss_3v3 0.15943f
+C99 vbias vss_3v3 0.15943f
+C100 vss_3v3 analog_bus0 0.15943f
+C101 core_p core_n 0.21126f
+C102 dig_in_0_ dig_in_1_ 3.75854f
+C103 iref_drv_30u vss_3v3 0.03635f
+C104 ibias1 vss_3v3 0.15943f
+C105 vss_3v3 s14_an_2_esd 0.01358f
+C106 vdd_1v2 vss_3v3 0.05645f
+C107 dig_in_23_ dig_in_22_ 0.23029f
+C108 dig_in_6_ dig_in_3_ 0.01052f
+C109 ibias0 dig_in_3_ 0.16321f
+C110 dig_in_16_ dig_in_15_ 0.23029f
+C111 dig_in_9_ dig_in_8_ 0.23029f
+C112 dig_out_5_ dig_out_4_ 0.23029f
+C113 ibias0 vss_3v3 0.01693f
+C114 iref_drv_30u vdd_3v3 0.60712f
+C115 vdd_1v2 vss_3v3 0.05764f
+C116 dig_in_2_ dig_in_1_ 6.58974f
+C117 vdd_3v3 dig_in_0_ 0.23525f
+C118 dig_in_17_ dig_in_16_ 0.23029f
+C119 dig_in_10_ dig_in_9_ 0.23029f
+C120 iref_drv_30u analog_bus1 0.54673f
+C121 s14_an_2_ dig_in_0_ 0.12873f
+C122 iref_drv_30u core_n 0.01561f
+C123 dig_out_6_ dig_out_5_ 0.23029f
+C124 dig_out_0_ vss_3v3 0.13023f
+C125 dig_out_1_ vss_3v3 0.04024f
+C126 dig_out_2_ vss_3v3 0.04024f
+C127 dig_out_3_ vss_3v3 0.04024f
+C128 dig_out_4_ vss_3v3 0.04024f
+C129 dig_out_5_ vss_3v3 0.03825f
+C130 dig_out_6_ vss_3v3 0.03626f
+C131 dig_out_7_ vss_3v3 0.03626f
+C132 dig_out_8_ vss_3v3 0.03626f
+C133 dig_out_9_ vss_3v3 0.03626f
+C134 dig_out_10_ vss_3v3 0.03626f
+C135 dig_out_11_ vss_3v3 0.04726f
+C136 s14_an_1_esd vss_3v3 0.15069f
+C137 dig_in_4_ vss_3v3 0.03013f
+C138 dig_in_5_ vss_3v3 0.03013f
+C139 dig_in_6_ vss_3v3 0.03013f
+C140 dig_in_7_ vss_3v3 0.03013f
+C141 dig_in_8_ vss_3v3 0.03626f
+C142 dig_in_9_ vss_3v3 0.03626f
+C143 dig_in_10_ vss_3v3 0.03626f
+C144 dig_in_11_ vss_3v3 0.03626f
+C145 dig_in_12_ vss_3v3 0.03626f
+C146 dig_in_13_ vss_3v3 0.03626f
+C147 dig_in_14_ vss_3v3 0.03626f
+C148 dig_in_15_ vss_3v3 0.03626f
+C149 dig_in_16_ vss_3v3 0.03626f
+C150 dig_in_17_ vss_3v3 0.03626f
+C151 dig_in_18_ vss_3v3 0.03626f
+C152 dig_in_19_ vss_3v3 0.03626f
+C153 dig_in_20_ vss_3v3 0.03626f
+C154 dig_in_21_ vss_3v3 0.03626f
+C155 dig_in_22_ vss_3v3 0.03626f
+C156 dig_in_23_ vss_3v3 0.03626f
+C157 reset vss_3v3 0.03646f
+C158 enable vss_3v3 0.03646f
+C159 clk vss_3v3 0.08678f
+C160 vbias vss_3v3 0.25962f
+C161 analog_bus3 vss_3v3 0.18025f
+C162 analog_bus2 vss_3v3 0.18303f
+C163 analog_bus0 vss_3v3 0.22596f
+C164 s14_an_0_esd vss_3v3 0.15079f
+C165 vss_3v3 vss_3v3 0.09418f ; **FLOATING
+C166 vss_3v3 vss_3v3 0.03587f ; **FLOATING
+C167 vss_3v3 vss_3v3 0.03077f ; **FLOATING
+C168 vss_3v3 vss_3v3 0.02939f ; **FLOATING
+C169 vss_3v3 vss_3v3 0.02872f ; **FLOATING
+C170 vss_3v3 vss_3v3 0.02972f ; **FLOATING
+C171 vss_3v3 vss_3v3 0.03194f ; **FLOATING
+C172 vss_3v3 vss_3v3 0.13667f ; **FLOATING
+C173 vdd_3v3 vss_3v3 51.08282f
+C174 vss_3v3 vss_3v3 -3.97114f
+C175 ibias1 vss_3v3 17.59322f
+C176 s14_an_2_ vss_3v3 10.0309f
+C177 vss_3v3 vss_3v3 -0.1917f
+C178 dig_in_0_ vss_3v3 39.40053f
+C179 vss_3v3 vss_3v3 -0.01342f
+C180 vss_3v3 vss_3v3 -3.43693f
+C181 vss_3v3 vss_3v3 -0.32481f
+C182 vss_3v3 vss_3v3 -0.28235f
+C183 vss_3v3 vss_3v3 -0.53447f
+C184 vss_3v3 vss_3v3 -0.41135f
+C185 dig_in_1_ vss_3v3 15.65477f
+C186 dig_in_3_ vss_3v3 18.97194f
+C187 s14_an_2_esd vss_3v3 20.72996f
+C188 vss_3v3 vss_3v3 -0.22754f
+C189 vss_3v3 vss_3v3 -0.18856f
+C190 vss_3v3 vss_3v3 -0.25105f
+C191 vss_3v3 vss_3v3 -0.27604f
+C192 vss_3v3 vss_3v3 -0.17097f
+C193 vss_3v3 vss_3v3 -3.03449f
+C194 vss_3v3 vss_3v3 -0.25343f
+C195 vdd_1v2 vss_3v3 40.97342f
+C196 vss_3v3 vss_3v3 -1.05457f
+C197 vss_3v3 vss_3v3 -0.98979f
+C198 vss_3v3 vss_3v3 -0.83418f
+C199 vss_3v3 vss_3v3 -0.46913f
+C200 vss_3v3 vss_3v3 -0.93516f
+C201 vss_3v3 vss_3v3 -0.91797f
+C202 vss_3v3 vss_3v3 -0.16205f
+C203 vss_3v3 vss_3v3 -0.42158f
+C204 vss_3v3 vss_3v3 -1.18931f
+C205 vss_3v3 vss_3v3 -0.57788f
+C206 vss_3v3 vss_3v3 -0.79049f
+C207 vss_3v3 vss_3v3 -3.97024f
+C208 ibias0 vss_3v3 24.04229f
+C209 s14_an_1_ vss_3v3 3.51693f
+C210 vss_3v3 vss_3v3 -1.40059f
+C211 vss_3v3 vss_3v3 -6.80153f
+C212 vss_3v3 vss_3v3 -6.6905f
+C213 s14_an_0_ vss_3v3 2.66173f
+C214 iref_drv_30u vss_3v3 -4.38726f
+C215 vss_3v3 vss_3v3 -0.85692f
+C216 vss_3v3 vss_3v3 -1.23915f
+C217 vss_3v3 vss_3v3 -1.15158f
+C218 vss_3v3 vss_3v3 -4.63527f
+C219 analog_bus1 vss_3v3 23.6753f
+C220 vss_3v3 vss_3v3 -1.09956f
+C221 core_p vss_3v3 -0.83436f
+C222 vss_3v3 vss_3v3 -1.89751f
+C223 vss_3v3 vss_3v3 -1.28987f
+C224 iref_pd_30u vss_3v3 -2.81707f
+C225 vss_3v3 vss_3v3 -1.09956f
+C226 core_n vss_3v3 -0.80858f
+C227 vss_3v3 vss_3v3 -1.92078f
+C228 vss_3v3 vss_3v3 -1.28987f
+C229 vss_3v3 vss_3v3 -2.74493f
+C230 vss_3v3 vss_3v3 -2.64305f
+C231 vss_3v3 vss_3v3 -1.00783f
+C232 vss_3v3 vss_3v3 -4.1965f
+C233 vss_3v3 vss_3v3 -4.98894f
+C234 vss_3v3 vss_3v3 -1.00783f
+.ends
+
+* the blocks, as xschem netlists schematic/xschem/slot_14.sch
+** sch_path: /foss/designs/chipalooza_lvds_pll/schematic/xschem/slot_14.sch
+
+* expanding   symbol:  lvds_pattern.sym # of pins=8
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_pattern/schematic/xschem/lvds_pattern.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_pattern/schematic/xschem/lvds_pattern.sch
+.subckt lvds_pattern ref_clk en reset mode D_p D_n VDD VSS
+*.PININFO ref_clk:I en:I reset:I mode:I D_p:O D_n:O VDD:B VSS:B
+xicg gclk ref_clk en VDD VSS sg13cmos5l_lgcp_1
+xclkb gclk_b gclk VDD VSS sg13cmos5l_buf_4
+xicg2 gclk_free ref_clk VDD VDD VSS sg13cmos5l_lgcp_1
+xclkb2 gclk_free_b gclk_free VDD VSS sg13cmos5l_buf_4
+xrstb reset_b reset VDD VSS sg13cmos5l_inv_2
+xs0 s0 s0_n gclk_b fb reset_b VDD VSS sg13cmos5l_dfrbp_2
+xs1 s1 s1_n gclk_b s0 reset_b VDD VSS sg13cmos5l_dfrbp_2
+xs2 s2 s2_n gclk_b s1 reset_b VDD VSS sg13cmos5l_dfrbp_2
+xs3 s3 s3_n gclk_b s2 reset_b VDD VSS sg13cmos5l_dfrbp_2
+xs4 s4 s4_n gclk_b s3 reset_b VDD VSS sg13cmos5l_dfrbp_2
+xs5 s5 s5_n gclk_b s4 reset_b VDD VSS sg13cmos5l_dfrbp_2
+xs6 s6 s6_n gclk_b s5 reset_b VDD VSS sg13cmos5l_dfrbp_2
+xfb fb s6 s5 VDD VSS sg13cmos5l_xnor2_1
+xclkn gclk_bn gclk_b VDD VSS sg13cmos5l_inv_2
+xmodep dp0 gclk_bn fp mode VDD VSS sg13cmos5l_mux2_2
+xmoden dn0 gclk_b fn mode VDD VSS sg13cmos5l_mux2_2
+xp1 dp1 dp0 VDD VSS sg13cmos5l_inv_2
+xp2 dp2 dp1 VDD VSS sg13cmos5l_inv_8
+xbp D_p dp2 VDD VSS sg13cmos5l_inv_16
+xn1 dn1 dn0 VDD VSS sg13cmos5l_inv_2
+xn2 dn2 dn1 VDD VSS sg13cmos5l_inv_8
+xbn D_n dn2 VDD VSS sg13cmos5l_inv_16
+xffn fn fn_n gclk_free_b s6_i VDD VDD VSS sg13cmos5l_dfrbp_2
+xffp fp fp_n gclk_free_b s6 VDD VDD VSS sg13cmos5l_dfrbp_2
+x1 VDD VSS sg13cmos5l_decap_4
+x2 VDD VSS sg13cmos5l_decap_4
+x3 VDD VSS sg13cmos5l_decap_4
+x4 VDD VSS sg13cmos5l_decap_4
+x5 VDD VSS sg13cmos5l_decap_4
+x6 VDD VSS sg13cmos5l_decap_4
+x7 VDD VSS sg13cmos5l_decap_8
+x8 VDD VSS sg13cmos5l_decap_8
+x9 VDD VSS sg13cmos5l_decap_8
+x10 VDD VSS sg13cmos5l_decap_8
+x11 VDD VSS sg13cmos5l_decap_8
+x12 VDD VSS sg13cmos5l_decap_8
+x13 VDD VSS sg13cmos5l_decap_8
+x14 VDD VSS sg13cmos5l_decap_8
+x15 VDD VSS sg13cmos5l_decap_8
+x16 VDD VSS sg13cmos5l_decap_8
+x17 VDD VSS sg13cmos5l_decap_8
+x18 VDD VSS sg13cmos5l_decap_8
+x19 VDD VSS sg13cmos5l_decap_8
+x20 VDD VSS sg13cmos5l_decap_8
+x21 VDD VSS sg13cmos5l_decap_8
+x22 VDD VSS sg13cmos5l_decap_8
+x23 VDD VSS sg13cmos5l_decap_8
+x24 VDD VSS sg13cmos5l_decap_8
+x25 VDD VSS sg13cmos5l_decap_8
+x26 VDD VSS sg13cmos5l_decap_8
+x27 VDD VSS sg13cmos5l_decap_8
+x28 VDD VSS sg13cmos5l_decap_8
+x29 VDD VSS sg13cmos5l_decap_8
+x30 VDD VSS sg13cmos5l_decap_8
+x31 VDD VSS sg13cmos5l_decap_8
+x32 VDD VSS sg13cmos5l_decap_8
+x33 VDD VSS sg13cmos5l_decap_8
+x34 VDD VSS sg13cmos5l_decap_8
+x35 VDD VSS sg13cmos5l_decap_8
+x36 VDD VSS sg13cmos5l_decap_8
+x37 VDD VSS sg13cmos5l_decap_8
+x38 VDD VSS sg13cmos5l_decap_8
+x39 VDD VSS sg13cmos5l_decap_8
+x40 VDD VSS sg13cmos5l_decap_8
+x41 VDD VSS sg13cmos5l_decap_8
+xinvd s6_i s6 VDD VSS sg13cmos5l_inv_1
+xant_en en VDD VSS sg13cmos5l_antennanp
+xant_mode mode VDD VSS sg13cmos5l_antennanp
+xant_ref ref_clk VDD VSS sg13cmos5l_antennanp
+.ends
+
+
+* expanding   symbol:  lvds_tx.sym # of pins=9
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/lvds_tx.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/lvds_tx.sch
+.subckt lvds_tx D_p D_n Iref_pd Iref_drv Vref Va Out_p Out_n Vss
+*.PININFO D_p:I D_n:I Iref_pd:I Iref_drv:I Vref:I Va:B Vss:B Out_p:O Out_n:O
+Xpd D_p D_n Iref_pd In_p In_n Va Vss predriver
+Xdrv Va Out_p In_p In_n Iref_drv Vref Out_n Vss Driver
+.ends
+
+
+* expanding   symbol:  iref_x15.sym # of pins=4
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/iref_x15/schematic/xschem/iref_x15.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/iref_x15/schematic/xschem/iref_x15.sch
+.subckt iref_x15 IREF_IN IREF_OUT Va Vss
+*.PININFO IREF_IN:I IREF_OUT:O Va:B Vss:B
+XMn1 IREF_IN IREF_IN Vss Vss sg13_hv_nmos w=3.2u l=2u ng=1 m=1 mm_ok=1
+XMn2 CASC IREF_IN Vss Vss sg13_hv_nmos w=48u l=2u ng=6 m=1 mm_ok=1
+XMp1 CASC CASC Va Va sg13_hv_pmos w=48u l=2u ng=6 m=1 mm_ok=1
+XMp2 IREF_OUT CASC Va Va sg13_hv_pmos w=48u l=2u ng=6 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  ref_odt.sym # of pins=5
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/ref_odt/schematic/xschem/ref_odt.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/ref_odt/schematic/xschem/ref_odt.sch
+.subckt ref_odt EN PAD VDD VDDH VSS
+*.PININFO PAD:B EN:I VDD:B VDDH:B VSS:B
+XR1 PAD X VSS rppd w=40u l=6.65u m=1 b=0 mm_ok=1
+XDN VSS X dantenna l=1.26u w=20u
+XDP X VDDH dpantenna l=1.26u w=20u
+XMSW X ENH VSS VSS sg13_hv_nmos w=300u l=0.45u ng=30 m=1 mm_ok=1
+xls EN ENH VDD VDDH VSS ref_odt_lvlup
+XDEN VSS EN dantenna l=0.78u w=0.78u
+.ends
+
+
+* expanding   symbol:  sg13g2_hv_decap_8.sym # of pins=0
+** sym_path: /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell_hv/sym/xschem/sg13g2_hv_decap_8.sym
+** sch_path: /foss/pdks/ihp-sg13cmos5l/libs.ref/sg13cmos5l_stdcell_hv/sch/xschem/sg13g2_hv_decap_8.sch
+.subckt sg13g2_hv_decap_8 VDD VSS
+
+
+XM1 VSS VDD VSS VSS sg13_hv_nmos w=0.840u l=1.000u ng=2 m=1 mm_ok=1
+XM2 VDD VSS VDD VDD sg13_hv_pmos w=4.800u l=1.000u ng=2 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  predriver.sym # of pins=7
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/predriver.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/predriver.sch
+.subckt predriver D_p D_n Iref In_p In_n Va Vss
+*.PININFO Va:B Vss:B Iref:I D_p:I D_n:I In_p:O In_n:O
+Xkpm D_p D_n Iref net1 Va Vss predriver_comp
+XMref Iref Iref Vss Vss sg13_hv_nmos w=2u l=2u ng=1 m=1 mm_ok=1
+Xknm D_n D_p Iref net2 Va Vss predriver_comp
+Xstm net1 net2 In_p In_n Va Vss predriver_stage
+.ends
+
+
+* expanding   symbol:  Driver.sym # of pins=8
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/Driver.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/Driver.sch
+.subckt Driver Va Out_p In_p In_n Iref Vref Out_n Vss
+*.PININFO Va:B Out_p:O Out_n:O Vref:I In_p:I In_n:I Vss:B Iref:I
+XM9 Iref Iref Vss Vss sg13_hv_nmos w=0.8u l=0.5u ng=1 m=1 mm_ok=1
+XCop Vss Out_p Vss Vss sg13_hv_nmos w=20u l=5u ng=2 m=1 mm_ok=1
+XCon Vss Out_n Vss Vss sg13_hv_nmos w=20u l=5u ng=2 m=1 mm_ok=1
+x_cmfb cm Vref Iref cmfb Va Vss cmfb_amp
+x_hbridge In_p In_n Iref cmfb Out_p Out_n cm Va Vss hbridge
+.ends
+
+
+* expanding   symbol:  ref_odt_lvlup.sym # of pins=5
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/ref_odt/schematic/xschem/ref_odt_lvlup.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/ref_odt/schematic/xschem/ref_odt_lvlup.sch
+.subckt ref_odt_lvlup i o vdd iovdd vss
+*.PININFO i:I o:O vdd:B iovdd:B vss:B
+XMP_I IN_N i vdd vdd sg13_lv_pmos w=4.75u l=0.13u ng=1 m=1 mm_ok=1
+XMN_I IN_N i vss vss sg13_lv_nmos w=2.75u l=0.13u ng=1 m=1 mm_ok=1
+XMP_LN LVLD_N LVLD iovdd iovdd sg13_hv_pmos w=0.3u l=0.45u ng=1 m=1 mm_ok=1
+XMN_LN LVLD_N i vss vss sg13_hv_nmos w=1.9u l=0.45u ng=1 m=1 mm_ok=1
+XMP_L LVLD LVLD_N iovdd iovdd sg13_hv_pmos w=0.3u l=0.45u ng=1 m=1 mm_ok=1
+XMN_L LVLD IN_N vss vss sg13_hv_nmos w=1.9u l=0.45u ng=1 m=1 mm_ok=1
+XMP_O o LVLD_N iovdd iovdd sg13_hv_pmos w=3.9u l=0.45u ng=1 m=1 mm_ok=1
+XMN_O o LVLD_N vss vss sg13_hv_nmos w=1.9u l=0.45u ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  predriver_comp.sym # of pins=6
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/predriver_comp.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/predriver_comp.sch
+.subckt predriver_comp Gin Din Iref Out Va Vss
+*.PININFO Va:B Vss:B Out:O Din:I Gin:I Iref:I
+XMld net1 net1 Va Va sg13_hv_pmos w=12u l=0.4u ng=4 m=1 mm_ok=1
+XMlo Out net1 Va Va sg13_hv_pmos w=12u l=0.4u ng=4 m=1 mm_ok=1
+XMid net1 Din net2 Vss sg13_hv_nmos w=24u l=0.45u ng=6 m=1 mm_ok=1
+XMio Out Gin net2 Vss sg13_hv_nmos w=24u l=0.45u ng=6 m=1 mm_ok=1
+XMt net2 Iref Vss Vss sg13_hv_nmos w=17.52u l=0.45u ng=6 m=2 mm_ok=1
+.ends
+
+
+* expanding   symbol:  predriver_stage.sym # of pins=6
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/predriver_stage.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/predriver_stage.sch
+.subckt predriver_stage In_p In_n Out_p Out_n Va Vss
+*.PININFO In_p:I Out_p:O In_n:I Out_n:O Va:B Vss:B
+XMpp0 net1 In_p Va Va sg13_hv_pmos w=2.64u l=0.4u ng=1 m=1 mm_ok=1
+XMnp0 net1 In_p Vss Vss sg13_hv_nmos w=1.6u l=0.45u ng=1 m=1 mm_ok=1
+XMpp1 net2 net1 Va Va sg13_hv_pmos w=12.52u l=0.4u ng=4 m=1 mm_ok=1
+XMnp1 net2 net1 Vss Vss sg13_hv_nmos w=5u l=0.45u ng=4 m=1 mm_ok=1
+XMpp2 Out_p net2 Va Va sg13_hv_pmos w=32u l=0.4u ng=10 m=1 mm_ok=1
+XMnp2 Out_p net2 Vss Vss sg13_hv_nmos w=16u l=0.45u ng=10 m=1 mm_ok=1
+XMpn0 net3 In_n Va Va sg13_hv_pmos w=2.64u l=0.4u ng=1 m=1 mm_ok=1
+XMnn0 net3 In_n Vss Vss sg13_hv_nmos w=1.6u l=0.45u ng=1 m=1 mm_ok=1
+XMpn1 net4 net3 Va Va sg13_hv_pmos w=12.52u l=0.4u ng=4 m=1 mm_ok=1
+XMnn1 net4 net3 Vss Vss sg13_hv_nmos w=5u l=0.45u ng=4 m=1 mm_ok=1
+XMpn2 Out_n net4 Va Va sg13_hv_pmos w=32u l=0.4u ng=10 m=1 mm_ok=1
+XMnn2 Out_n net4 Vss Vss sg13_hv_nmos w=16u l=0.45u ng=10 m=1 mm_ok=1
+XMpxp net4 net2 Va Va sg13_hv_pmos w=4.38u l=0.4u ng=1 m=1 mm_ok=1
+XMnxp net4 net2 Vss Vss sg13_hv_nmos w=1.75u l=0.45u ng=1 m=1 mm_ok=1
+XMpxn net2 net4 Va Va sg13_hv_pmos w=4.38u l=0.4u ng=1 m=1 mm_ok=1
+XMnxn net2 net4 Vss Vss sg13_hv_nmos w=1.75u l=0.45u ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  cmfb_amp.sym # of pins=6
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/cmfb_amp.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/cmfb_amp.sch
+.subckt cmfb_amp cm Vref Iref cmfb Va Vss
+*.PININFO Va:B Vss:B cm:I Iref:I Vref:I cmfb:O
+XM13 pd pd Va Va sg13_hv_pmos w=5u l=1u ng=1 m=1 mm_ok=1
+XM14 cmfb pd Va Va sg13_hv_pmos w=5u l=1u ng=1 m=1 mm_ok=1
+XM11 pd cm otail Vss sg13_hv_nmos w=20u l=1u ng=4 m=1 mm_ok=1
+XM12 cmfb Vref otail Vss sg13_hv_nmos w=20u l=1u ng=4 m=1 mm_ok=1
+XM10 otail Iref Vss Vss sg13_hv_nmos w=0.8u l=0.5u ng=1 m=1 mm_ok=1
+XCc Vss cc_g Vss Vss sg13_hv_nmos w=50u l=5u ng=5 m=1 mm_ok=1
+XRc cmfb cc_g Vss rppd w=1u l=6u m=1 b=0 mm_ok=1
+.ends
+
+
+* expanding   symbol:  hbridge.sym # of pins=9
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/hbridge.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_tx/schematic/xschem/hbridge.sch
+.subckt hbridge In_p In_n Iref cmfb Out_p Out_n cm Va Vss
+*.PININFO Va:B Vss:B In_p:I In_n:I Iref:I cmfb:I Out_p:O Out_n:O cm:O
+XCtn Vss tail_n Vss Vss sg13_hv_nmos w=30u l=5u ng=3 m=1 mm_ok=1
+XM2 tail_p cmfb Va Va sg13_hv_pmos w=97.2u l=0.5u ng=20 m=1 mm_ok=1
+XM5 Out_p In_p tail_p Va sg13_hv_pmos w=80u l=0.4u ng=16 m=1 mm_ok=1
+XM4 Out_n In_n tail_p Va sg13_hv_pmos w=80u l=0.4u ng=16 m=1 mm_ok=1
+XM1 Out_p In_p tail_n Vss sg13_hv_nmos w=30u l=0.45u ng=15 m=1 mm_ok=1
+XM3 Out_n In_n tail_n Vss sg13_hv_nmos w=30u l=0.45u ng=15 m=1 mm_ok=1
+XM6 tail_n Iref Vss Vss sg13_hv_nmos w=99.2u l=0.5u ng=31 m=1 mm_ok=1
+XRp Out_p cm Vss rhigh w=1u l=7.35u m=1 b=0 mm_ok=1
+XRn Out_n cm Vss rhigh w=1u l=7.35u m=1 b=0 mm_ok=1
+.ends
+
+
