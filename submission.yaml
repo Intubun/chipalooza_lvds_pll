@@ -4,7 +4,7 @@
 # This is the configuration file for your submission.
 # Please edit the fields below to match your project.
 
-project-name: Chipalooza LVDS PLL Project
+project-name: Chipalooza LVDS Transmitter
 
 # Must be a unique name and must match TOP in the Makefile, the file names in
 # layout/, schematic/xschem/ and testbenches/xschem/, and the top cell inside
@@ -28,8 +28,8 @@ slot-size: large
 # The three dedicated analog pads of slot 14, all sg13cmos5l_IOPadAnalog.  Each
 # has two core terminals: s14_an[i] is the pad itself (pad), s14_an_i_esd goes
 # through the pad's secondary protection (padres).
-#   pad 0  s14_an[0]     LVDS out -, the pad direct
-#   pad 1  s14_an[1]     LVDS out +, the pad direct
+#   pad 0  s14_an[0]     LVDS out -, the pad direct; the switchable back-termination
+#   pad 1  s14_an[1]     LVDS out +, the pad direct; the switchable back-termination
 #   pad 2  s14_an_2_esd  ref_clk in, through the secondary protection (a gate input)
 #          s14_an[2]     the switchable 50 ohm termination of ref_clk, on the pad itself
 analog-pins: 3
@@ -58,23 +58,31 @@ long-description: |
     **only** from PDK standard cells and clocked by `ref_clk`, one bit per
     period. `mode` selects clock passthrough or PRBS-7, `reset` reseeds the
     shift register and `en` gates the clock. The line bit and its complement
-    are re-timed through a pair of
-    flip-flops after the inversion, so both edges leave the block
-    synchronously. That pair answers to neither `en` nor `reset` - ungated
-    clock, `RESET_B` tied high - so the outputs are differential from the first
-    clock edge after power-up and never two equal levels, and the driver's
+    are re-timed through a pair of flip-flops after the inversion, so both
+    edges leave the block synchronously. That pair answers to neither `en`
+    nor `reset` - ungated clock, `RESET_B` tied high - so the outputs are
+    differential from the first clock edge after power-up and the driver's
     common-mode loop settles once instead of at every enable or reset.
   * **`lvds_tx`** (`xlvds`) - the pre-driver and the LVDS output driver, a
     hand-drawn analog block with its own common-mode feedback loop.
   * **`iref_x15`** (`xiref_pd`, `xiref_drv`) - 1:15 current mirrors that turn
-    the 2 uA the harness current DACs give into the 30 uA the transmitter was
+    the ~2 uA of the harness current DACs into the ~30 uA the transmitter was
     characterised at.
   * **`ref_odt`** (`xodt`) - a switchable 50 ohm termination of `ref_clk` on
     pad 2: 45 ohm of poly resistor straight behind the pad, a 3.3 V NMOS switch
     driven at 3.3 V through a level shifter, two diodes clamping the switch's
     drain. `dig_in[0]` = 1 turns it on.
+  * **`lvds_bt`** (`xbt`) - a switchable ~200 ohm back-termination across the
+    output pair (2 x 93 ohm of poly resistor and a 3.3 V NMOS switch, the same
+    level shifter). The driver is a current source and would otherwise throw
+    back whole whatever the receiver, the package and the bond wire reflect;
+    with it, the receiver sees a flat signal. `dig_in[4]` = 1 turns it on,
+    together with one more step of driver current (`ibias1`, see below).
+  * Taps `RT0`-`RT2`: `analog_bus0/1/2` reach `ibias0`, `vbias` and `ibias1`
+    through 1.1 kohm each, to measure the bias nodes or force them from
+    outside.
   * Decoupling: a row of decap cells per supply domain, 83 on 1.2 V and 95 HV
-    cells on 3.3 V.
+    cells on 3.3 V; an antenna diode on the long `reset` line (`DRST`).
 
   ## Interface
 
@@ -82,8 +90,8 @@ long-description: |
 
   | Pad | Core terminal | Dir | Function |
   | --- | --- | --- | --- |
-  | 0 | `s14_an[0]`    | out | `d_n`, LVDS out -, the pad direct |
-  | 1 | `s14_an[1]`    | out | `d_p`, LVDS out +, the pad direct |
+  | 0 | `s14_an[0]`    | out | `d_n`, LVDS out -, the pad direct; `xbt` |
+  | 1 | `s14_an[1]`    | out | `d_p`, LVDS out +, the pad direct; `xbt` |
   | 2 | `s14_an_2_esd` | in  | `ref_clk`, through the pad's secondary protection |
   | 2 | `s14_an[2]`    | -   | the 50 ohm termination of `ref_clk`, switched by `dig_in[0]` |
 
@@ -95,42 +103,55 @@ long-description: |
   | `dig_in[1]` | pattern `en`, gates the pattern clock |
   | `dig_in[2]` | PRBS reset |
   | `dig_in[3]` | `mode`: 0 clock passthrough, 1 PRBS-7 |
+  | `dig_in[4]` | 1 = ~200 ohm back-termination of the LVDS pair on |
 
-  `dig_in[23:4]`, `dig_out[11:0]`, `clk`, `enable`, `reset` and `vbias` are
-  not connected. Analog references, inside the 50 nA to 10 uA the harness
-  current DACs deliver: `ibias0` 2 uA for the pre-driver and `ibias1` 2 uA for
-  the driver, each mirrored 1:15; `analog_bus1` 1.2 V as the LVDS common-mode
-  reference.
+  Analog references, from the harness:
+
+  | Pin | Function |
+  | --- | --- |
+  | `ibias0` | pre-driver reference into `xiref_pd`: IDAC code 6 (1.94 uA, 29 uA after the 1:15 mirror) |
+  | `ibias1` | driver reference into `xiref_drv`: code 6; code 9 (2.90 uA, 43.5 uA) with `dig_in[4]` = 1 |
+  | `vbias` | `Vref`, the LVDS common-mode reference: 1.2 V from the harness voltage reference |
+  | `analog_bus0` / `1` / `2` | taps on `ibias0` / `vbias` / `ibias1` through 1.1 kohm |
+
+  The IDAC codes take the current DACs as sources into the pin, linear to
+  10 uA over 5 bits (10/31 uA a step). `dig_in[23:5]`, `dig_out[11:0]`,
+  `analog_bus3`, `clk`, `enable` and `reset` are not connected.
 
   ## How it is tested
 
   Everything below runs inside the IIC-OSIC-TOOLS container. Each bench also
-  carries Simulate / Load waves arrows, so it can be run from inside Xschem.
+  carries Simulate / Load waves arrows and waveform panels, so it can be run
+  and looked at from inside Xschem. The three LVDS benches run the same 700 ns
+  in three phases - A: termination and back-termination off; B: the `ref_clk`
+  termination on (the pad halves: 50 ohm into 50 ohm); C: both on, the
+  generator set for a 50 ohm load, `ibias1` at code 9.
 
-  * `make sim-xschem TB=slot_14_tb_lvds` - the top cell, PRBS-7 at 500 Mb/s
-    into 49.9 + 49.9 ohm, ending in the TIA/EIA-644-A checks on the settled
-    pattern.
-  * `make sim-lvds-postlayout` - the same path with `lvds_pattern` and
-    `lvds_tx` from their magic extraction with coupling capacitance
-    (`testbenches/xschem/slot_14_tb_lvds_postlayout.sch`).
+  * `make sim-lvds` - the top cell from its schematics, pad 2's IO cell, the
+    outputs into 49.9 + 49.9 ohm.
+  * `make sim-lvds-pads` - the top-level wiring as laid out with the blocks
+    from their schematics, the three IHP pad models, 2 nH bond wire, 0.5 pF
+    package, a 50 ohm line and the receiver (1 pF + 100 ohm).
+  * `make sim-lvds-pex` - the same surroundings with the whole slot as laid
+    out, every block from its own extraction (`make extract-top`).
   * `make -C macros/lvds_tx cace` - CACE of the transmitter on its schematic,
     layout, pex and rcx netlists over 54 PVT conditions.
-  * `make sim-lvds-pads` - the top cell with the IHP pad models, bond wire,
-    package, a 50 ohm line and the receiver; `ref_clk` with the termination off
-    and on.
-  * `make check` - top-level DRC and LVS (`scripts/verify/`).
+  * `make check` - top-level DRC (antenna rules included) and LVS
+    (`scripts/verify/`).
 
-  Post-layout, both blocks extracted, PRBS-7 at 500 Mb/s:
+  Results of the PEX bench (tt, 27 C, PRBS-7 at 500 Mb/s, at the receiver):
 
-      |Vod|     382 / 384 mV     4.1.1 wants 247 ... 454 mV
-      Vos       1.194 V          4.1.2 wants 1.125 ... 1.375 V
-      Vos p-p   81 mV (tt, 27 C), 136 mV (tt, -40 C, 3.63 V), 74 mV (ss, 125 C, 2.97 V)
-                                 4.1.5 wants under 150 mV
+  | | A: back-termination off | C: back-termination on |
+  | --- | --- | --- |
+  | Vod | +385 / -391 mV, ringing after each edge | +-366 mV, flat |
+  | Vos | 1.194 V, 45 mV p-p | 1.191 V, 36 mV p-p |
+  | 20-80 % edge | 71 ps | 67 ps |
+  | 3.3 V supply | 5.2 mA | 6.9 mA |
 
-  The common-mode dip that set Vos p-p came from the pre-driver's last stage
-  pulling up faster than down, so both bridge inputs were high at every edge;
-  its PMOS went from 40 to 32 um, and the pattern generator's output flops from
-  sdfbbp_1 to dfrbp_2 (macros/lvds_tx/README.md, macros/lvds_pattern/README.md).
+  The `ref_clk` termination measures 51 ohm (phase B). Over the CACE grid
+  (ss/tt/ff, -40/27/125 C, 2.97/3.3/3.63 V) the transmitter stays inside
+  TIA/EIA-644-A with the back-termination off (|Vod| 345-394 mV, Vos
+  1.191-1.195 V, Vos p-p <= 78 mV) and on (304-364 mV, 1.174-1.194 V, <= 83 mV).
 
   ## External hardware
 
@@ -142,16 +163,27 @@ long-description: |
   devices. With the termination on (`dig_in[0]` = 1) a 50 ohm generator set to
   0 ... 1.2 V into 50 ohm, sourcing 24 mA while high; with it off the same
   generator set to 0 ... 1.2 V into high-Z, or a termination on the board.
-  Turn the termination on before the generator. Nothing else is required.
+  Turn the termination on before the generator.
+
+  For measuring, an SMU on the analog-bus pads reaches the bias nodes through
+  the taps: the voltages directly (force 0 A), the IDAC currents through the
+  mirror input's own I-V curve (~50 mV/uA, calibrated on the chip with the IDAC
+  at code 0), or the bias forced from outside should the IDAC or the voltage
+  reference not work.
 
   ## Status
 
-  The layout (`layout/slot_14.gds`) is on the slot-14 frame and routed to it:
-  supplies on TopMetal1, bias on Metal4, decoupling as two rows of decap cells
-  (1.2 V and 3.3 V) under the supply straps, antenna diodes on `en`, `mode`
-  and `ref_clk`, the termination beside pad 2. Top level and macros are DRC clean (antenna rules included) and LVS
-  clean, the top level with its pin names compared. `vss_1v2` and `vss_3v3`
-  are one net, as the harness ties them.
+  The layout (`layout/slot_14.gds`) is on the slot-14 frame and routed to it
+  by a script chain (`scripts/top/build_layout.sh`): supplies on TopMetal1,
+  bias on Metal4, control lines on Metal3 with via arrays, decoupling under the
+  supply straps, the two terminations beside the pads. Top level and macros are
+  DRC clean (antenna rules included) and LVS clean, the top level with its pin
+  names compared. `vss_1v2` and `vss_3v3` are one net, as the harness ties them.
+
+  Not covered: ESD events and Monte-Carlo mismatch are not simulated; the PEX
+  netlist carries capacitance only; the package and receiver values are
+  estimates; the output edges (40-75 ps) are faster than TIA/EIA-644-A's
+  minimum transition time.
 
 # These paths are used to verify your
 # submission during the precheck.
