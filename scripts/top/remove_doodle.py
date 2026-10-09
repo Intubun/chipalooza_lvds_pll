@@ -3,7 +3,7 @@
 
     python3 scripts/top/remove_doodle.py [--in <gds>] [--out <gds>]
 
-The cell was floating metal on metal1..4 (scripts/gen_doodle.py drew it); the
+The cell was floating metal on metal1..4 (drawn by scripts/gen_doodle.py, since removed); the
 LVS purged it anyway, so nothing else changes.
 """
 import datetime, os, shutil, sys

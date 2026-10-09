@@ -13,6 +13,7 @@
 #                                     bias, supplies, decaps
 #   3_pads.gds    route_pads.py       Out_n -> pad 0, Out_p -> pad 1, ref_clk <- pad 2
 #   4_odt.gds     add_odt.py          the ref_clk termination on pad 2, wired
+#   5_bt.gds      add_bt.py           the switchable back-termination of the LVDS pair, wired
 #
 # --install refuses when layout/slot_14.klay.gds differs from slot_14.gds - a
 # KLayout save would be lost - and keeps the old one in layout/backups/.
@@ -25,6 +26,7 @@ python3 scripts/top/floorplan_shift.py --in layout/slot_14_base.gds --out $B/1_s
 python3 scripts/top/route_top.py       --in $B/1_shift.gds          --out $B/2_route.gds
 python3 scripts/top/route_pads.py      --in $B/2_route.gds          --out $B/3_pads.gds
 python3 scripts/top/add_odt.py         --in $B/3_pads.gds           --out $B/4_odt.gds
+python3 scripts/top/add_bt.py          --in $B/4_odt.gds            --out $B/5_bt.gds
 
 if [ "$1" = --install ]; then
     if ! cmp -s layout/slot_14.gds layout/slot_14.klay.gds; then
@@ -34,7 +36,7 @@ if [ "$1" = --install ]; then
     ts=$(date +%Y-%m-%d_%Hh%Mm%Ss)
     mkdir -p layout/backups
     cp layout/slot_14.gds layout/backups/slot_14_VOR_build_$ts.gds
-    cp $B/4_odt.gds layout/slot_14.gds
-    cp $B/4_odt.gds layout/slot_14.klay.gds
+    cp $B/5_bt.gds layout/slot_14.gds
+    cp $B/5_bt.gds layout/slot_14.klay.gds
     echo "installiert: layout/slot_14.gds (+ .klay.gds), alt: layout/backups/slot_14_VOR_build_$ts.gds"
 fi

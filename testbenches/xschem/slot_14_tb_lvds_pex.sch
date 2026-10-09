@@ -32,14 +32,14 @@ C {devices/lab_pin.sym} -240 90 0 0 {name=p23 sig_type=std_logic lab=nc_dig_in_8
 C {devices/lab_pin.sym} -240 110 0 0 {name=p24 sig_type=std_logic lab=nc_dig_in_7}
 C {devices/lab_pin.sym} -240 130 0 0 {name=p25 sig_type=std_logic lab=nc_dig_in_6}
 C {devices/lab_pin.sym} -240 150 0 0 {name=p26 sig_type=std_logic lab=nc_dig_in_5}
-C {devices/lab_pin.sym} -240 170 0 0 {name=p27 sig_type=std_logic lab=nc_dig_in_4}
+C {devices/lab_pin.sym} -240 170 0 0 {name=p27 sig_type=std_logic lab=bt_en}
 C {devices/lab_pin.sym} -240 190 0 0 {name=p28 sig_type=std_logic lab=mode}
 C {devices/lab_pin.sym} -240 210 0 0 {name=p29 sig_type=std_logic lab=rst}
 C {devices/lab_pin.sym} -240 230 0 0 {name=p30 sig_type=std_logic lab=en}
 C {devices/lab_pin.sym} -240 250 0 0 {name=p31 sig_type=std_logic lab=odt_en}
 C {devices/lab_pin.sym} -240 270 0 0 {name=p32 sig_type=std_logic lab=ib0}
 C {devices/lab_pin.sym} -240 290 0 0 {name=p33 sig_type=std_logic lab=ib1}
-C {devices/lab_pin.sym} -240 310 0 0 {name=p34 sig_type=std_logic lab=nc_vbias}
+C {devices/lab_pin.sym} -240 310 0 0 {name=p34 sig_type=std_logic lab=vcm_ref}
 C {devices/lab_pin.sym} 240 -350 0 1 {name=p35 sig_type=std_logic lab=nc_dig_out_11}
 C {devices/lab_pin.sym} 240 -330 0 1 {name=p36 sig_type=std_logic lab=nc_dig_out_10}
 C {devices/lab_pin.sym} 240 -310 0 1 {name=p37 sig_type=std_logic lab=nc_dig_out_9}
@@ -59,7 +59,7 @@ C {devices/lab_pin.sym} 240 -50 0 1 {name=p50 sig_type=std_logic lab=refclk_core
 C {devices/lab_pin.sym} 240 -30 0 1 {name=p51 sig_type=std_logic lab=nc_s14_an_1_esd}
 C {devices/lab_pin.sym} 240 -10 0 1 {name=p52 sig_type=std_logic lab=nc_s14_an_0_esd}
 C {devices/lab_pin.sym} 240 10 0 1 {name=p53 sig_type=std_logic lab=nc_analog_bus0}
-C {devices/lab_pin.sym} 240 30 0 1 {name=p54 sig_type=std_logic lab=vcm_ref}
+C {devices/lab_pin.sym} 240 30 0 1 {name=p54 sig_type=std_logic lab=nc_analog_bus1}
 C {devices/lab_pin.sym} 240 50 0 1 {name=p55 sig_type=std_logic lab=nc_analog_bus2}
 C {devices/lab_pin.sym} 240 70 0 1 {name=p56 sig_type=std_logic lab=nc_analog_bus3}
 T {supplies, bias, control} -1650 -1050 0 0 0.4 0.4 {}
@@ -78,109 +78,139 @@ T {pad ring, 3.3 V} -1460 -590 0 0 0.3 0.3 {}
 C {devices/vsource.sym} -1500 -420 0 0 {name=Vvcm value="1.2"}
 C {devices/lab_pin.sym} -1500 -450 0 0 {name=p63 sig_type=std_logic lab=vcm_ref}
 C {devices/gnd.sym} -1500 -390 0 0 {name=g64 lab=GND}
-T {analog_bus1, 1.2 V} -1460 -430 0 0 0.3 0.3 {}
-C {isource.sym} -1500 -260 0 0 {name=Iib0 value="-2u"}
+T {vbias = Vref, 1.2 V} -1460 -430 0 0 0.3 0.3 {}
+C {isource.sym} -1500 -260 0 0 {name=Iib0 value="-1.935u"}
 C {devices/lab_pin.sym} -1500 -290 0 0 {name=p65 sig_type=std_logic lab=ib0}
 C {devices/gnd.sym} -1500 -230 0 0 {name=g66 lab=GND}
-T {ibias0, 2 uA} -1460 -270 0 0 0.3 0.3 {}
-C {isource.sym} -1500 -100 0 0 {name=Iib1 value="-2u"}
+T {ibias0, IDAC code 6 = 1.935uA} -1460 -270 0 0 0.3 0.3 {}
+C {isource.sym} -1500 -100 0 0 {name=Iib1 value="PWL(0 -1.935u 400n -1.935u 400.1n -2.903u)"}
 C {devices/lab_pin.sym} -1500 -130 0 0 {name=p67 sig_type=std_logic lab=ib1}
 C {devices/gnd.sym} -1500 -70 0 0 {name=g68 lab=GND}
-T {ibias1, 2 uA} -1460 -110 0 0 0.3 0.3 {}
-C {devices/vsource.sym} -1500 60 0 0 {name=Vodt value="'odt_en'"}
-C {devices/lab_pin.sym} -1500 30 0 0 {name=p69 sig_type=std_logic lab=odt_en}
+T {ibias1, code 6; code 9 = 2.903uA from 400 ns} -1460 -110 0 0 0.3 0.3 {}
+C {devices/vsource.sym} -1500 60 0 0 {name=Vodt value="PWL(0 0 300n 0 300.1n 1.2)"}
+C {devices/lab_pin.sym} -1500 30 0 0 {name=p69 sig_type=std_logic lab=odt_en_drv}
 C {devices/gnd.sym} -1500 90 0 0 {name=g70 lab=GND}
-T {dig_in[0] ODT: 0 / 1.2} -1460 50 0 0 0.3 0.3 {}
+C {res.sym} -1080 60 0 0 {name=Rodt_en value="100"}
+C {devices/lab_pin.sym} -1080 30 0 0 {name=p71 sig_type=std_logic lab=odt_en_drv}
+C {devices/lab_pin.sym} -1080 90 0 0 {name=p72 sig_type=std_logic lab=odt_en}
+T {dig_in[0] ODT: off, on from 300 ns} -1460 50 0 0 0.3 0.3 {}
 C {devices/vsource.sym} -1500 220 0 0 {name=Ven value="PWL(0 0 3n 0 3.1n 1.2)"}
-C {devices/lab_pin.sym} -1500 190 0 0 {name=p71 sig_type=std_logic lab=en}
-C {devices/gnd.sym} -1500 250 0 0 {name=g72 lab=GND}
+C {devices/lab_pin.sym} -1500 190 0 0 {name=p73 sig_type=std_logic lab=en_drv}
+C {devices/gnd.sym} -1500 250 0 0 {name=g74 lab=GND}
+C {res.sym} -1080 220 0 0 {name=Ren value="100"}
+C {devices/lab_pin.sym} -1080 190 0 0 {name=p75 sig_type=std_logic lab=en_drv}
+C {devices/lab_pin.sym} -1080 250 0 0 {name=p76 sig_type=std_logic lab=en}
 T {dig_in[1] en} -1460 210 0 0 0.3 0.3 {}
-C {devices/vsource.sym} -1500 380 0 0 {name=Vrst value="PWL(0 1.2 2n 1.2 2.1n 0)"}
-C {devices/lab_pin.sym} -1500 350 0 0 {name=p73 sig_type=std_logic lab=rst}
-C {devices/gnd.sym} -1500 410 0 0 {name=g74 lab=GND}
-T {dig_in[2] reset} -1460 370 0 0 0.3 0.3 {}
+C {devices/vsource.sym} -1500 380 0 0 {name=Vrst value="PWL(0 1.2 2n 1.2 2.1n 0 400n 0 400.1n 1.2 402n 1.2 402.1n 0)"}
+C {devices/lab_pin.sym} -1500 350 0 0 {name=p77 sig_type=std_logic lab=rst_drv}
+C {devices/gnd.sym} -1500 410 0 0 {name=g78 lab=GND}
+C {res.sym} -1080 380 0 0 {name=Rrst value="100"}
+C {devices/lab_pin.sym} -1080 350 0 0 {name=p79 sig_type=std_logic lab=rst_drv}
+C {devices/lab_pin.sym} -1080 410 0 0 {name=p80 sig_type=std_logic lab=rst}
+T {dig_in[2] reset until 2 ns, again at 400 ns} -1460 370 0 0 0.3 0.3 {}
 C {devices/vsource.sym} -1500 540 0 0 {name=Vmode value="1.2"}
-C {devices/lab_pin.sym} -1500 510 0 0 {name=p75 sig_type=std_logic lab=mode}
-C {devices/gnd.sym} -1500 570 0 0 {name=g76 lab=GND}
+C {devices/lab_pin.sym} -1500 510 0 0 {name=p81 sig_type=std_logic lab=mode_drv}
+C {devices/gnd.sym} -1500 570 0 0 {name=g82 lab=GND}
+C {res.sym} -1080 540 0 0 {name=Rmode value="100"}
+C {devices/lab_pin.sym} -1080 510 0 0 {name=p83 sig_type=std_logic lab=mode_drv}
+C {devices/lab_pin.sym} -1080 570 0 0 {name=p84 sig_type=std_logic lab=mode}
 T {dig_in[3] mode = PRBS-7} -1460 530 0 0 0.3 0.3 {}
+C {devices/vsource.sym} -1500 700 0 0 {name=Vbt value="PWL(0 0 400n 0 400.1n 1.2)"}
+C {devices/lab_pin.sym} -1500 670 0 0 {name=p85 sig_type=std_logic lab=bt_en_drv}
+C {devices/gnd.sym} -1500 730 0 0 {name=g86 lab=GND}
+C {res.sym} -1080 700 0 0 {name=Rbt_en value="100"}
+C {devices/lab_pin.sym} -1080 670 0 0 {name=p87 sig_type=std_logic lab=bt_en_drv}
+C {devices/lab_pin.sym} -1080 730 0 0 {name=p88 sig_type=std_logic lab=bt_en}
+T {dig_in[4] back-termination: off, on from 400 ns} -1460 690 0 0 0.3 0.3 {}
 C {sg13cmos5l_io/sg13cmos5l_IOPadAnalog.sym} -1000 900 0 0 {name=xpad2}
-C {devices/gnd.sym} -992.5 560 0 0 {name=g77 lab=GND}
-C {devices/lab_pin.sym} -982.5 570 0 0 {name=p78 sig_type=std_logic lab=vdd_1v2}
-C {devices/gnd.sym} -972.5 580 0 0 {name=g79 lab=GND}
-C {devices/lab_pin.sym} -960 590 0 0 {name=p80 sig_type=std_logic lab=iovdd}
-C {devices/lab_pin.sym} -900 550 0 0 {name=p81 sig_type=std_logic lab=clk_pad}
-C {devices/lab_pin.sym} -800 550 0 0 {name=p82 sig_type=std_logic lab=refclk_core}
+C {devices/gnd.sym} -992.5 560 0 0 {name=g89 lab=GND}
+C {devices/lab_pin.sym} -982.5 570 0 0 {name=p90 sig_type=std_logic lab=vdd_1v2}
+C {devices/gnd.sym} -972.5 580 0 0 {name=g91 lab=GND}
+C {devices/lab_pin.sym} -960 590 0 0 {name=p92 sig_type=std_logic lab=iovdd}
+C {devices/lab_pin.sym} -900 550 0 0 {name=p93 sig_type=std_logic lab=clk_pad}
+C {devices/lab_pin.sym} -800 550 0 0 {name=p94 sig_type=std_logic lab=refclk_core}
+C {devices/lab_pin.sym} -890 800 0 0 {name=p95 sig_type=std_logic lab=clk_pad}
 C {sg13cmos5l_io/sg13cmos5l_IOPadAnalog.sym} 900 -300 0 0 {name=xpad1}
-C {devices/gnd.sym} 907.5 -640 0 0 {name=g83 lab=GND}
-C {devices/lab_pin.sym} 917.5 -630 0 0 {name=p84 sig_type=std_logic lab=vdd_1v2}
-C {devices/gnd.sym} 927.5 -620 0 0 {name=g85 lab=GND}
-C {devices/lab_pin.sym} 940 -610 0 0 {name=p86 sig_type=std_logic lab=iovdd}
-C {devices/lab_pin.sym} 1000 -650 0 0 {name=p87 sig_type=std_logic lab=chip_p}
-C {devices/lab_pin.sym} 1100 -650 0 0 {name=p88 sig_type=std_logic lab=nc_pad1_res}
+C {devices/gnd.sym} 907.5 -640 0 0 {name=g96 lab=GND}
+C {devices/lab_pin.sym} 917.5 -630 0 0 {name=p97 sig_type=std_logic lab=vdd_1v2}
+C {devices/gnd.sym} 927.5 -620 0 0 {name=g98 lab=GND}
+C {devices/lab_pin.sym} 940 -610 0 0 {name=p99 sig_type=std_logic lab=iovdd}
+C {devices/lab_pin.sym} 1000 -650 0 0 {name=p100 sig_type=std_logic lab=chip_p}
+C {devices/lab_pin.sym} 1100 -650 0 0 {name=p101 sig_type=std_logic lab=nc_pad1_res}
+C {devices/lab_pin.sym} 1010 -400 0 0 {name=p102 sig_type=std_logic lab=chip_p}
 C {sg13cmos5l_io/sg13cmos5l_IOPadAnalog.sym} 900 300 0 0 {name=xpad0}
-C {devices/gnd.sym} 907.5 -40 0 0 {name=g89 lab=GND}
-C {devices/lab_pin.sym} 917.5 -30 0 0 {name=p90 sig_type=std_logic lab=vdd_1v2}
-C {devices/gnd.sym} 927.5 -20 0 0 {name=g91 lab=GND}
-C {devices/lab_pin.sym} 940 -10 0 0 {name=p92 sig_type=std_logic lab=iovdd}
-C {devices/lab_pin.sym} 1000 -50 0 0 {name=p93 sig_type=std_logic lab=chip_n}
-C {devices/lab_pin.sym} 1100 -50 0 0 {name=p94 sig_type=std_logic lab=nc_pad0_res}
+C {devices/gnd.sym} 907.5 -40 0 0 {name=g103 lab=GND}
+C {devices/lab_pin.sym} 917.5 -30 0 0 {name=p104 sig_type=std_logic lab=vdd_1v2}
+C {devices/gnd.sym} 927.5 -20 0 0 {name=g105 lab=GND}
+C {devices/lab_pin.sym} 940 -10 0 0 {name=p106 sig_type=std_logic lab=iovdd}
+C {devices/lab_pin.sym} 1000 -50 0 0 {name=p107 sig_type=std_logic lab=chip_n}
+C {devices/lab_pin.sym} 1100 -50 0 0 {name=p108 sig_type=std_logic lab=nc_pad0_res}
+C {devices/lab_pin.sym} 1010 200 0 0 {name=p109 sig_type=std_logic lab=chip_n}
 T {pad 2: ref_clk in through padres (secondary protection), termination on the pad itself} -1000 960 0 0 0.3 0.3 {}
 T {pad 1: d_p, the pad direct} 900 -240 0 0 0.3 0.3 {}
 T {pad 0: d_n, the pad direct} 900 360 0 0 0.3 0.3 {}
-T {ref_clk: 50 ohm source, 50 ohm line, package, bond wire} -1650 560 0 0 0.35 0.35 {}
-C {devices/vsource.sym} -1500 700 0 0 {name=Vclk value="PULSE(0 'emf' 0 100p 100p 0.9n 2n)"}
-C {devices/lab_pin.sym} -1500 670 0 0 {name=p95 sig_type=std_logic lab=clk_src}
-C {devices/gnd.sym} -1500 730 0 0 {name=g96 lab=GND}
-C {res.sym} -1340 700 0 0 {name=Rclk value="50"}
-C {devices/lab_pin.sym} -1340 670 0 0 {name=p97 sig_type=std_logic lab=clk_src}
-C {devices/lab_pin.sym} -1340 730 0 0 {name=p98 sig_type=std_logic lab=clk_line}
-C {capa.sym} -1180 700 0 0 {name=Cpkg_clk value="0.5p"}
-C {devices/lab_pin.sym} -1180 670 0 0 {name=p99 sig_type=std_logic lab=clk_pkg}
-C {devices/gnd.sym} -1180 730 0 0 {name=g100 lab=GND}
-C {ind.sym} -1020 700 0 0 {name=Lclk value="2n"}
-C {devices/lab_pin.sym} -1020 670 0 0 {name=p101 sig_type=std_logic lab=clk_pkg}
-C {devices/lab_pin.sym} -1020 730 0 0 {name=p102 sig_type=std_logic lab=clk_pad}
-T {the termination itself is xodt inside the top cell, on clk_pad = s14_an[2]} -860 680 0 0 0.3 0.3 {}
+T {ref_clk: 50 ohm generator, 50 ohm line, package, bond wire} -2450 500 0 0 0.35 0.35 {}
+C {devices/vsource.sym} -2300 800 0 0 {name=Vclk_a value="PULSE(0 1.2 0 100p 100p 0.9n 2n)"}
+C {devices/lab_pin.sym} -2300 770 0 0 {name=p110 sig_type=std_logic lab=clk_mid}
+C {devices/gnd.sym} -2300 830 0 0 {name=g111 lab=GND}
+C {devices/vsource.sym} -2300 640 0 0 {name=Vclk_b value="PULSE(0 1.2 400n 100p 100p 0.9n 2n)"}
+C {devices/lab_pin.sym} -2300 610 0 0 {name=p112 sig_type=std_logic lab=clk_src}
+C {devices/lab_pin.sym} -2300 670 0 0 {name=p113 sig_type=std_logic lab=clk_mid}
+C {res.sym} -2140 700 0 0 {name=Rclk value="50"}
+C {devices/lab_pin.sym} -2140 670 0 0 {name=p114 sig_type=std_logic lab=clk_src}
+C {devices/lab_pin.sym} -2140 730 0 0 {name=p115 sig_type=std_logic lab=clk_line}
+C {capa.sym} -1980 700 0 0 {name=Cpkg_clk value="0.5p"}
+C {devices/lab_pin.sym} -1980 670 0 0 {name=p116 sig_type=std_logic lab=clk_pkg}
+C {devices/gnd.sym} -1980 730 0 0 {name=g117 lab=GND}
+C {ind.sym} -1820 700 0 0 {name=Lclk value="2n"}
+C {devices/lab_pin.sym} -1820 670 0 0 {name=p118 sig_type=std_logic lab=clk_pkg}
+C {devices/lab_pin.sym} -1820 730 0 0 {name=p119 sig_type=std_logic lab=clk_bw}
+C {devices/vsource.sym} -1660 700 0 0 {name=Vpad2 value="0"}
+C {devices/lab_pin.sym} -1660 670 0 0 {name=p120 sig_type=std_logic lab=clk_bw}
+C {devices/lab_pin.sym} -1660 730 0 0 {name=p121 sig_type=std_logic lab=clk_pad}
+T {Vclk_b joins at 400 ns: EMF 1.2 V before, 2.4 V after.  Vpad2 is the ammeter:
+the current into pad 2, i.e. into xodt (s14_an[2]) and the pad cell} -2450 560 0 0 0.3 0.3 {}
 T {d_p / d_n: bond wire, package, 50 ohm line, receiver} 1400 -760 0 0 0.35 0.35 {}
 C {ind.sym} 1500 -600 0 0 {name=Lbp value="2n"}
-C {devices/lab_pin.sym} 1500 -630 0 0 {name=p103 sig_type=std_logic lab=chip_p}
-C {devices/lab_pin.sym} 1500 -570 0 0 {name=p104 sig_type=std_logic lab=pkg_p}
+C {devices/lab_pin.sym} 1500 -630 0 0 {name=p122 sig_type=std_logic lab=chip_p}
+C {devices/lab_pin.sym} 1500 -570 0 0 {name=p123 sig_type=std_logic lab=pkg_p}
 C {capa.sym} 1660 -600 0 0 {name=Cpkg_p value="0.5p"}
-C {devices/lab_pin.sym} 1660 -630 0 0 {name=p105 sig_type=std_logic lab=pkg_p}
-C {devices/gnd.sym} 1660 -570 0 0 {name=g106 lab=GND}
+C {devices/lab_pin.sym} 1660 -630 0 0 {name=p124 sig_type=std_logic lab=pkg_p}
+C {devices/gnd.sym} 1660 -570 0 0 {name=g125 lab=GND}
 C {capa.sym} 1980 -600 0 0 {name=Crx_p value="1p"}
-C {devices/lab_pin.sym} 1980 -630 0 0 {name=p107 sig_type=std_logic lab=rx_p}
-C {devices/gnd.sym} 1980 -570 0 0 {name=g108 lab=GND}
+C {devices/lab_pin.sym} 1980 -630 0 0 {name=p126 sig_type=std_logic lab=rx_p}
+C {devices/gnd.sym} 1980 -570 0 0 {name=g127 lab=GND}
 C {ind.sym} 1500 -200 0 0 {name=Lbn value="2n"}
-C {devices/lab_pin.sym} 1500 -230 0 0 {name=p109 sig_type=std_logic lab=chip_n}
-C {devices/lab_pin.sym} 1500 -170 0 0 {name=p110 sig_type=std_logic lab=pkg_n}
+C {devices/lab_pin.sym} 1500 -230 0 0 {name=p128 sig_type=std_logic lab=chip_n}
+C {devices/lab_pin.sym} 1500 -170 0 0 {name=p129 sig_type=std_logic lab=pkg_n}
 C {capa.sym} 1660 -200 0 0 {name=Cpkg_n value="0.5p"}
-C {devices/lab_pin.sym} 1660 -230 0 0 {name=p111 sig_type=std_logic lab=pkg_n}
-C {devices/gnd.sym} 1660 -170 0 0 {name=g112 lab=GND}
+C {devices/lab_pin.sym} 1660 -230 0 0 {name=p130 sig_type=std_logic lab=pkg_n}
+C {devices/gnd.sym} 1660 -170 0 0 {name=g131 lab=GND}
 C {capa.sym} 1980 -200 0 0 {name=Crx_n value="1p"}
-C {devices/lab_pin.sym} 1980 -230 0 0 {name=p113 sig_type=std_logic lab=rx_n}
-C {devices/gnd.sym} 1980 -170 0 0 {name=g114 lab=GND}
+C {devices/lab_pin.sym} 1980 -230 0 0 {name=p132 sig_type=std_logic lab=rx_n}
+C {devices/gnd.sym} 1980 -170 0 0 {name=g133 lab=GND}
 C {res.sym} 2140 -500 0 0 {name=Rt_p value="49.9"}
-C {devices/lab_pin.sym} 2140 -530 0 0 {name=p115 sig_type=std_logic lab=rx_p}
-C {devices/lab_pin.sym} 2140 -470 0 0 {name=p116 sig_type=std_logic lab=vos}
+C {devices/lab_pin.sym} 2140 -530 0 0 {name=p134 sig_type=std_logic lab=rx_p}
+C {devices/lab_pin.sym} 2140 -470 0 0 {name=p135 sig_type=std_logic lab=vos}
 C {res.sym} 2140 -300 0 0 {name=Rt_n value="49.9"}
-C {devices/lab_pin.sym} 2140 -330 0 0 {name=p117 sig_type=std_logic lab=vos}
-C {devices/lab_pin.sym} 2140 -270 0 0 {name=p118 sig_type=std_logic lab=rx_n}
+C {devices/lab_pin.sym} 2140 -330 0 0 {name=p136 sig_type=std_logic lab=vos}
+C {devices/lab_pin.sym} 2140 -270 0 0 {name=p137 sig_type=std_logic lab=rx_n}
 T {100 ohm at the receiver, mid-point = Vos} 2200 -420 0 0 0.3 0.3 {}
 T {LVDS link with the IHP pads - slot_14 with its three sg13cmos5l_IOPadAnalog,
 bond wire 2nH, package 0.5pF, a 50 ohm line of 200ps, the receiver 1pF + 100 ohm.
 
-Runs once: ref_clk with the termination off (dig_in[0] = 0, source at 1.2 V
-EMF, series terminated).  let runs = 2 in the code block adds the run with it
-on (dig_in[0] = 1, xodt puts 50 ohm on pad 2; source at 2.4 V EMF).
-The outputs are never terminated on chip.  The log prints
-Vod / Vos at the receiver and at the pads, the 20-80 % rise time at the
-receiver, the clock at pad 2 and behind the secondary protection, and the
-currents of the supplies and of the clock source.
+One run, three phases - the same as slot_14_tb_lvds:
+  A    0 - 300 ns   ODT off, EMF 1.2 V   pad 1.2 V (the open end doubles 0.6 V)
+  B  300 - 400 ns   ODT on,  EMF 1.2 V   pad halved to 0.6 V: 50 ohm into 50 ohm
+  C  400 - 700 ns   ODT on,  EMF 2.4 V   pad 1.2 V, 24 mA while high; reset at 400 ns;
+                                        the output back-termination on (dig_in[4]), ibias1 3 uA
+The outputs are never terminated on chip.  The log prints each phase: the ODT
+switch, the clock at pad 2 and behind the protection, the pad current, Vod / Vos
+at the receiver and at the pads, the supplies; the rise time in A and C.
 
 The slot: everything as laid out: the wiring and every block from the extraction
 (slot_14_pex.spice, from scripts/sim/extract_top.sh - run make extract-top after a layout change).
-The pad cells are the PDK's spice model.  The schematic without pads: slot_14_tb_lvds.} -1700 -1700 0 0 0.45 0.45 {}
+The pad cells are the PDK's spice model.} -1700 -1700 0 0 0.45 0.45 {}
 C {devices/code_shown.sym} -1700 -2600 0 0 {name=NGSPICE
 only_toplevel=true
 value="
@@ -201,59 +231,339 @@ Vsub sub! 0 0
 Tclk clk_line 0 clk_pkg 0 Z0=50 TD=200p
 Tp pkg_p 0 rx_p 0 Z0=50 TD=200p
 Tn pkg_n 0 rx_n 0 Z0=50 TD=200p
-.param odt_en=0 emf=1.2
 .temp 27
-.options savecurrents klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
+* no savecurrents: with the PEX netlist it writes thousands of device currents
+.options klu method=trap reltol=1e-3 abstol=1e-12 gmin=1e-12
 .ic v(x1.xlvds.xdrv.cmfb)=1.54
 .control
-save rx_p rx_n vos chip_p chip_n refclk_core clk_pad x1.core_p x1.core_n i(Vvdd_3v3) i(Vvdd_1v2) i(Viovdd) i(Vclk)
-* 1 = ODT off only, 2 = then once more with the termination on
-let runs = 1
-let run = 0
-while run < runs
-  if run = 1
-    alterparam odt_en=1.2
-    alterparam emf=2.4
-    reset
-  end
-  tran 5p 300n 0 5p
-  let vd = v(rx_p)-v(rx_n)
-  let vdpad = v(chip_p)-v(chip_n)
-  meas tran vod_max MAX vd from=120n to=295n
-  meas tran vod_min MIN vd from=120n to=295n
-  meas tran vos_avg AVG v(vos) from=120n to=295n
-  meas tran vos_max MAX v(vos) from=120n to=295n
-  meas tran vos_min MIN v(vos) from=120n to=295n
-  let vos_pp = vos_max - vos_min
-  meas tran vodpad_max MAX vdpad from=120n to=295n
-  meas tran vodpad_min MIN vdpad from=120n to=295n
-  let th20 = vod_min + 0.2*(vod_max - vod_min)
-  let th80 = vod_min + 0.8*(vod_max - vod_min)
-  meas tran t20 WHEN vd=$&th20 RISE=5 FROM=150n
-  meas tran t80 WHEN vd=$&th80 RISE=5 FROM=150n
-  let trise = t80 - t20
-  meas tran ck_max MAX v(refclk_core) from=120n to=295n
-  meas tran ck_min MIN v(refclk_core) from=120n to=295n
-  meas tran pad_max MAX v(clk_pad) from=120n to=295n
-  meas tran pad_min MIN v(clk_pad) from=120n to=295n
-  meas tran i_clk AVG i(Vclk) from=120n to=295n
-* the pattern pair between lvds_pattern and lvds_tx: a static pair means the
-* clock or the control never arrived, and the numbers above mean nothing
-  meas tran core_pp PP v(x1.core_p) from=120n to=295n
-  meas tran i_3v3 AVG i(Vvdd_3v3) from=120n to=295n
-  meas tran i_1v2 AVG i(Vvdd_1v2) from=120n to=295n
-  meas tran i_io AVG i(Viovdd) from=120n to=295n
-  echo === run $&run - 0 dig_in 0 = 0 ODT off, 1 dig_in 0 = 1 ODT on
-  print vod_max vod_min vos_avg vos_pp vodpad_max vodpad_min trise
-  print ck_max ck_min pad_max pad_min core_pp i_3v3 i_1v2 i_io i_clk
-  set wr_vecnames
-  set wr_singlescale
-  if run = 0
-    wrdata ../plot_simulations/data/@schname\\\\_noodt.txt vd vdpad v(vos) v(refclk_core) v(clk_pad)
-  else
-    wrdata ../plot_simulations/data/@schname\\\\_odt.txt vd vdpad v(vos) v(refclk_core) v(clk_pad)
-  end
-  let run = run + 1
-end
+save rx_p rx_n vos chip_p chip_n refclk_core clk_pad odt_en i(Vpad2) x1.xodt.enh x1.xodt.x
++ x1.core_p x1.core_n i(Vvdd_3v3) i(Vvdd_1v2) i(Viovdd)
+tran 5p 700n 0 5p
+write @schname\\\\.raw
+
+let vd = v(rx_p)-v(rx_n)
+let vdpad = v(chip_p)-v(chip_n)
+meas tran enh_a AVG v(x1.xodt.enh) from=150n to=295n
+meas tran x_max_a MAX v(x1.xodt.x) from=150n to=295n
+meas tran pad_max_a MAX v(clk_pad) from=150n to=295n
+meas tran pad_min_a MIN v(clk_pad) from=150n to=295n
+meas tran ck_max_a MAX v(refclk_core) from=150n to=295n
+meas tran ck_min_a MIN v(refclk_core) from=150n to=295n
+meas tran ipad_max_a MAX i(Vpad2) from=150n to=295n
+meas tran ipad_avg_a AVG i(Vpad2) from=150n to=295n
+meas tran core_pp_a PP v(x1.core_p) from=150n to=295n
+meas tran vod_max_a MAX vd from=150n to=295n
+meas tran vod_min_a MIN vd from=150n to=295n
+meas tran vodpad_max_a MAX vdpad from=150n to=295n
+meas tran vodpad_min_a MIN vdpad from=150n to=295n
+meas tran vos_avg_a AVG v(vos) from=150n to=295n
+meas tran vos_pp_a PP v(vos) from=150n to=295n
+meas tran i_3v3_a AVG i(Vvdd_3v3) from=150n to=295n
+meas tran i_1v2_a AVG i(Vvdd_1v2) from=150n to=295n
+meas tran enh_b AVG v(x1.xodt.enh) from=320n to=395n
+meas tran x_max_b MAX v(x1.xodt.x) from=320n to=395n
+meas tran pad_max_b MAX v(clk_pad) from=320n to=395n
+meas tran pad_min_b MIN v(clk_pad) from=320n to=395n
+meas tran ck_max_b MAX v(refclk_core) from=320n to=395n
+meas tran ck_min_b MIN v(refclk_core) from=320n to=395n
+meas tran ipad_max_b MAX i(Vpad2) from=320n to=395n
+meas tran ipad_avg_b AVG i(Vpad2) from=320n to=395n
+meas tran core_pp_b PP v(x1.core_p) from=320n to=395n
+meas tran vod_max_b MAX vd from=320n to=395n
+meas tran vod_min_b MIN vd from=320n to=395n
+meas tran vodpad_max_b MAX vdpad from=320n to=395n
+meas tran vodpad_min_b MIN vdpad from=320n to=395n
+meas tran vos_avg_b AVG v(vos) from=320n to=395n
+meas tran vos_pp_b PP v(vos) from=320n to=395n
+meas tran i_3v3_b AVG i(Vvdd_3v3) from=320n to=395n
+meas tran i_1v2_b AVG i(Vvdd_1v2) from=320n to=395n
+meas tran enh_c AVG v(x1.xodt.enh) from=500n to=695n
+meas tran x_max_c MAX v(x1.xodt.x) from=500n to=695n
+meas tran pad_max_c MAX v(clk_pad) from=500n to=695n
+meas tran pad_min_c MIN v(clk_pad) from=500n to=695n
+meas tran ck_max_c MAX v(refclk_core) from=500n to=695n
+meas tran ck_min_c MIN v(refclk_core) from=500n to=695n
+meas tran ipad_max_c MAX i(Vpad2) from=500n to=695n
+meas tran ipad_avg_c AVG i(Vpad2) from=500n to=695n
+meas tran core_pp_c PP v(x1.core_p) from=500n to=695n
+meas tran vod_max_c MAX vd from=500n to=695n
+meas tran vod_min_c MIN vd from=500n to=695n
+meas tran vodpad_max_c MAX vdpad from=500n to=695n
+meas tran vodpad_min_c MIN vdpad from=500n to=695n
+meas tran vos_avg_c AVG v(vos) from=500n to=695n
+meas tran vos_pp_c PP v(vos) from=500n to=695n
+meas tran i_3v3_c AVG i(Vvdd_3v3) from=500n to=695n
+meas tran i_1v2_c AVG i(Vvdd_1v2) from=500n to=695n
+let th20_a = vod_min_a + 0.2*(vod_max_a - vod_min_a)
+let th80_a = vod_min_a + 0.8*(vod_max_a - vod_min_a)
+meas tran t20_a WHEN vd=$&th20_a RISE=5 FROM=150n
+meas tran t80_a WHEN vd=$&th80_a RISE=5 FROM=150n
+let trise_a = t80_a - t20_a
+let th20_c = vod_min_c + 0.2*(vod_max_c - vod_min_c)
+let th80_c = vod_min_c + 0.8*(vod_max_c - vod_min_c)
+meas tran t20_c WHEN vd=$&th20_c RISE=5 FROM=500n
+meas tran t80_c WHEN vd=$&th80_c RISE=5 FROM=500n
+let trise_c = t80_c - t20_c
+echo === phase A - ODT off, EMF 1.2 V: pad 1.2 V, no pad current (150-295 ns)
+print enh_a x_max_a pad_max_a pad_min_a ck_max_a ck_min_a ipad_max_a ipad_avg_a
+print core_pp_a vod_max_a vod_min_a vodpad_max_a vodpad_min_a vos_avg_a vos_pp_a
+print i_3v3_a i_1v2_a
+echo === phase B - ODT on, EMF 1.2 V: pad halved to 0.6 V if the ODT is 50 ohm (320-395 ns)
+print enh_b x_max_b pad_max_b pad_min_b ck_max_b ck_min_b ipad_max_b ipad_avg_b
+print core_pp_b vod_max_b vod_min_b vodpad_max_b vodpad_min_b vos_avg_b vos_pp_b
+print i_3v3_b i_1v2_b
+echo === phase C - ODT on, EMF 2.4 V: pad 1.2 V, 24 mA while high; back-termination on, ibias1 3 uA (500-695 ns)
+print enh_c x_max_c pad_max_c pad_min_c ck_max_c ck_min_c ipad_max_c ipad_avg_c
+print core_pp_c vod_max_c vod_min_c vodpad_max_c vodpad_min_c vos_avg_c vos_pp_c
+print i_3v3_c i_1v2_c
+print trise_a trise_c
+let r_odt = 50 * pad_max_b / (1.2 - pad_max_b)
+echo === ODT resistance from phase B, 50 * Vpad / (1.2 V - Vpad):
+print r_odt
+
+set wr_vecnames
+set wr_singlescale
+wrdata ../plot_simulations/data/@schname\\\\.txt
++ vd vdpad v(vos) v(refclk_core) v(clk_pad) i(Vpad2) v(odt_en)
 .endc
 "}
+C {launcher.sym} 2700 -2150 0 0 {name=h_sim
+descr="Simulate"
+tclcommand="
+set_sim_defaults
+file mkdir $netlist_dir
+write_data [save_params] $netlist_dir/[file rootname [file tail [xschem get current_name]]].save
+xschem netlist
+set _cwd [pwd]
+cd $netlist_dir
+simulate
+cd $_cwd
+"}
+C {launcher.sym} 2700 -2110 0 0 {name=h_waves
+descr="Load waves"
+tclcommand="xschem raw_read $netlist_dir/slot_14_tb_lvds_pex.raw tran"
+}
+C {launcher.sym} 2700 -2070 0 0 {name=h_check
+descr="Check PRBS + timing"
+tclcommand="exec python3 [file dirname [xschem get current_dirname]]/../../scripts/check_timing.py &"
+}
+B 2 2700 -1950 4500 -1550 {flags=graph
+y1=-0.2
+y2=3.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=0
+x2=7e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="odt_en
+x1.xodt.enh"
+color="8 10"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2700 -1450 4500 -1050 {flags=graph
+y1=-0.2
+y2=1.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=0
+x2=7e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="clk_pad
+x1.xodt.x
+refclk_core"
+color="4 12 7"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2700 -950 4500 -550 {flags=graph
+y1=-0.01
+y2=0.03
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=0
+x2=7e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="i(vpad2)"
+color="4"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2700 -450 4500 -50 {flags=graph
+y1=0.9
+y2=1.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=0
+x2=7e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="rx_p
+rx_n
+vos"
+color="4 5 8"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2700 50 4500 450 {flags=graph,unlocked
+y1=-0.2
+y2=3.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=2.94e-07
+x2=3.08e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="odt_en
+x1.xodt.enh
+clk_pad
+x1.xodt.x"
+color="8 10 4 12"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2700 550 4500 950 {flags=graph,unlocked
+y1=-0.01
+y2=0.03
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=2.94e-07
+x2=3.08e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="i(vpad2)"
+color="4"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2700 1050 4500 1450 {flags=graph,unlocked
+y1=-0.2
+y2=1.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=3.96e-07
+x2=4.08e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="clk_pad
+refclk_core"
+color="4 7"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2700 1550 4500 1950 {flags=graph,unlocked
+y1=-0.5
+y2=1.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=6.5e-07
+x2=6.6e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="rx_p
+rx_n
+\\"vd;rx_p rx_n -\\""
+color="4 5 7"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2700 2050 4500 2450 {flags=graph,unlocked
+y1=-0.5
+y2=1.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=6.5e-07
+x2=6.6e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="chip_p
+chip_n
+\\"vdpad;chip_p chip_n -\\""
+color="4 5 7"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}

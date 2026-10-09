@@ -19,7 +19,7 @@ its secondary protection (series resistor and diodes), the one for gates.
   s14_an[2]      odt       pad 2 itself: the switchable 50 ohm termination
   s14_an_0_esd, s14_an_1_esd   not connected
 
-Not connected: dig_out[11:0], dig_in[23:4], analog_bus0/2/3, vbias, clk,
+Not connected: dig_out[11:0], dig_in[23:5], analog_bus3, clk,
 enable and reset - the reference arrives on its own pad.  The harness masks
 dig_in to zero for an unselected project (proj_dig_in is dig_in ANDed with
 select & dig_ena in user_project_control.v), so dig_in[1] alone stops the
@@ -37,7 +37,9 @@ leaves the clock stopped and the output pair static - a legal idle.
                            are complementary from the first edge after power-up
                            and the LVDS driver settles once, not at every enable.
   dig_in[3]     mode       0 = clock passthrough, 1 = PRBS-7
-  dig_in[23:4]  unused
+  dig_in[4]     bt         1 = ~200 ohm across the LVDS pair (xbt) - set ibias1
+                           to 3 uA with it, or |Vod| drops by a third; 0 = off
+  dig_in[23:5]  unused
 
 The PLL that clocked lvds_pattern through pll_clk left the project on
 2026-10-07, and the pattern's clock source select (pll_clk, clk_src) with
@@ -84,8 +86,8 @@ N 2190 -1060 2230 -1060 {lab=s14_an[1]}
 C {lab_pin.sym} 2230 -1060 0 1 {name=l_xlvds_out_p sig_type=std_logic lab=s14_an[1]}
 N 2190 -970 2230 -970 {lab=vdd_3v3}
 C {lab_pin.sym} 2230 -970 0 1 {name=l_xlvds_va sig_type=std_logic lab=vdd_3v3}
-N 1850 -1000 1890 -1000 {lab=analog_bus1}
-C {lab_pin.sym} 1850 -1000 0 0 {name=l_xlvds_vref sig_type=std_logic lab=analog_bus1}
+N 1850 -1000 1890 -1000 {lab=vbias}
+C {lab_pin.sym} 1850 -1000 0 0 {name=l_xlvds_vref sig_type=std_logic lab=vbias}
 N 2190 -950 2230 -950 {lab=vss_3v3}
 C {lab_pin.sym} 2230 -950 0 1 {name=l_xlvds_vss sig_type=std_logic lab=vss_3v3}
 C {lvds_tx.sym} 2040 -1030 0 0 {name=xlvds}
@@ -118,6 +120,37 @@ C {lab_pin.sym} 1790 -1250 0 1 {name=l_xodt_vddh sig_type=std_logic lab=vdd_3v3}
 N 1750 -1210 1790 -1210 {lab=vss_3v3}
 C {lab_pin.sym} 1790 -1210 0 1 {name=l_xodt_vss sig_type=std_logic lab=vss_3v3}
 C {ref_odt.sym} 1630 -1250 0 0 {name=xodt}
+N 2450 -1270 2450 -1230 {lab=ibias0}
+C {lab_pin.sym} 2450 -1230 3 0 {name=l_RT0_m sig_type=std_logic lab=ibias0}
+N 2450 -1370 2450 -1330 {lab=analog_bus0}
+C {lab_pin.sym} 2450 -1370 1 0 {name=l_RT0_p sig_type=std_logic lab=analog_bus0}
+C {sg13cmos5l_pr/rppd.sym} 2450 -1300 0 0 {name=RT0
+w=1u l=4u model=rppd body=vss_1v2 spiceprefix=X b=0 m=1 mm_ok=1 value=\"expr_eng(  ( 70.0e-6 / @w + 260.0 * ( (@b + 1)* @l + ( 1.081*( @w + 6.0e-9 ) + 0.18e-6 )*@b ) / ( @w + 6.0e-9 ) ) / @m  )\"}
+N 2560 -1270 2560 -1230 {lab=vbias}
+C {lab_pin.sym} 2560 -1230 3 0 {name=l_RT1_m sig_type=std_logic lab=vbias}
+N 2560 -1370 2560 -1330 {lab=analog_bus1}
+C {lab_pin.sym} 2560 -1370 1 0 {name=l_RT1_p sig_type=std_logic lab=analog_bus1}
+C {sg13cmos5l_pr/rppd.sym} 2560 -1300 0 0 {name=RT1
+w=1u l=4u model=rppd body=vss_1v2 spiceprefix=X b=0 m=1 mm_ok=1 value=\"expr_eng(  ( 70.0e-6 / @w + 260.0 * ( (@b + 1)* @l + ( 1.081*( @w + 6.0e-9 ) + 0.18e-6 )*@b ) / ( @w + 6.0e-9 ) ) / @m  )\"}
+N 2670 -1270 2670 -1230 {lab=ibias1}
+C {lab_pin.sym} 2670 -1230 3 0 {name=l_RT2_m sig_type=std_logic lab=ibias1}
+N 2670 -1370 2670 -1330 {lab=analog_bus2}
+C {lab_pin.sym} 2670 -1370 1 0 {name=l_RT2_p sig_type=std_logic lab=analog_bus2}
+C {sg13cmos5l_pr/rppd.sym} 2670 -1300 0 0 {name=RT2
+w=1u l=4u model=rppd body=vss_1v2 spiceprefix=X b=0 m=1 mm_ok=1 value=\"expr_eng(  ( 70.0e-6 / @w + 260.0 * ( (@b + 1)* @l + ( 1.081*( @w + 6.0e-9 ) + 0.18e-6 )*@b ) / ( @w + 6.0e-9 ) ) / @m  )\"}
+N 1880 -1340 1920 -1340 {lab=dig_in[4]}
+C {lab_pin.sym} 1880 -1340 0 0 {name=l_xbt_en sig_type=std_logic lab=dig_in[4]}
+N 1880 -1260 1920 -1260 {lab=s14_an[0]}
+C {lab_pin.sym} 1880 -1260 0 0 {name=l_xbt_outn sig_type=std_logic lab=s14_an[0]}
+N 1880 -1300 1920 -1300 {lab=s14_an[1]}
+C {lab_pin.sym} 1880 -1300 0 0 {name=l_xbt_outp sig_type=std_logic lab=s14_an[1]}
+N 2160 -1340 2200 -1340 {lab=vdd_1v2}
+C {lab_pin.sym} 2200 -1340 0 1 {name=l_xbt_vdd sig_type=std_logic lab=vdd_1v2}
+N 2160 -1300 2200 -1300 {lab=vdd_3v3}
+C {lab_pin.sym} 2200 -1300 0 1 {name=l_xbt_vddh sig_type=std_logic lab=vdd_3v3}
+N 2160 -1260 2200 -1260 {lab=vss_3v3}
+C {lab_pin.sym} 2200 -1260 0 1 {name=l_xbt_vss sig_type=std_logic lab=vss_3v3}
+C {lvds_bt.sym} 2040 -1300 0 0 {name=xbt}
 N 1300 -930 1300 -890 {lab=vss_1v2}
 C {lab_pin.sym} 1300 -890 3 0 {name=l_DRST_d0 sig_type=std_logic lab=vss_1v2}
 N 1300 -1030 1300 -990 {lab=dig_in[2]}
@@ -235,7 +268,7 @@ T {dig_in[5]  not connected} -180 -808 0 1 0.25 0.25 {}
 N 0 -780 40 -780 {lab=dig_in[4]}
 C {devices/ipin.sym} 0 -780 2 1 {name=p_dig_in_4 lab=dig_in[4]}
 C {lab_pin.sym} 40 -780 0 1 {name=lp_dig_in_4 sig_type=std_logic lab=dig_in[4]}
-T {dig_in[4]  not connected} -180 -788 0 1 0.25 0.25 {}
+T {dig_in[4]  ->  xbt.EN - 1 = ~200 ohm back-termination of the LVDS pair on (with ibias1 3 uA)} -180 -788 0 1 0.25 0.25 {}
 N 0 -760 40 -760 {lab=dig_in[3]}
 C {devices/ipin.sym} 0 -760 2 1 {name=p_dig_in_3 lab=dig_in[3]}
 C {lab_pin.sym} 40 -760 0 1 {name=lp_dig_in_3 sig_type=std_logic lab=dig_in[3]}
@@ -255,15 +288,15 @@ T {dig_in[0]  ->  xodt.EN - 1 = 50 ohm termination of ref_clk on} -180 -708 0 1 
 N 0 -680 40 -680 {lab=ibias0}
 C {devices/ipin.sym} 0 -680 2 1 {name=p_ibias0 lab=ibias0}
 C {lab_pin.sym} 40 -680 0 1 {name=lp_ibias0 sig_type=std_logic lab=ibias0}
-T {ibias0  ->  xiref_pd (1:15) -> xlvds.Iref_pd - 2 uA in, 30 uA out} -180 -688 0 1 0.25 0.25 {}
+T {ibias0  ->  xiref_pd (1:15) -> xlvds.Iref_pd - IDAC code 6 (1.94 uA in, 29 uA out)} -180 -688 0 1 0.25 0.25 {}
 N 0 -660 40 -660 {lab=ibias1}
 C {devices/ipin.sym} 0 -660 2 1 {name=p_ibias1 lab=ibias1}
 C {lab_pin.sym} 40 -660 0 1 {name=lp_ibias1 sig_type=std_logic lab=ibias1}
-T {ibias1  ->  xiref_drv (1:15) -> xlvds.Iref_drv - 2 uA in, 30 uA out} -180 -668 0 1 0.25 0.25 {}
+T {ibias1  ->  xiref_drv (1:15) -> xlvds.Iref_drv - code 6; code 9 (2.90 uA) with dig_in[4]} -180 -668 0 1 0.25 0.25 {}
 N 0 -640 40 -640 {lab=vbias}
 C {devices/ipin.sym} 0 -640 2 1 {name=p_vbias lab=vbias}
 C {lab_pin.sym} 40 -640 0 1 {name=lp_vbias sig_type=std_logic lab=vbias}
-T {vbias  not connected} -180 -648 0 1 0.25 0.25 {}
+T {vbias  ->  xlvds.Vref - 1.2 V common-mode reference, the harness voltage reference} -180 -648 0 1 0.25 0.25 {}
 N 0 -620 40 -620 {lab=dig_out[11]}
 C {devices/opin.sym} 0 -620 2 0 {name=p_dig_out_11 lab=dig_out[11]}
 C {lab_pin.sym} 40 -620 0 1 {name=lp_dig_out_11 sig_type=std_logic lab=dig_out[11]}
@@ -321,12 +354,12 @@ N 0 -360 40 -360 {lab=s14_an[1]}
 C {devices/iopin.sym} 0 -360 2 0 {name=p_s14_an_1 lab=s14_an[1]}
 C {lab_pin.sym} 40 -360 0 1 {name=lp_s14_an_1 sig_type=std_logic lab=s14_an[1]}
 T {LVDS out +, pad 1 direct} 100 -368 0 0 0.25 0.25 {}
-T {s14_an[1]  ->  xlvds.Out_p} -180 -368 0 1 0.25 0.25 {}
+T {s14_an[1]  ->  xlvds.Out_p, xbt.OUTP} -180 -368 0 1 0.25 0.25 {}
 N 0 -340 40 -340 {lab=s14_an[0]}
 C {devices/iopin.sym} 0 -340 2 0 {name=p_s14_an_0 lab=s14_an[0]}
 C {lab_pin.sym} 40 -340 0 1 {name=lp_s14_an_0 sig_type=std_logic lab=s14_an[0]}
 T {LVDS out -, pad 0 direct} 100 -348 0 0 0.25 0.25 {}
-T {s14_an[0]  ->  xlvds.Out_n} -180 -348 0 1 0.25 0.25 {}
+T {s14_an[0]  ->  xlvds.Out_n, xbt.OUTN} -180 -348 0 1 0.25 0.25 {}
 N 0 -320 40 -320 {lab=s14_an_2_esd}
 C {devices/iopin.sym} 0 -320 2 0 {name=p_s14_an_2_esd lab=s14_an_2_esd}
 C {lab_pin.sym} 40 -320 0 1 {name=lp_s14_an_2_esd sig_type=std_logic lab=s14_an_2_esd}
@@ -343,15 +376,15 @@ T {s14_an_0_esd  not connected} -180 -288 0 1 0.25 0.25 {}
 N 0 -260 40 -260 {lab=analog_bus0}
 C {devices/iopin.sym} 0 -260 2 0 {name=p_analog_bus0 lab=analog_bus0}
 C {lab_pin.sym} 40 -260 0 1 {name=lp_analog_bus0 sig_type=std_logic lab=analog_bus0}
-T {analog_bus0  not connected} -180 -268 0 1 0.25 0.25 {}
+T {analog_bus0  ->  tap on ibias0 through RT0 (1.1 kohm): measure it, or force it from outside} -180 -268 0 1 0.25 0.25 {}
 N 0 -240 40 -240 {lab=analog_bus1}
 C {devices/iopin.sym} 0 -240 2 0 {name=p_analog_bus1 lab=analog_bus1}
 C {lab_pin.sym} 40 -240 0 1 {name=lp_analog_bus1 sig_type=std_logic lab=analog_bus1}
-T {analog_bus1  ->  xlvds.Vref - 1.2 V common-mode reference} -180 -248 0 1 0.25 0.25 {}
+T {analog_bus1  ->  tap on vbias = Vref through RT1 (1.1 kohm)} -180 -248 0 1 0.25 0.25 {}
 N 0 -220 40 -220 {lab=analog_bus2}
 C {devices/iopin.sym} 0 -220 2 0 {name=p_analog_bus2 lab=analog_bus2}
 C {lab_pin.sym} 40 -220 0 1 {name=lp_analog_bus2 sig_type=std_logic lab=analog_bus2}
-T {analog_bus2  not connected} -180 -228 0 1 0.25 0.25 {}
+T {analog_bus2  ->  tap on ibias1 through RT2 (1.1 kohm)} -180 -228 0 1 0.25 0.25 {}
 N 0 -200 40 -200 {lab=analog_bus3}
 C {devices/iopin.sym} 0 -200 2 0 {name=p_analog_bus3 lab=analog_bus3}
 C {lab_pin.sym} 40 -200 0 1 {name=lp_analog_bus3 sig_type=std_logic lab=analog_bus3}

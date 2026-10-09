@@ -12,11 +12,13 @@ metal3 stubs at x = 340; this adds:
   metal4 bridge; 2 x 2 via2 onto each pin of lvds_pattern; the dangling line of
   dig_in[0] (it went to clk_src) goes;
 * reset: an antenna diode (dantenna, DRST in the schematic) under the line;
-* ibias0, ibias1, analog_bus1 on 1 um metal4, over the metal3 control lines:
+* ibias0, ibias1 and vbias (Vref) on 1 um metal4, over the metal3 control lines:
   from the frame pin a metal3 tail and a via3 array, along metal4 to x 336 /
   334 / 332, up, and a via3 array onto the stub of xiref_pd.IREF_IN,
-  xiref_drv.IREF_IN and xlvds.Vref.  All three climb, so the lowest pin and the
-  lowest stub take the rightmost column and nothing crosses;
+  xiref_drv.IREF_IN and xlvds.Vref - vbias first up the frame edge on metal2 to
+  y 115, so all three climb, the lowest pin and stub in the rightmost column;
+* taps: analog_bus0 / 2 / 1 to ibias0 / ibias1 / Vref through 1.1 kohm each, to
+  measure the bias nodes or force them from outside;
 * the four supplies on TopMetal1, crossing-free - left edge, bottom to top
   vdd_1v2, vss_1v2, vss_3v3, vdd_3v3, and at the stubs vdd_1v2 lowest and
   vss_1v2 highest of the 1.2 V pair, vss_3v3 left of vdd_3v3 - each landing
@@ -137,13 +139,16 @@ for s in list(top.shapes(M2).each()):
 # ---------------------------------------------------------------- control lines, 0.6 um metal3
 # dig_in[1..3] -> en, reset, mode of lvds_pattern.  The frame pins sit at a 0.44 um
 # pitch, so each line leaves its pin 0.2 um wide and fans out within 4 um onto its
-# own 0.6 um track (pitch 1.4, dig_in[0] takes the one below - add_odt.py).  Up at
+# own 0.6 um track (pitch 1.4; dig_in[0] takes the one below - add_odt.py - and
+# dig_in[4] the one above mode's - add_bt.py).  Up at
 # x 104.5 / 109 / 112.3, east to the pins; mode crosses over the other two on a
 # metal4 bridge.  Every change of layer and every pin gets a via array.
 W = 0.6
 Y_PIN = {"en": 78.90, "reset": 79.34, "mode": 79.78}           # the frame pins dig_in[1..3]
 Y_TRK = {"en": 78.60, "reset": 80.00, "mode": 81.40}           # their tracks after the fan-out
-X_JOG = {"en": 4.1, "reset": 4.1, "mode": 2.9}                 # where they leave the pin's height
+# where they leave the pin's height; the outermost go first: dig_in[0] (down, add_odt.py) and
+# dig_in[4] (up, add_bt.py) at x 2.9, mode at 4.1, en and reset at 5.3
+X_JOG = {"en": 5.3, "reset": 5.3, "mode": 4.1}
 X_UP = {"en": 112.255, "reset": 108.955, "mode": 104.515}      # the climb
 Y_END = {"en": 103.915 + DY, "reset": 111.915 + DY, "mode": 101.915 + DY}  # lvds_pattern's pins
 X_PIN = (338.78, 339.78)                                        # the pins: metal2, 1 x 1 um
@@ -215,13 +220,89 @@ for v in (V1, V2):
 
 # ---------------------------------------------------------------- bias on metal4, 1 um
 for y_pin, x_down, y_stub in ((98.155, 336.0, 61.5 + DY),     # ibias0 -> xiref_pd.IREF_IN
-                              (101.095, 334.0, 64.0 + DY),    # ibias1 -> xiref_drv.IREF_IN
-                              (109.915, 332.0, 92.5 + DY)):   # analog_bus1 -> xlvds.Vref
+                              (101.095, 334.0, 64.0 + DY)):   # ibias1 -> xiref_drv.IREF_IN
     box(M3, 1.9, y_pin - 1.0, 5.2, y_pin + 1.0)                 # the frame pin is 2 um high
     box(M4, 3.0, y_pin - 1.0, 5.2, y_pin + 1.0)
     array(V3, 3.0, y_pin - 1.0, 5.2, y_pin + 1.0, 0.19, 0.29, 0.06)
     path(M4, [(3.0, y_pin), (x_down, y_pin), (x_down, y_stub), (341.0, y_stub)], 1.0)
     array(V3, 340.0, y_stub - 0.5, 341.0, y_stub + 0.5, 0.19, 0.29, 0.06)   # onto the 1 um metal3 stub
+
+# Vref from vbias, the harness's voltage reference at 1.2 V.  Its frame pin is the
+# lowest of the bias pins and Vref's stub the highest, so it climbs at the frame
+# first - metal2 at x 6.5..7.5, under the other bias lines, up to y 115 above all
+# of them - and then runs like them: east on metal4, up at x 332, onto the stub.
+Y_VB, Y_VR, Y_VS = 95.215, 115.0, 92.5 + DY
+box(M3, 1.9, Y_VB - 1.0, 7.5, Y_VB + 1.0)
+array(V2, 6.5, Y_VB - 1.0, 7.5, Y_VB + 1.0, 0.19, 0.29, 0.06)
+box(M2, 6.5, Y_VB - 1.0, 7.5, Y_VR + 0.5)
+box(M3, 6.5, Y_VR - 0.5, 7.5, Y_VR + 0.5)
+array(V2, 6.5, Y_VR - 0.5, 7.5, Y_VR + 0.5, 0.19, 0.29, 0.06)
+array(V3, 6.5, Y_VR - 0.5, 7.5, Y_VR + 0.5, 0.19, 0.29, 0.06)
+path(M4, [(6.5, Y_VR), (332.0, Y_VR), (332.0, Y_VS), (341.0, Y_VS)], 1.0)
+array(V3, 340.0, Y_VS - 0.5, 341.0, Y_VS + 0.5, 0.19, 0.29, 0.06)
+
+# ---------------------------------------------------------------- taps for measuring
+# analog_bus0 -> ibias0, analog_bus2 -> ibias1, analog_bus1 -> Vref, each through
+# 1.1 kohm of rppd (w 1 um, l 4 um) right at the frame edge: through the harness's
+# analog bus switches the node can be measured, or forced from outside if the IDAC
+# or the voltage reference do not work.  2 uA drop 2 mV; the resistor keeps the bus
+# capacitance and what is coupled onto the bus off the bias nodes.  The schematic
+# carries them as RT0..RT2.
+
+
+def flat_pcell(name, x, y, **p):
+    """a PDK PCell, flattened into the top cell at (x, y); returns its metal1 boxes, bottom first"""
+    c = pl.cell(pl.add_pcell_variant(PCL, PCL.layout().pcell_id(name), {k: str(v) for k, v in p.items()}))
+    t = kdb.Trans(D(x), D(y))
+    m1 = []
+    for li in pl.layer_indexes():
+        r = kdb.Region(c.begin_shapes_rec(li))
+        if r.is_empty():
+            continue
+        info = pl.get_info(li)
+        top.shapes(ly.layer(info.layer, info.datatype)).insert(r.transformed(t))
+        if (info.layer, info.datatype) == (8, 0):
+            m1 = sorted([q.bbox().to_dtype(ly.dbu).moved(kdb.DVector(x, y)) for q in r.merged().each()],
+                        key=lambda b: b.bottom)
+    assert len(m1) == 2, (name, m1)
+    return m1
+
+
+def term_stack(b, upto):
+    """via1 .. up to metal2 / metal3 / metal4 on the centre of a resistor terminal"""
+    cx, cy = b.center().x, b.center().y
+    via(V1, cx, cy)
+    box(M2, cx - 0.19, cy - 0.19, cx + 0.19, cy + 0.19)
+    if upto >= 3:
+        via(V2, cx, cy)
+        box(M3, cx - 0.19, cy - 0.19, cx + 0.19, cy + 0.19)
+    if upto >= 4:
+        via(V3, cx, cy)
+        box(M4, cx - 0.19, cy - 0.19, cx + 0.19, cy + 0.19)
+    return cx, cy
+
+
+TAP = dict(w="1u", l="4u", R="1110")
+for pin_y, x_tail in ((109.915, 11.0), (112.855, 14.0), (106.975, 17.0)):   # analog_bus1, 0, 2
+    box(M3, 1.9, pin_y - 1.0, x_tail, pin_y + 1.0)                          # the bus pin's tail
+# RT1: analog_bus1 (bottom) -> Vref (top, metal4 at y 115)
+bot, tp = flat_pcell("rppd", 10.0, 110.6, **TAP)
+term_stack(bot, 3)
+term_stack(tp, 4)
+# RT0: ibias0 (bottom, metal4 at y 98.2) -> analog_bus0 (top, metal2 up to its tail at y 112.9)
+bot, tp = flat_pcell("rppd", 13.0, 99.2, **TAP)
+cx, cy = term_stack(bot, 4)
+box(M4, cx - 0.5, 97.655, cx + 0.5, cy + 0.19)
+cx, cy = term_stack(tp, 2)
+box(M2, cx - 0.25, cy - 0.19, cx + 0.25, 113.1)
+via(V2, cx, 112.855)
+box(M2, cx - 0.19, 112.855 - 0.19, cx + 0.19, 113.1)
+# RT2: ibias1 (bottom, metal4 at y 101.1) -> analog_bus2 (top, its tail at y 107)
+bot, tp = flat_pcell("rppd", 16.0, 101.75, **TAP)
+cx, cy = term_stack(bot, 4)
+box(M4, cx - 0.5, 100.595, cx + 0.5, cy + 0.19)
+cx, cy = term_stack(tp, 3)
+box(M3, cx - 0.5, cy - 0.3, cx + 0.5, 106.975)
 
 # ---------------------------------------------------------------- supplies on TopMetal1
 TM = {

@@ -22,10 +22,17 @@ What changes on the way:
   the same substrate; the harness ties them too): the missing one is a port
   again, joined to the other by 1 mohm.
 * names a bench can use: the instances as in the schematic (xpat, xlvds,
-  xiref_pd, xiref_drv, xodt, XDRST), the pattern pair core_p / core_n, the
+  xiref_pd, xiref_drv, xodt, xbt, XDRST), the pattern pair core_p / core_n, the
   mirror outputs iref_pd_30u / iref_drv_30u; inside lvds_tx (pex only) the
   pre-driver pair In_p / In_n and the CMFB node xdrv.cmfb - the paths
   x1.xlvds.In_p and x1.xlvds.xdrv.cmfb then read as in the schematic.
+* pex: magic leaves the n-diode of ref_odt (DN) and of every antennanp open -
+  joined to X / A again, the nets the KLayout LVS connects them to (below);
+  ref_odt's switch gate and the node behind R1 are enh and x, as in the
+  schematic, so x1.xodt.enh / x1.xodt.x read the same in every bench.
+* both: capacitors onto nodes that touch no device anywhere are dropped -
+  magic's hierarchical corrections on child nets it did not pass out as ports
+  (below); held only by capacitors, many negative, they made the run unstable.
 * pex: every extracted cell gets a pex_ prefix, so the standard cells as laid
   out cannot clash with the library's own definitions a bench includes.
 * wires: a block is called by its schematic port order, matched by name; a
@@ -33,13 +40,13 @@ What changes on the way:
   the schematic block does not have) goes to ground instead, so every
   top-level net keeps its total capacitance.
 """
-import io, re, sys
+import io, os, re, sys
 
 RAW, SCH, SYM, OUTDIR = sys.argv[1:5]
 TOP = "slot_14"
 GROUNDS = ("vss_1v2", "vss_3v3")
 BLOCKS = {"xpat": "lvds_pattern", "xlvds": "lvds_tx", "xiref_pd": "iref_x15",
-          "xiref_drv": "iref_x15", "xodt": "ref_odt"}
+          "xiref_drv": "iref_x15", "xodt": "ref_odt", "xbt": "lvds_bt"}
 TOP_NETS = {"xpat/D_p": "core_p", "xpat/D_n": "core_n",
             "xlvds/Iref_pd": "iref_pd_30u", "xlvds/Iref_drv": "iref_drv_30u"}
 TX_NETS = {"pd/In_p": "In_p", "pd/In_n": "In_n", "drv/x_cmfb/cmfb": "xdrv.cmfb"}
@@ -97,6 +104,8 @@ net = lambda n: clean(TOP_NETS.get(n, n))
 def rename_inst(inst, sub):
     if sub == "ref_odt":
         return "xodt"
+    if sub == "lvds_bt":
+        return "xbt"
     if sub == "dantenna":
         return "XDRST"
     return inst[1:] if inst[:2] in ("Xx", "XX") else inst
@@ -110,6 +119,12 @@ for t in body:
     top_cards.append((kind, inst, [net(n) for n in nodes], rest))
 found = set(i for k, i, n, r in top_cards if k == "X")
 assert set(BLOCKS) <= found and "XDRST" in found, sorted(found)[:12]
+# the ODT switch's gate is a port of the extracted ref_odt (the top level couples
+# to it), so its node carries the parent's name: call it xodt.enh there, which
+# flattens to x1.xodt.enh - the name the schematic gives it
+odt = next(c for c in top_cards if c[1] == "xodt")
+gate = odt[2][cells["ref_odt"][1].index("ref_odt_lvlup_0/o")]
+top_cards = [(k, i, ["xodt.enh" if v == gate else v for v in nn], r) for k, i, nn, r in top_cards]
 
 
 def header(title):
@@ -130,19 +145,125 @@ def top_lines(subname, cards):
     return out
 
 
+# ------------------------------------------------------------------ magic's open n-diodes
+# Magic reads the contacts of some n+ diodes (dantenna) as not touching their
+# metal1: the diode's diffusion comes out as a node of its own that only a
+# coupling capacitance reaches - DN of ref_odt, the n-diode of every
+# sg13cmos5l_antennanp.  The layout has the contacts (the same as on the
+# dpantenna next to them, which magic does connect) and the KLayout LVS sees the
+# connection, so the node is joined to the net it couples to most: X and A.
+EXPECT = {"ref_odt": lambda ports, body: next(
+              n for t in body if card_nodes(t, cells)[1][0] == "rppd"
+              for n in card_nodes(t, cells)[0][:2] if n != "PAD"),
+          "sg13cmos5l_antennanp": lambda ports, body: "A"}
+JOIN = {}                            # cell -> {open diode node: the net it belongs to}
+for cname, cports, cbody in raw:
+    use = {}
+    for t in cbody:
+        if t[0][0] not in "Cc":
+            for n in card_nodes(t, cells)[0]:
+                use[n] = use.get(n, 0) + 1
+    for t in cbody:
+        nodes, rest = card_nodes(t, cells)
+        if rest[0] != "dantenna" or use[nodes[1]] > 1 or nodes[1] in cports:
+            continue
+        caps = [(float(re.sub(r"[a-z]+$", "", c[3]) or 0) * {"f": 1, "a": 1e-3, "p": 1e3}.get(c[3][-1], 1),
+                 c[2] if c[1] == nodes[1] else c[1])
+                for c in cbody if c[0][0] in "Cc" and nodes[1] in c[1:3]]
+        net = max(caps)[1]
+        assert cname in EXPECT, "%s: open n-diode %s, nearest net %s - check it" % (cname, nodes[1], net)
+        assert net == EXPECT[cname](cports, cbody), (cname, nodes[1], net)
+        JOIN.setdefault(cname, {})[nodes[1]] = net
+# ref_odt: the gate of the switch and the node behind R1, by their schematic names
+x_odt = EXPECT["ref_odt"](cells["ref_odt"][1], cells["ref_odt"][2])
+ODT_NETS = {x_odt: "x", "ref_odt_lvlup_0/o": "enh"}
+for k, v in list(JOIN.get("ref_odt", {}).items()):
+    JOIN["ref_odt"][k] = ODT_NETS.get(v, v)
+
+# ------------------------------------------------------------------ magic's floating correction nodes
+# The hierarchical extraction puts capacitance - much of it negative, the
+# corrections for what a parent's metal shields in a child - on nodes named
+# after a child's internal net (x_hbridge/M6/S9 in Driver, and up through
+# lvds_tx to the top) without passing that net out of the child as a port.
+# The node then touches no device anywhere: an island held only by
+# capacitors, many of them with a negative total - which makes the transient
+# unstable (timestep too small at ~0.5 us).  Their capacitors are dropped:
+# they load nothing as extracted.  A node counts as connected when a device
+# touches it in its cell or below, or, for a port, when the net it is given
+# is connected in the cell above.
+DEV = {}
+for cname, cports, cbody in raw:
+    dev, calls = set(), []
+    for t in cbody:
+        if t[0][0] in "Cc":
+            continue
+        nodes, rest = card_nodes(t, cells)
+        if t[0][0] in "Xx" and rest[0] in cells:
+            calls.append((nodes, rest[0]))
+        else:
+            dev |= set(nodes)
+    DEV[cname] = (dev, calls)
+CONN = {}
+
+
+def conn(cname, node):
+    key = (cname, node)
+    if key not in CONN:
+        dev, calls = DEV[cname]
+        CONN[key] = node in dev or any(
+            n == node and conn(sub, cells[sub][1][i]) for nodes, sub in calls for i, n in enumerate(nodes))
+    return CONN[key]
+
+
+sys.setrecursionlimit(10000)
+topo, seen = [], set()
+
+
+def visit(c):
+    if c in seen:
+        return
+    seen.add(c)
+    for nodes, sub in DEV[c][1]:
+        visit(sub)
+    topo.append(c)
+
+
+visit(TOP)
+topo.reverse()                                           # every parent before its children
+port_live = {c: set() for c in cells}
+FLOAT = {}
+for c in topo:
+    allnodes = set(cells[c][1]) | set(n for t in cells[c][2] for n in card_nodes(t, cells)[0])
+    FLOAT[c] = set(n for n in allnodes if not conn(c, n)
+                   and (c == TOP or n not in cells[c][1] or n not in port_live[c]))
+    for nodes, sub in DEV[c][1]:
+        for i, n in enumerate(nodes):
+            if n not in FLOAT[c]:
+                port_live[sub].add(cells[sub][1][i])
+float_caps = sum(1 for c in cells for t in cells[c][2] if t[0][0] in "Cc"
+                 and set(card_nodes(t, cells)[0]) & FLOAT.get(c, set()))
+FLOAT_TOP = set(clean(TOP_NETS.get(n, n)) for n in FLOAT[TOP])          # the top level's names, as in top_cards
+top_cards = [(k, i, nn, r) for k, i, nn, r in top_cards if not (k == "C" and set(nn) & FLOAT_TOP)]
+
 # ------------------------------------------------------------------ pex: everything extracted
 pfx = lambda s: "pex_" + s if s in cells and s != TOP else s
 pex = header("everything as laid out, every block from its own extraction")
 for cname, cports, cbody in raw:
     if cname == TOP:
         continue
-    ren = TX_NETS if cname == "lvds_tx" else {}
+    ren = dict(TX_NETS if cname == "lvds_tx" else ODT_NETS if cname == "ref_odt" else {})
+    ren.update(JOIN.get(cname, {}))
     pex.append(".subckt %s %s" % (pfx(cname), " ".join(ren.get(p, p) for p in cports)))
     for t in cbody:
         nodes, rest = card_nodes(t, cells)
+        if t[0][0] in "Cc" and set(nodes) & FLOAT.get(cname, set()):
+            continue                 # onto an island magic left unconnected (above)
         if t[0][0] in "Xx":
             rest = [pfx(rest[0])] + rest[1:]
-        pex.append(" ".join([t[0]] + [ren.get(n, n) for n in nodes] + rest))
+        nodes = [ren.get(n, n) for n in nodes]
+        if t[0][0] in "Cc" and nodes[0] == nodes[1]:
+            continue                 # the coupling of a joined diode to its own net
+        pex.append(" ".join([t[0]] + nodes + rest))
     pex.append(".ends")
 pex += top_lines(TOP + "_pex", [(k, i, n, [pfx(r[0])] + r[1:] if k == "X" else r)
                                 for k, i, n, r in top_cards])
@@ -199,3 +320,11 @@ print("  slot_14_pex.spice    %5d C, %d cells" % (nc(pex), len(raw)))
 print("  slot_14_wires.spice  %5d C on the top-level wiring (%d to block internals now to ground, %d inside blocks dropped)"
       % (nc(wires), caps_moved, caps_dropped))
 print("  %s joined to %s" % (", ".join(missing) or "nothing", ground))
+print("  %d capacitors onto floating islands dropped (%s)" % (float_caps, ", ".join(
+    "%s %d" % (c, len(FLOAT[c])) for c in topo if FLOAT.get(c))))
+for cname, j in sorted(JOIN.items()):
+    print("  %s: open n-diode joined to %s (magic, see above)" % (cname, ", ".join(sorted(set(j.values())))))
+if os.environ.get("PEX_DEBUG"):
+    for c in topo:
+        if FLOAT.get(c):
+            print("FLOAT", c, len(FLOAT[c]), sorted(FLOAT[c])[:6])

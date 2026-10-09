@@ -238,8 +238,7 @@ data path buys 63 ps of hold margin and costs 63 ps of the ~500 ps setup slack.
 
 No LibreLane run, no STA. The layout is placed and routed by hand, DRC and LVS
 clean; the timing figures above are from simulation, and the extracted block
-drives the post-layout LVDS bench at the top level
-(`testbenches/xschem/slot_14_tb_lvds_postlayout.sch`).
+is part of the top level's PEX bench (`testbenches/xschem/slot_14_tb_lvds_pex.sch`).
 
 The top level instantiates this macro as `xpat` and wires `D_p`/`D_n` straight
 into `lvds_tx`. `ref_clk` comes from pad 2 through its secondary protection

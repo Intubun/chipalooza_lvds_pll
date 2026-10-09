@@ -15,7 +15,9 @@ The run has three phases:
   B  300 - 400 ns   ODT on,  EMF 1.2 V   pad halved to 0.6 V: 50 ohm into 50 ohm
                                         (too small for the clock - the pattern stalls)
   C  400 - 700 ns   ODT on,  EMF 2.4 V   pad 1.2 V again, 24 mA while high;
-                                        reset at 400 ns, PRBS-7 runs again
+                                        reset at 400 ns, PRBS-7 runs again;
+                                        the output back-termination on (dig_in[4])
+                                        and ibias1 3 uA
 
 PRBS-7 at 500 Mb/s through the pre-driver and the driver into 49.9 + 49.9 ohm
 across pads 1 and 0 with the Vos tap.  The log prints each phase: the clock at
@@ -47,24 +49,24 @@ L 3 -1340 -1820 -1340 -1180 {}
 L 3 -2260 -1180 -1340 -1180 {}
 L 3 -2260 -1820 -2260 -1180 {}
 T {supplies} -2260 -1875 0 0 0.4 0.4 {}
-N -2000 -1040 -2000 -1010 {lab=analog_bus1}
-C {devices/lab_wire.sym} -2000 -1040 0 0 {name=ls_analog_bus1 sig_type=std_logic lab=analog_bus1}
-C {devices/vsource.sym} -2000 -980 0 0 {name=Vanalog_bus1 value="1.2"}
+N -2000 -1040 -2000 -1010 {lab=vbias}
+C {devices/lab_wire.sym} -2000 -1040 0 0 {name=ls_vbias sig_type=std_logic lab=vbias}
+C {devices/vsource.sym} -2000 -980 0 0 {name=Vvbias value="1.2"}
 N -2000 -950 -2000 -920 {lab=GND}
-C {devices/gnd.sym} -2000 -920 0 0 {name=lg_analog_bus1 lab=GND}
-T {LVDS common-mode reference, 1.2 V (the IDAC grid has no 1.25 V)} -1920 -985 0 0 0.3 0.3 {}
+C {devices/gnd.sym} -2000 -920 0 0 {name=lg_vbias lab=GND}
+T {LVDS common-mode reference, 1.2 V from the harness voltage reference} -1920 -985 0 0 0.3 0.3 {}
 N -2000 -840 -2000 -810 {lab=ibias0}
 C {devices/lab_wire.sym} -2000 -840 0 0 {name=ls_ibias0 sig_type=std_logic lab=ibias0}
-C {isource.sym} -2000 -780 0 0 {name=Iibias0 value=-2u}
+C {isource.sym} -2000 -780 0 0 {name=Iibias0 value="-1.935u"}
 N -2000 -750 -2000 -720 {lab=GND}
 C {devices/gnd.sym} -2000 -720 0 0 {name=lg_ibias0 lab=GND}
-T {pre-driver reference, 2 uA into the 1:15 mirror} -1920 -785 0 0 0.3 0.3 {}
+T {pre-driver reference, IDAC code 6 = 1.935uA into the 1:15 mirror} -1920 -785 0 0 0.3 0.3 {}
 N -2000 -640 -2000 -610 {lab=ibias1}
 C {devices/lab_wire.sym} -2000 -640 0 0 {name=ls_ibias1 sig_type=std_logic lab=ibias1}
-C {isource.sym} -2000 -580 0 0 {name=Iibias1 value=-2u}
+C {isource.sym} -2000 -580 0 0 {name=Iibias1 value="PWL(0 -1.935u 400n -1.935u 400.1n -2.903u)"}
 N -2000 -550 -2000 -520 {lab=GND}
 C {devices/gnd.sym} -2000 -520 0 0 {name=lg_ibias1 lab=GND}
-T {driver reference, 2 uA into the 1:15 mirror} -1920 -585 0 0 0.3 0.3 {}
+T {driver reference, code 6; code 9 = 2.903uA from 400 ns} -1920 -585 0 0 0.3 0.3 {}
 L 3 -2260 -1100 -1340 -1100 {}
 L 3 -1340 -1100 -1340 -460 {}
 L 3 -2260 -460 -1340 -460 {}
@@ -94,10 +96,16 @@ C {devices/vsource.sym} -2000 340 0 0 {name=Vdig_in_3 value="1.2"}
 N -2000 370 -2000 400 {lab=GND}
 C {devices/gnd.sym} -2000 400 0 0 {name=lg_dig_in_3 lab=GND}
 T {mode = 1, PRBS-7 throughout} -1920 335 0 0 0.3 0.3 {}
+N -2000 480 -2000 510 {lab=dig_in[4]}
+C {devices/lab_wire.sym} -2000 480 0 0 {name=ls_dig_in_4 sig_type=std_logic lab=dig_in[4]}
+C {devices/vsource.sym} -2000 540 0 0 {name=Vdig_in_4 value="PWL(0 0 400n 0 400.1n 1.2)"}
+N -2000 570 -2000 600 {lab=GND}
+C {devices/gnd.sym} -2000 600 0 0 {name=lg_dig_in_4 lab=GND}
+T {back-termination: off, on from 400 ns} -1920 535 0 0 0.3 0.3 {}
 L 3 -2260 -380 -1340 -380 {}
-L 3 -1340 -380 -1340 460 {}
-L 3 -2260 460 -1340 460 {}
-L 3 -2260 -380 -2260 460 {}
+L 3 -1340 -380 -1340 660 {}
+L 3 -2260 660 -1340 660 {}
+L 3 -2260 -380 -2260 660 {}
 T {pattern control} -2260 -435 0 0 0.4 0.4 {}
 N -300 -350 -240 -350 {lab=vdd_3v3}
 C {devices/lab_wire.sym} -300 -350 0 0 {name=lx_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
@@ -249,6 +257,7 @@ C {devices/gnd.sym} 1327.5 930 0 0 {name=lgr_pad2_iovss lab=GND}
 C {lab_pin.sym} 1340 940 0 0 {name=lr_pad2_iovdd sig_type=std_logic lab=iovdd}
 C {lab_pin.sym} 1400 900 0 0 {name=lr_pad2_pad sig_type=std_logic lab=s14_an[2]}
 C {lab_pin.sym} 1500 900 0 0 {name=lr_pad2_padres sig_type=std_logic lab=s14_an_2_esd}
+C {lab_pin.sym} 1410 1150 0 0 {name=lr_pad2_bond sig_type=std_logic lab=s14_an[2]}
 T {ref_clk: 50 ohm generator onto pad 2.  Vclk_b joins at 400 ns:
 EMF 1.2 V before, 2.4 V after (1.2 V into 50 ohm).
 Vpad2 is the ammeter: the current into the pad, i.e. into xodt.} 400 580 0 0 0.35 0.35 {}
@@ -276,7 +285,7 @@ tclcommand="exec python3 [file dirname [xschem get current_dirname]]/../../scrip
 }
 B 2 2050 -1950 3850 -1550 {flags=graph
 y1=-0.2
-y2=1.6
+y2=3.6
 ypos1=0
 ypos2=2
 divy=5
@@ -290,9 +299,8 @@ xlabmag=1.0
 ylabmag=1.0
 legendmag=1.0
 node="dig_in_0_
-clk_pad
-s14_an_2_esd"
-color="8 4 7"
+x1.xodt.enh"
+color="8 10"
 dataset=-1
 unitx=1
 logx=0
@@ -300,6 +308,31 @@ logy=0
 autoload=0
 hilight_wave=-1}
 B 2 2050 -1450 3850 -1050 {flags=graph
+y1=-0.2
+y2=1.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=0
+x2=7e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="clk_pad
+x1.xodt.x
+s14_an_2_esd"
+color="4 12 7"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2050 -950 3850 -550 {flags=graph
 y1=-0.01
 y2=0.03
 ypos1=0
@@ -322,7 +355,7 @@ logx=0
 logy=0
 autoload=0
 hilight_wave=-1}
-B 2 2050 -950 3850 -550 {flags=graph
+B 2 2050 -450 3850 -50 {flags=graph
 y1=0.9
 y2=1.6
 ypos1=0
@@ -347,50 +380,26 @@ logx=0
 logy=0
 autoload=0
 hilight_wave=-1}
-B 2 2050 -450 3850 -50 {flags=graph,unlocked
-y1=-0.2
-y2=1.6
-ypos1=0
-ypos2=2
-divy=5
-subdivy=1
-unity=1
-x1=2.5e-07
-x2=2.6e-07
-divx=5
-subdivx=1
-xlabmag=1.0
-ylabmag=1.0
-legendmag=1.0
-node="clk_pad
-s14_an_2_esd
-x1.core_p"
-color="4 7 5"
-dataset=-1
-unitx=1
-logx=0
-logy=0
-autoload=0
-hilight_wave=-1}
 B 2 2050 50 3850 450 {flags=graph,unlocked
 y1=-0.2
-y2=1.6
+y2=3.6
 ypos1=0
 ypos2=2
 divy=5
 subdivy=1
 unity=1
-x1=6.5e-07
-x2=6.6e-07
+x1=2.94e-07
+x2=3.08e-07
 divx=5
 subdivx=1
 xlabmag=1.0
 ylabmag=1.0
 legendmag=1.0
-node="clk_pad
-s14_an_2_esd
-x1.core_p"
-color="4 7 5"
+node="dig_in_0_
+x1.xodt.enh
+clk_pad
+x1.xodt.x"
+color="8 10 4 12"
 dataset=-1
 unitx=1
 logx=0
@@ -398,6 +407,53 @@ logy=0
 autoload=0
 hilight_wave=-1}
 B 2 2050 550 3850 950 {flags=graph,unlocked
+y1=-0.01
+y2=0.03
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=2.94e-07
+x2=3.08e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="i(vpad2)"
+color="4"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2050 1050 3850 1450 {flags=graph,unlocked
+y1=-0.01
+y2=1.6
+ypos1=0
+ypos2=2
+divy=5
+subdivy=1
+unity=1
+x1=3.96e-07
+x2=4.08e-07
+divx=5
+subdivx=1
+xlabmag=1.0
+ylabmag=1.0
+legendmag=1.0
+node="clk_pad
+i(vpad2)"
+color="4"
+dataset=-1
+unitx=1
+logx=0
+logy=0
+autoload=0
+hilight_wave=-1}
+B 2 2050 1550 3850 1950 {flags=graph,unlocked
 y1=-0.5
 y2=1.6
 ypos1=0
@@ -414,7 +470,7 @@ ylabmag=1.0
 legendmag=1.0
 node="d_p
 d_n
-vod"
+\\"vod;d_p d_n -\\""
 color="4 5 7"
 dataset=-1
 unitx=1
@@ -447,11 +503,13 @@ Vsub sub! 0 0
 * measurements, the wrdata and the graph panels actually need.  In_p / In_n are
 * the pre-driver pair inside xlvds, where a common-mode problem shows up first.
 save d_p d_n vos clk_pad s14_an_2_esd dig_in_0_ i(Vpad2) x1.core_p x1.core_n
-+ i(Vvdd_3v3) i(Vvdd_1v2) i(Viovdd) x1.xlvds.In_p x1.xlvds.In_n
++ x1.xodt.enh x1.xodt.x i(Vvdd_3v3) i(Vvdd_1v2) i(Viovdd) x1.xlvds.In_p x1.xlvds.In_n
 tran 5p 700n 0 5p
 write @schname\\\\.raw
 
 let vod = v(d_p)-v(d_n)
+meas tran enh_a AVG v(x1.xodt.enh) from=150n to=295n
+meas tran x_max_a MAX v(x1.xodt.x) from=150n to=295n
 meas tran pad_max_a MAX v(clk_pad) from=150n to=295n
 meas tran pad_min_a MIN v(clk_pad) from=150n to=295n
 meas tran ck_max_a MAX v(s14_an_2_esd) from=150n to=295n
@@ -465,6 +523,8 @@ meas tran vos_avg_a AVG v(vos) from=150n to=295n
 meas tran vos_pp_a PP v(vos) from=150n to=295n
 meas tran i_3v3_a AVG i(Vvdd_3v3) from=150n to=295n
 meas tran i_1v2_a AVG i(Vvdd_1v2) from=150n to=295n
+meas tran enh_b AVG v(x1.xodt.enh) from=320n to=395n
+meas tran x_max_b MAX v(x1.xodt.x) from=320n to=395n
 meas tran pad_max_b MAX v(clk_pad) from=320n to=395n
 meas tran pad_min_b MIN v(clk_pad) from=320n to=395n
 meas tran ck_max_b MAX v(s14_an_2_esd) from=320n to=395n
@@ -478,6 +538,8 @@ meas tran vos_avg_b AVG v(vos) from=320n to=395n
 meas tran vos_pp_b PP v(vos) from=320n to=395n
 meas tran i_3v3_b AVG i(Vvdd_3v3) from=320n to=395n
 meas tran i_1v2_b AVG i(Vvdd_1v2) from=320n to=395n
+meas tran enh_c AVG v(x1.xodt.enh) from=500n to=695n
+meas tran x_max_c MAX v(x1.xodt.x) from=500n to=695n
 meas tran pad_max_c MAX v(clk_pad) from=500n to=695n
 meas tran pad_min_c MIN v(clk_pad) from=500n to=695n
 meas tran ck_max_c MAX v(s14_an_2_esd) from=500n to=695n
@@ -492,14 +554,17 @@ meas tran vos_pp_c PP v(vos) from=500n to=695n
 meas tran i_3v3_c AVG i(Vvdd_3v3) from=500n to=695n
 meas tran i_1v2_c AVG i(Vvdd_1v2) from=500n to=695n
 echo === phase A - ODT off, EMF 1.2 V: pad 1.2 V, no pad current (150-295 ns)
-print pad_max_a pad_min_a ck_max_a ck_min_a ipad_max_a ipad_avg_a
+print enh_a x_max_a pad_max_a pad_min_a ck_max_a ck_min_a ipad_max_a ipad_avg_a
 print core_pp_a vod_max_a vod_min_a vos_avg_a vos_pp_a i_3v3_a i_1v2_a
 echo === phase B - ODT on, EMF 1.2 V: pad halved to 0.6 V if the ODT is 50 ohm (320-395 ns)
-print pad_max_b pad_min_b ck_max_b ck_min_b ipad_max_b ipad_avg_b
+print enh_b x_max_b pad_max_b pad_min_b ck_max_b ck_min_b ipad_max_b ipad_avg_b
 print core_pp_b vod_max_b vod_min_b vos_avg_b vos_pp_b i_3v3_b i_1v2_b
-echo === phase C - ODT on, EMF 2.4 V: pad 1.2 V, 24 mA while high (500-695 ns)
-print pad_max_c pad_min_c ck_max_c ck_min_c ipad_max_c ipad_avg_c
+echo === phase C - ODT on, EMF 2.4 V: pad 1.2 V, 24 mA while high; back-termination on, ibias1 3 uA (500-695 ns)
+print enh_c x_max_c pad_max_c pad_min_c ck_max_c ck_min_c ipad_max_c ipad_avg_c
 print core_pp_c vod_max_c vod_min_c vos_avg_c vos_pp_c i_3v3_c i_1v2_c
+let r_odt = 50 * pad_max_b / (1.2 - pad_max_b)
+echo === ODT resistance from phase B, 50 * Vpad / (1.2 V - Vpad):
+print r_odt
 
 set wr_vecnames
 set wr_singlescale

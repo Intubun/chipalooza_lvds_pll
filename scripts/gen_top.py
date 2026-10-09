@@ -58,17 +58,19 @@ PIN_USE = dict(
      ("dig_in[2]", "xpat.reset - active high, seeds the PRBS shift register; DRST antenna diode"),
      ("dig_in[1]", "xpat.en - gates the pattern clock, not the output pair"),
      ("dig_in[0]", "xodt.EN - 1 = 50 ohm termination of ref_clk on"),
-     ("ibias0", "xiref_pd (1:15) -> xlvds.Iref_pd - 2 uA in, 30 uA out"),
-     ("ibias1", "xiref_drv (1:15) -> xlvds.Iref_drv - 2 uA in, 30 uA out"),
-     ("vbias", NC),
-     ("analog_bus1", "xlvds.Vref - 1.2 V common-mode reference"),
+     ("dig_in[4]", "xbt.EN - 1 = ~200 ohm back-termination of the LVDS pair on (with ibias1 3 uA)"),
+     ("ibias0", "xiref_pd (1:15) -> xlvds.Iref_pd - IDAC code 6 (1.94 uA in, 29 uA out)"),
+     ("ibias1", "xiref_drv (1:15) -> xlvds.Iref_drv - code 6; code 9 (2.90 uA) with dig_in[4]"),
+     ("vbias", "xlvds.Vref - 1.2 V common-mode reference, the harness voltage reference"),
+     ("analog_bus0", "tap on ibias0 through RT0 (1.1 kohm): measure it, or force it from outside"),
+     ("analog_bus1", "tap on vbias = Vref through RT1 (1.1 kohm)"),
+     ("analog_bus2", "tap on ibias1 through RT2 (1.1 kohm)"),
      ("s14_an_2_esd", "xpat.ref_clk"),
-     ("s14_an[0]", "xlvds.Out_n"),
-     ("s14_an[1]", "xlvds.Out_p")]
-    + [("dig_in[%d]" % b, NC) for b in range(23, 3, -1)]
+     ("s14_an[0]", "xlvds.Out_n, xbt.OUTN"),
+     ("s14_an[1]", "xlvds.Out_p, xbt.OUTP")]
+    + [("dig_in[%d]" % b, NC) for b in range(23, 4, -1)]
     + [("dig_out[%d]" % b, NC) for b in range(12)]
-    + [(n, NC) for n in ("analog_bus0", "analog_bus2", "analog_bus3",
-                         "s14_an_0_esd", "s14_an_1_esd")]
+    + [(n, NC) for n in ("analog_bus3", "s14_an_0_esd", "s14_an_1_esd")]
     + [("s14_an[2]", "xodt.PAD - the termination, on pad 2 itself")])
 
 # The port name that ipin.sym draws is 0.33 high and grows left from x = -18.75;
@@ -99,9 +101,13 @@ def sym_offsets(path):
 # stub hanging in the air
 PINS = dict((cell, sym_offsets(os.path.join(HERE, "..", "macros", cell, "schematic",
                                             "xschem", cell + ".sym")))
-            for cell in ("lvds_pattern", "lvds_tx", "iref_x15", "ref_odt"))
+            for cell in ("lvds_pattern", "lvds_tx", "iref_x15", "ref_odt", "lvds_bt"))
 PINS["mos"] = {"D": (20, 30), "G": (-20, 0), "S": (20, -30), "B": (20, 0)}
 PINS["dio"] = {"d1": (0, -30), "d0": (0, 30)}          # sg13cmos5l_pr/dantenna.sym: d1 cathode, d0 anode
+PINS["res"] = {"P": (0, -30), "M": (0, 30)}            # sg13cmos5l_pr/rppd.sym
+# rppd's value as the PDK symbol computes it - xschem shows it, the LVS ignores it
+RPPD_VALUE = ('value=\\"expr_eng(  ( 70.0e-6 / @w + 260.0 * ( (@b + 1)* @l + ( 1.081*( @w + 6.0e-9 ) '
+              '+ 0.18e-6 )*@b ) / ( @w + 6.0e-9 ) ) / @m  )\\"')
 # decap rows in the layout - keep in step with N_LV / N_HV in scripts/top/route_top.py
 DECAP_LV, DECAP_HV = 83, 95
 
@@ -116,7 +122,7 @@ CELLS = [
     # the output pair straight onto pads 1 and 0, the bias through two 1:15 mirrors
     ("xlvds", "lvds_tx.sym", "lvds_tx", 2040, -1030, {
         "D_p": "core_p", "D_n": "core_n", "Iref_pd": "iref_pd_30u",
-        "Iref_drv": "iref_drv_30u", "Vref": "analog_bus1", "Va": "vdd_3v3",
+        "Iref_drv": "iref_drv_30u", "Vref": "vbias", "Va": "vdd_3v3",
         "Out_p": "s14_an[1]", "Out_n": "s14_an[0]", "Vss": "vss_3v3"}, ""),
     # the IDAC grid stops at 10 uA; the transmitter wants 30 uA per reference
     ("xiref_pd", "iref_x15.sym", "iref_x15", 1900, -800, {
@@ -127,6 +133,21 @@ CELLS = [
     # behind the secondary protection the ~520 ohm there would make it a divider
     ("xodt", "ref_odt.sym", "ref_odt", 1630, -1250, {
         "EN": "dig_in[0]", "PAD": "s14_an[2]", "VDD": "vdd_1v2", "VDDH": "vdd_3v3", "VSS": "vss_3v3"}, ""),
+    # the switchable ~200 ohm back-termination across the output pair: a wave
+    # coming back from the receiver is absorbed instead of thrown back by the
+    # current-source driver; ibias1 3 uA instead of 2 uA keeps |Vod|
+    # taps on the bias nodes for measuring - or forcing from outside, should the
+    # IDAC or the voltage reference not work: 1.1 kohm of rppd each, at the frame
+    # edge in the layout (scripts/top/route_top.py)
+    ("RT0", "sg13cmos5l_pr/rppd.sym", "res", 2450, -1300, {"P": "analog_bus0", "M": "ibias0"},
+     "w=1u l=4u model=rppd body=vss_1v2 spiceprefix=X b=0 m=1 mm_ok=1 " + RPPD_VALUE),
+    ("RT1", "sg13cmos5l_pr/rppd.sym", "res", 2560, -1300, {"P": "analog_bus1", "M": "vbias"},
+     "w=1u l=4u model=rppd body=vss_1v2 spiceprefix=X b=0 m=1 mm_ok=1 " + RPPD_VALUE),
+    ("RT2", "sg13cmos5l_pr/rppd.sym", "res", 2670, -1300, {"P": "analog_bus2", "M": "ibias1"},
+     "w=1u l=4u model=rppd body=vss_1v2 spiceprefix=X b=0 m=1 mm_ok=1 " + RPPD_VALUE),
+    ("xbt", "lvds_bt.sym", "lvds_bt", 2040, -1300, {
+        "EN": "dig_in[4]", "OUTP": "s14_an[1]", "OUTN": "s14_an[0]",
+        "VDD": "vdd_1v2", "VDDH": "vdd_3v3", "VSS": "vss_3v3"}, ""),
     # reset is ~470 um of metal3 from dig_in[2] to a small gate and has no antenna
     # diode inside lvds_pattern (en, mode and ref_clk do): this one sits under the
     # line in the layout, 9 um before the pin (scripts/top/route_top.py)
@@ -163,7 +184,7 @@ its secondary protection (series resistor and diodes), the one for gates.
   s14_an[2]      odt       pad 2 itself: the switchable 50 ohm termination
   s14_an_0_esd, s14_an_1_esd   not connected
 
-Not connected: dig_out[11:0], dig_in[23:4], analog_bus0/2/3, vbias, clk,
+Not connected: dig_out[11:0], dig_in[23:5], analog_bus3, clk,
 enable and reset - the reference arrives on its own pad.  The harness masks
 dig_in to zero for an unselected project (proj_dig_in is dig_in ANDed with
 select & dig_ena in user_project_control.v), so dig_in[1] alone stops the
@@ -181,7 +202,9 @@ leaves the clock stopped and the output pair static - a legal idle.
                            are complementary from the first edge after power-up
                            and the LVDS driver settles once, not at every enable.
   dig_in[3]     mode       0 = clock passthrough, 1 = PRBS-7
-  dig_in[23:4]  unused
+  dig_in[4]     bt         1 = ~200 ohm across the LVDS pair (xbt) - set ibias1
+                           to 3 uA with it, or |Vod| drops by a third; 0 = off
+  dig_in[23:5]  unused
 
 The PLL that clocked lvds_pattern through pll_clk left the project on
 2026-10-07, and the pattern's clock source select (pll_clk, clk_src) with
@@ -344,10 +367,11 @@ TB_LVDS_DRIVE = {
     "vdd_3v3": ("v", "3.3", "gated 3.3 V"),
     "vdd_1v2": ("v", "1.2", "gated 1.2 V"),
     "iovdd": ("v", "3.3", "pad ring, 3.3 V - pad 2's IO cell"),
-    "analog_bus1": ("v", "1.2", "LVDS common-mode reference, 1.2 V (the IDAC grid has no 1.25 V)"),
-    "ibias0": ("i", "-2u", "pre-driver reference, 2 uA into the 1:15 mirror"),
-    "ibias1": ("i", "-2u", "driver reference, 2 uA into the 1:15 mirror"),
+    "vbias": ("v", "1.2", "LVDS common-mode reference, 1.2 V from the harness voltage reference"),
+    "ibias0": ("i", "-1.935u", "pre-driver reference, IDAC code 6 = 1.935uA into the 1:15 mirror"),
+    "ibias1": ("i", "PWL(0 -1.935u 400n -1.935u 400.1n -2.903u)", "driver reference, code 6; code 9 = 2.903uA from 400 ns"),
     "dig_in[0]": ("v", "PWL(0 0 300n 0 300.1n 1.2)", "ODT: off, on from 300 ns"),
+    "dig_in[4]": ("v", "PWL(0 0 400n 0 400.1n 1.2)", "back-termination: off, on from 400 ns"),
     "dig_in[1]": ("v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
     "dig_in[2]": ("v", "PWL(0 1.2 2n 1.2 2.1n 0 400n 0 400.1n 1.2 402n 1.2 402.1n 0)",
                   "reset until 2 ns, again at 400 ns"),
@@ -360,7 +384,7 @@ TB_LVDS_PADS = ("s14_an[1]", "s14_an[0]")     # the differential pair: d_p, d_n
 TB_LVDS_PHASES = [
     ("a", 150, 295, "phase A - ODT off, EMF 1.2 V: pad 1.2 V, no pad current"),
     ("b", 320, 395, "phase B - ODT on, EMF 1.2 V: pad halved to 0.6 V if the ODT is 50 ohm"),
-    ("c", 500, 695, "phase C - ODT on, EMF 2.4 V: pad 1.2 V, 24 mA while high"),
+    ("c", 500, 695, "phase C - ODT on, EMF 2.4 V: pad 1.2 V, 24 mA while high; back-termination on, ibias1 3 uA"),
 ]
 
 
@@ -368,7 +392,8 @@ def tb_lvds_measures():
     out = []
     for k, t0, t1, what in TB_LVDS_PHASES:
         w = "from=%dn to=%dn" % (t0, t1)
-        for name, fn, vec in (("pad_max", "MAX", "v(clk_pad)"), ("pad_min", "MIN", "v(clk_pad)"),
+        for name, fn, vec in (("enh", "AVG", "v(x1.xodt.enh)"), ("x_max", "MAX", "v(x1.xodt.x)"),
+                              ("pad_max", "MAX", "v(clk_pad)"), ("pad_min", "MIN", "v(clk_pad)"),
                               ("ck_max", "MAX", "v(s14_an_2_esd)"), ("ck_min", "MIN", "v(s14_an_2_esd)"),
                               ("ipad_max", "MAX", "i(Vpad2)"), ("ipad_avg", "AVG", "i(Vpad2)"),
                               ("core_pp", "PP", "v(x1.core_p)"),
@@ -378,10 +403,15 @@ def tb_lvds_measures():
             out.append("meas tran %s_%s %s %s %s" % (name, k, fn, vec, w))
     for k, t0, t1, what in TB_LVDS_PHASES:
         out.append("echo === %s (%d-%d ns)" % (what, t0, t1))
-        out.append("print pad_max_%s pad_min_%s ck_max_%s ck_min_%s ipad_max_%s ipad_avg_%s"
-                   % ((k,) * 6))
+        out.append("print enh_%s x_max_%s pad_max_%s pad_min_%s ck_max_%s ck_min_%s ipad_max_%s ipad_avg_%s"
+                   % ((k,) * 8))
         out.append("print core_pp_%s vod_max_%s vod_min_%s vos_avg_%s vos_pp_%s i_3v3_%s i_1v2_%s"
                    % ((k,) * 7))
+    # phase B: the same generator into the termination - the pad divides 1.2 V EMF
+    # between the generator's 50 ohm and the ODT
+    out.append("let r_odt = 50 * pad_max_b / (1.2 - pad_max_b)")
+    out.append("echo === ODT resistance from phase B, 50 * Vpad / (1.2 V - Vpad):")
+    out.append("print r_odt")
     return "\n".join(out)
 
 
@@ -408,7 +438,7 @@ Vsub sub! 0 0
 * measurements, the wrdata and the graph panels actually need.  In_p / In_n are
 * the pre-driver pair inside xlvds, where a common-mode problem shows up first.
 save d_p d_n vos clk_pad s14_an_2_esd dig_in_0_ i(Vpad2) x1.core_p x1.core_n
-+ i(Vvdd_3v3) i(Vvdd_1v2) i(Viovdd) x1.xlvds.In_p x1.xlvds.In_n
++ x1.xodt.enh x1.xodt.x i(Vvdd_3v3) i(Vvdd_1v2) i(Viovdd) x1.xlvds.In_p x1.xlvds.In_n
 tran 5p 700n 0 5p
 write @schname\\\\.raw
 
@@ -519,7 +549,7 @@ def stim_groups(groups, drive):
                        % (STIM_X, y - 60, tag, name))
             out.append('C {devices/vsource.sym} %d %d 0 0 {name=V%s value="%s"}'
                        % (STIM_X, y, tag, val) if kind == "v" else
-                       "C {isource.sym} %d %d 0 0 {name=I%s value=%s}"
+                       'C {isource.sym} %d %d 0 0 {name=I%s value="%s"}'
                        % (STIM_X, y, tag, val))
             out.append("N %d %d %d %d {lab=GND}"
                        % (STIM_X, y + 30, STIM_X, y + 60))
@@ -618,7 +648,8 @@ def pad_network(pins, pads):
 # set to 1.2 V into 50 ohm.  Placed below the output termination, connected by
 # net labels only.
 REFCLK_X, REFCLK_Y = 500, 1000
-PAD2_PINS = {"vss": (7.5, -340), "vdd": (17.5, -330), "iovss": (27.5, -320),
+# the pad pin is there twice: core side (100, -350) and bond pad (110, -100), one net
+PAD2_PINS = {"vss": (7.5, -340), "vdd": (17.5, -330), "iovss": (27.5, -320), "bond": (110, -100),
              "iovdd": (40, -310), "pad": (100, -350), "padres": (200, -350)}
 
 
@@ -646,7 +677,7 @@ def refclk_path():
     px, py = x + 800, y + 250
     out.append("C {sg13cmos5l_io/sg13cmos5l_IOPadAnalog.sym} %d %d 0 0 {name=xpad2}" % (px, py))
     for pin, net in (("vss", "GND"), ("vdd", "vdd_1v2"), ("iovss", "GND"),
-                     ("iovdd", "iovdd"), ("pad", "s14_an[2]"), ("padres", "s14_an_2_esd")):
+                     ("iovdd", "iovdd"), ("pad", "s14_an[2]"), ("padres", "s14_an_2_esd"), ("bond", "s14_an[2]")):
         dx, dy = PAD2_PINS[pin]
         lab(px + dx, py + dy, net, "pad2_" + pin)
     out.append("T {ref_clk: 50 ohm generator onto pad 2.  Vclk_b joins at 400 ns:\n"
@@ -662,8 +693,8 @@ def refclk_path():
 # the sources, split by what they are actually for
 TB_LVDS_GROUPS = [
     ("supplies", ["vdd_3v3", "vdd_1v2", "iovdd"]),
-    ("bias", ["analog_bus1", "ibias0", "ibias1"]),
-    ("pattern control", ["dig_in[0]", "dig_in[1]", "dig_in[2]", "dig_in[3]"]),
+    ("bias", ["vbias", "ibias0", "ibias1"]),
+    ("pattern control", ["dig_in[0]", "dig_in[1]", "dig_in[2]", "dig_in[3]", "dig_in[4]"]),
 ]
 
 LVDS_TITLE = """LVDS bench for the top cell - the schematic, and the ODT switched on and off.
@@ -676,7 +707,9 @@ The run has three phases:
   B  300 - 400 ns   ODT on,  EMF 1.2 V   pad halved to 0.6 V: 50 ohm into 50 ohm
                                         (too small for the clock - the pattern stalls)
   C  400 - 700 ns   ODT on,  EMF 2.4 V   pad 1.2 V again, 24 mA while high;
-                                        reset at 400 ns, PRBS-7 runs again
+                                        reset at 400 ns, PRBS-7 runs again;
+                                        the output back-termination on (dig_in[4])
+                                        and ibias1 3 uA
 
 PRBS-7 at 500 Mb/s through the pre-driver and the driver into 49.9 + 49.9 ohm
 across pads 1 and 0 with the Vos tap.  The log prints each phase: the clock at
@@ -697,15 +730,25 @@ def gen_tb_lvds(path, symbol):
     out.append("C {%s.sym} 0 0 0 0 {name=x1}" % TOP)
     out += pad_network(pins, TB_LVDS_PADS)
     out += refclk_path()
-    # the three full-run panels share their window and stay locked together; the
-    # zooms below them sit on a few bits of phase A and of phase C
+    # the four full-run panels share their window and stay locked together:
+    #   the switch - dig_in[0] and the gate of the ODT switch, level-shifted to 3.3 V
+    #   the pad - its envelope halves at 300 ns and is back at 1.2 V from 400 ns;
+    #     x1.xodt.x, behind R1, drops to ~0 once the switch is on
+    #   the current into the pad - edge spikes only with the ODT off, 12 mA and
+    #     then 24 mA while the clock is high with it on
+    #   the output pair
+    # below them the switch-on at 300 ns close up, and a few settled bits of phase C
     out += view_panels(
-        [(["dig_in_0_", "clk_pad", "s14_an_2_esd"], [8, 4, 7], -0.2, 1.6, 0.0, 7.0e-7),
+        [(["dig_in_0_", "x1.xodt.enh"], [8, 10], -0.2, 3.6, 0.0, 7.0e-7),
+         (["clk_pad", "x1.xodt.x", "s14_an_2_esd"], [4, 12, 7], -0.2, 1.6, 0.0, 7.0e-7),
          (["i(vpad2)"], [4], -0.01, 0.03, 0.0, 7.0e-7),
          (["d_p", "d_n", "vos"], [4, 5, 8], 0.9, 1.6, 0.0, 7.0e-7),
-         (["clk_pad", "s14_an_2_esd", "x1.core_p"], [4, 7, 5], -0.2, 1.6, 2.50e-7, 2.60e-7),
-         (["clk_pad", "s14_an_2_esd", "x1.core_p"], [4, 7, 5], -0.2, 1.6, 6.50e-7, 6.60e-7),
-         (["d_p", "d_n", "vod"], [4, 5, 7], -0.5, 1.6, 6.50e-7, 6.60e-7)],
+         (["dig_in_0_", "x1.xodt.enh", "clk_pad", "x1.xodt.x"], [8, 10, 4, 12],
+          -0.2, 3.6, 2.94e-7, 3.08e-7),
+         (["i(vpad2)"], [4], -0.01, 0.03, 2.94e-7, 3.08e-7),
+         (["clk_pad", "i(vpad2)"], [4], -0.01, 1.6, 3.96e-7, 4.08e-7),
+         # vod is a let vector, written after the rawfile: the panel computes it
+         (["d_p", "d_n", '\\\\"vod;d_p d_n -\\\\"'], [4, 5, 7], -0.5, 1.6, 6.50e-7, 6.60e-7)],
         TOP + "_tb_lvds")
     out.append(code_block(DOC_X, DOC_CODE_Y, TB_LVDS_CONTROL))
     io.open(path, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
@@ -715,14 +758,15 @@ def gen_tb_lvds(path, symbol):
 TB_SOURCES = [
     ("vdd_3v3", "v", "3.3", "gated 3.3 V"),
     ("vdd_1v2", "v", "1.2", "gated 1.2 V"),
-    ("analog_bus1", "v", "1.2", "LVDS common-mode reference, 1.2 V"),
+    ("vbias", "v", "1.2", "LVDS common-mode reference, 1.2 V"),
     ("s14_an_2_esd", "v", "PULSE(0 1.2 0 50p 50p 1.9n 4n)", "ref_clk, 250 MHz"),
     ("dig_in[0]", "v", "0", "ODT off"),
+    ("dig_in[4]", "v", "0", "back-termination off"),
     ("dig_in[1]", "v", "PWL(0 0 3n 0 3.1n 1.2)", "en, low until 3 ns"),
     ("dig_in[2]", "v", "PWL(0 1.2 2n 1.2 2.1n 0)", "reset, high until 2 ns"),
     ("dig_in[3]", "v", "PWL(0 0 10n 0 10.1n 1.2)", "mode -> PRBS-7 at 10 ns"),
-    ("ibias0", "i", "-2u", "pre-driver reference, 2 uA"),
-    ("ibias1", "i", "-2u", "driver reference, 2 uA"),
+    ("ibias0", "i", "-1.935u", "pre-driver reference, IDAC code 6"),
+    ("ibias1", "i", "-1.935u", "driver reference, IDAC code 6"),
 ]
 
 TB_CONTROL = r"""

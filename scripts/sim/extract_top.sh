@@ -4,7 +4,7 @@
 #   bash scripts/sim/extract_top.sh        # in the container; or: make extract-top
 #
 # One magic extraction of layout/slot_14.gds, hierarchical, with coupling
-# capacitance (cthresh 0.01 fF, as extract_lvds.sh and CACE's pex column), and
+# capacitance (cthresh 0.01 fF, as CACE's pex column), and
 # xschem's netlist of the top schematic.  scripts/sim/pex_top.py turns them into
 #
 #   netlist/pex/slot_14_pex.spice    everything as laid out       -> slot_14_tb_lvds_pex

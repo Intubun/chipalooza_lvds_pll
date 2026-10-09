@@ -28,11 +28,11 @@ C {devices/vsource.sym} -1200 -1700 0 0 {name=Vvdd_1v2 value="1.2"}
 N -1200 -1670 -1200 -1640 {lab=GND}
 C {devices/gnd.sym} -1200 -1640 0 0 {name=lg_vdd_1v2 lab=GND}
 T {gated 1.2 V} -1140 -1705 0 0 0.3 0.3 {}
-N -1200 -1560 -1200 -1530 {lab=analog_bus1}
-C {lab_pin.sym} -1200 -1560 1 0 {name=ls_analog_bus1 sig_type=std_logic lab=analog_bus1}
-C {devices/vsource.sym} -1200 -1500 0 0 {name=Vanalog_bus1 value="1.2"}
+N -1200 -1560 -1200 -1530 {lab=vbias}
+C {lab_pin.sym} -1200 -1560 1 0 {name=ls_vbias sig_type=std_logic lab=vbias}
+C {devices/vsource.sym} -1200 -1500 0 0 {name=Vvbias value="1.2"}
 N -1200 -1470 -1200 -1440 {lab=GND}
-C {devices/gnd.sym} -1200 -1440 0 0 {name=lg_analog_bus1 lab=GND}
+C {devices/gnd.sym} -1200 -1440 0 0 {name=lg_vbias lab=GND}
 T {LVDS common-mode reference, 1.2 V} -1140 -1505 0 0 0.3 0.3 {}
 N -1200 -1360 -1200 -1330 {lab=s14_an_2_esd}
 C {lab_pin.sym} -1200 -1360 1 0 {name=ls_s14_an_2_esd sig_type=std_logic lab=s14_an_2_esd}
@@ -46,36 +46,42 @@ C {devices/vsource.sym} -1200 -1100 0 0 {name=Vdig_in_0 value="0"}
 N -1200 -1070 -1200 -1040 {lab=GND}
 C {devices/gnd.sym} -1200 -1040 0 0 {name=lg_dig_in_0 lab=GND}
 T {ODT off} -1140 -1105 0 0 0.3 0.3 {}
-N -1200 -960 -1200 -930 {lab=dig_in[1]}
-C {lab_pin.sym} -1200 -960 1 0 {name=ls_dig_in_1 sig_type=std_logic lab=dig_in[1]}
-C {devices/vsource.sym} -1200 -900 0 0 {name=Vdig_in_1 value="PWL(0 0 3n 0 3.1n 1.2)"}
+N -1200 -960 -1200 -930 {lab=dig_in[4]}
+C {lab_pin.sym} -1200 -960 1 0 {name=ls_dig_in_4 sig_type=std_logic lab=dig_in[4]}
+C {devices/vsource.sym} -1200 -900 0 0 {name=Vdig_in_4 value="0"}
 N -1200 -870 -1200 -840 {lab=GND}
-C {devices/gnd.sym} -1200 -840 0 0 {name=lg_dig_in_1 lab=GND}
-T {en, low until 3 ns} -1140 -905 0 0 0.3 0.3 {}
-N -1200 -760 -1200 -730 {lab=dig_in[2]}
-C {lab_pin.sym} -1200 -760 1 0 {name=ls_dig_in_2 sig_type=std_logic lab=dig_in[2]}
-C {devices/vsource.sym} -1200 -700 0 0 {name=Vdig_in_2 value="PWL(0 1.2 2n 1.2 2.1n 0)"}
+C {devices/gnd.sym} -1200 -840 0 0 {name=lg_dig_in_4 lab=GND}
+T {back-termination off} -1140 -905 0 0 0.3 0.3 {}
+N -1200 -760 -1200 -730 {lab=dig_in[1]}
+C {lab_pin.sym} -1200 -760 1 0 {name=ls_dig_in_1 sig_type=std_logic lab=dig_in[1]}
+C {devices/vsource.sym} -1200 -700 0 0 {name=Vdig_in_1 value="PWL(0 0 3n 0 3.1n 1.2)"}
 N -1200 -670 -1200 -640 {lab=GND}
-C {devices/gnd.sym} -1200 -640 0 0 {name=lg_dig_in_2 lab=GND}
-T {reset, high until 2 ns} -1140 -705 0 0 0.3 0.3 {}
-N -1200 -560 -1200 -530 {lab=dig_in[3]}
-C {lab_pin.sym} -1200 -560 1 0 {name=ls_dig_in_3 sig_type=std_logic lab=dig_in[3]}
-C {devices/vsource.sym} -1200 -500 0 0 {name=Vdig_in_3 value="PWL(0 0 10n 0 10.1n 1.2)"}
+C {devices/gnd.sym} -1200 -640 0 0 {name=lg_dig_in_1 lab=GND}
+T {en, low until 3 ns} -1140 -705 0 0 0.3 0.3 {}
+N -1200 -560 -1200 -530 {lab=dig_in[2]}
+C {lab_pin.sym} -1200 -560 1 0 {name=ls_dig_in_2 sig_type=std_logic lab=dig_in[2]}
+C {devices/vsource.sym} -1200 -500 0 0 {name=Vdig_in_2 value="PWL(0 1.2 2n 1.2 2.1n 0)"}
 N -1200 -470 -1200 -440 {lab=GND}
-C {devices/gnd.sym} -1200 -440 0 0 {name=lg_dig_in_3 lab=GND}
-T {mode -> PRBS-7 at 10 ns} -1140 -505 0 0 0.3 0.3 {}
-N -1200 -360 -1200 -330 {lab=ibias0}
-C {lab_pin.sym} -1200 -360 1 0 {name=ls_ibias0 sig_type=std_logic lab=ibias0}
-C {isource.sym} -1200 -300 0 0 {name=Iibias0 value=-2u}
+C {devices/gnd.sym} -1200 -440 0 0 {name=lg_dig_in_2 lab=GND}
+T {reset, high until 2 ns} -1140 -505 0 0 0.3 0.3 {}
+N -1200 -360 -1200 -330 {lab=dig_in[3]}
+C {lab_pin.sym} -1200 -360 1 0 {name=ls_dig_in_3 sig_type=std_logic lab=dig_in[3]}
+C {devices/vsource.sym} -1200 -300 0 0 {name=Vdig_in_3 value="PWL(0 0 10n 0 10.1n 1.2)"}
 N -1200 -270 -1200 -240 {lab=GND}
-C {devices/gnd.sym} -1200 -240 0 0 {name=lg_ibias0 lab=GND}
-T {pre-driver reference, 2 uA} -1140 -305 0 0 0.3 0.3 {}
-N -1200 -160 -1200 -130 {lab=ibias1}
-C {lab_pin.sym} -1200 -160 1 0 {name=ls_ibias1 sig_type=std_logic lab=ibias1}
-C {isource.sym} -1200 -100 0 0 {name=Iibias1 value=-2u}
+C {devices/gnd.sym} -1200 -240 0 0 {name=lg_dig_in_3 lab=GND}
+T {mode -> PRBS-7 at 10 ns} -1140 -305 0 0 0.3 0.3 {}
+N -1200 -160 -1200 -130 {lab=ibias0}
+C {lab_pin.sym} -1200 -160 1 0 {name=ls_ibias0 sig_type=std_logic lab=ibias0}
+C {isource.sym} -1200 -100 0 0 {name=Iibias0 value=-1.935u}
 N -1200 -70 -1200 -40 {lab=GND}
-C {devices/gnd.sym} -1200 -40 0 0 {name=lg_ibias1 lab=GND}
-T {driver reference, 2 uA} -1140 -105 0 0 0.3 0.3 {}
+C {devices/gnd.sym} -1200 -40 0 0 {name=lg_ibias0 lab=GND}
+T {pre-driver reference, IDAC code 6} -1140 -105 0 0 0.3 0.3 {}
+N -1200 40 -1200 70 {lab=ibias1}
+C {lab_pin.sym} -1200 40 1 0 {name=ls_ibias1 sig_type=std_logic lab=ibias1}
+C {isource.sym} -1200 100 0 0 {name=Iibias1 value=-1.935u}
+N -1200 130 -1200 160 {lab=GND}
+C {devices/gnd.sym} -1200 160 0 0 {name=lg_ibias1 lab=GND}
+T {driver reference, IDAC code 6} -1140 95 0 0 0.3 0.3 {}
 N -280 -350 -220 -350 {lab=vdd_3v3}
 C {lab_pin.sym} -280 -350 0 0 {name=lx_vdd_3v3 sig_type=std_logic lab=vdd_3v3}
 N -280 -330 -220 -330 {lab=vdd_1v2}

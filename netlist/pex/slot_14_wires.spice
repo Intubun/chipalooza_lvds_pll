@@ -6,16 +6,17 @@
 
 .subckt slot_14_wires vdd_3v3 vdd_1v2 vss_3v3 vss_1v2 enable clk reset dig_in_23_ dig_in_22_ dig_in_21_ dig_in_20_ dig_in_19_ dig_in_18_ dig_in_17_ dig_in_16_ dig_in_15_ dig_in_14_ dig_in_13_ dig_in_12_ dig_in_11_ dig_in_10_ dig_in_9_ dig_in_8_ dig_in_7_ dig_in_6_ dig_in_5_ dig_in_4_ dig_in_3_ dig_in_2_ dig_in_1_ dig_in_0_ ibias0 ibias1 vbias dig_out_11_ dig_out_10_ dig_out_9_ dig_out_8_ dig_out_7_ dig_out_6_ dig_out_5_ dig_out_4_ dig_out_3_ dig_out_2_ dig_out_1_ dig_out_0_ s14_an_2_ s14_an_1_ s14_an_0_ s14_an_2_esd s14_an_1_esd s14_an_0_esd analog_bus0 analog_bus1 analog_bus2 analog_bus3
 Rjoin_vss_1v2 vss_1v2 vss_3v3 1m
-Xsg13g2_hv_decap_8_49 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_16 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_27 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_38 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_49 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_17 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_28 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_39 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
-xlvds core_p core_n iref_pd_30u iref_drv_30u analog_bus1 vdd_3v3 s14_an_1_ s14_an_0_ vss_3v3 lvds_tx
+xlvds core_p core_n iref_pd_30u iref_drv_30u vbias vdd_3v3 s14_an_1_ s14_an_0_ vss_3v3 lvds_tx
 Xsg13g2_hv_decap_8_18 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_29 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+xbt dig_in_4_ s14_an_1_ s14_an_0_ vdd_1v2 vdd_3v3 vss_3v3 lvds_bt
 Xsg13g2_hv_decap_8_19 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 xiref_pd ibias0 iref_pd_30u vdd_3v3 vss_3v3 iref_x15
 Xsg13cmos5l_decap_8_80 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
@@ -68,11 +69,11 @@ Xsg13cmos5l_decap_8_34 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_23 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_12 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_1 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
-Xsg13cmos5l_decap_8_35 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_79 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_68 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_57 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_46 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_35 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_24 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_13 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_2 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
@@ -83,9 +84,9 @@ Xsg13cmos5l_decap_8_47 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_25 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_14 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_3 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
+Xsg13cmos5l_decap_8_37 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_59 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_48 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
-Xsg13cmos5l_decap_8_37 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_26 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_15 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
 Xsg13cmos5l_decap_8_4 vdd_1v2 vss_3v3 sg13cmos5l_decap_8
@@ -128,15 +129,15 @@ Xsg13g2_hv_decap_8_51 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_62 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_40 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_3 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
-Xsg13g2_hv_decap_8_74 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_85 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_74 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_52 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_63 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_30 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_41 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_4 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
-Xsg13g2_hv_decap_8_75 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_86 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_75 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_53 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_64 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_20 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
@@ -184,247 +185,124 @@ Xsg13g2_hv_decap_8_14 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_25 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_36 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_47 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
-Xsg13g2_hv_decap_8_48 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_59 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_15 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_26 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
 Xsg13g2_hv_decap_8_37 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+Xsg13g2_hv_decap_8_48 vdd_3v3 vss_3v3 sg13g2_hv_decap_8
+X0 vbias analog_bus1 vss_3v3 rppd l=4u w=1u
 XDRST vss_3v3 dig_in_2_ dantenna l=0.78u w=0.78u
-C0 analog_bus3 vss_3v3 0.15943f
-C1 vdd_3v3 iref_pd_30u 0.65766f
-C2 vdd_1v2 vss_3v3 0.11364f
-C3 vss_3v3 s14_an_2_esd 0.02187f
-C4 s14_an_0_ s14_an_2_esd 0.63473f
-C5 ibias1 dig_in_2_ 0.15868f
-C6 vdd_1v2 ibias1 0.41576f
-C7 dig_in_0_ vss_3v3 0.14344f
-C8 vdd_1v2 vss_3v3 0.11364f
-C9 dig_in_18_ dig_in_17_ 0.23029f
-C10 iref_pd_30u analog_bus1 0.34352f
-C11 vdd_3v3 dig_in_2_ 1.03663f
-C12 vdd_3v3 vdd_1v2 4.212f
-C13 dig_in_11_ dig_in_10_ 0.23029f
-C14 ibias0 vss_3v3 0.15943f
-C15 core_n iref_pd_30u 0.21208f
-C16 vss_3v3 iref_pd_30u 0.04401f
-C17 vdd_1v2 vss_3v3 0.11364f
-C18 dig_out_7_ dig_out_6_ 0.23029f
-C19 ibias1 dig_in_1_ 0.1612f
-C20 analog_bus2 vss_3v3 0.15943f
-C21 vss_3v3 analog_bus1 0.15943f
-C22 dig_in_2_ analog_bus1 0.16379f
-C23 dig_in_2_ s14_an_2_esd 0.22358f
-C24 vdd_1v2 analog_bus1 2.47032f
-C25 vdd_1v2 vss_3v3 0.05645f
-C26 vdd_3v3 dig_in_1_ 1.14673f
-C27 iref_drv_30u ibias0 0.06001f
-C28 vdd_3v3 vss_3v3 0.79662f
-C29 dig_in_2_ dig_in_3_ 5.16924f
-C30 dig_in_19_ dig_in_18_ 0.23029f
-C31 dig_in_5_ dig_in_3_ 0.01052f
-C32 vdd_1v2 dig_in_3_ 0.07119f
-C33 vdd_1v2 vss_3v3 0.01201f
-C34 dig_in_12_ dig_in_11_ 0.23029f
-C35 vss_3v3 dig_in_0_ 0.05435f
-C36 vss_3v3 s14_an_2_esd 0.02432f
-C37 dig_in_5_ dig_in_4_ 0.23029f
-C38 analog_bus1 dig_in_1_ 0.1663f
-C39 dig_out_8_ dig_out_7_ 0.23029f
-C40 s14_an_1_ s14_an_2_esd 0.59514f
-C41 dig_out_1_ dig_out_0_ 0.23029f
-C42 vbias vss_3v3 0.15943f
-C43 core_p iref_pd_30u 0.15231f
-C44 vss_3v3 analog_bus0 0.15943f
-C45 dig_in_3_ dig_in_1_ 5.08747f
-C46 vdd_3v3 ibias1 3.83551f
-C47 ibias1 vss_3v3 0.15943f
-C48 dig_out_11_ dig_in_0_ 0.06459f
-C49 vss_3v3 dig_in_0_ 0.1083f
-C50 dig_in_20_ dig_in_19_ 0.23029f
-C51 dig_in_7_ dig_in_3_ 0.01052f
-C52 reset dig_in_23_ 0.23029f
-C53 dig_in_13_ dig_in_12_ 0.23029f
-C54 ibias1 analog_bus1 2.72433f
-C55 dig_in_6_ dig_in_5_ 0.23029f
-C56 ibias0 dig_in_2_ 0.15872f
-C57 vdd_1v2 ibias0 0.74604f
-C58 enable reset 0.22207f
-C59 dig_out_9_ dig_out_8_ 0.23029f
-C60 vss_3v3 vdd_1v2 0.11364f
-C61 dig_out_2_ dig_out_1_ 0.23029f
-C62 vdd_1v2 vss_3v3 0.11364f
-C63 clk enable 0.23029f
-C64 vdd_3v3 analog_bus1 2.13188f
-C65 vdd_3v3 s14_an_2_esd 0.03304f
-C66 ibias1 dig_in_3_ 0.16317f
-C67 ibias0 dig_in_1_ 0.16124f
-C68 vdd_3v3 dig_in_3_ 1.20477f
-C69 s14_an_2_ s14_an_2_esd 0.70873f
-C70 vdd_3v3 vss_3v3 -0.01154f
-C71 dig_in_21_ dig_in_20_ 0.23029f
-C72 vss_3v3 dig_in_0_ 0.02879f
-C73 dig_in_14_ dig_in_13_ 0.23029f
-C74 core_n analog_bus1 0.01127f
-C75 ibias0 vss_3v3 0.15943f
-C76 dig_in_7_ dig_in_6_ 0.23029f
-C77 iref_drv_30u iref_pd_30u 0.28896f
-C78 iref_pd_30u vss_3v3 0.02239f
-C79 dig_out_10_ dig_out_9_ 0.23029f
-C80 vdd_1v2 vss_3v3 0.11364f
-C81 dig_out_3_ dig_out_2_ 0.23029f
-C82 analog_bus3 vss_3v3 0.15943f
-C83 vdd_3v3 vss_3v3 0.79665f
-C84 analog_bus1 dig_in_3_ 0.20333f
-C85 vss_3v3 analog_bus1 0.15943f
-C86 ibias1 ibias0 7.87938f
-C87 iref_drv_30u vdd_1v2 0.05512f
-C88 vdd_1v2 dig_in_0_ 2.0035f
-C89 dig_in_22_ dig_in_21_ 0.23029f
-C90 vss_3v3 s14_an_2_esd 0.02129f
-C91 dig_in_4_ dig_in_3_ 0.24082f
-C92 dig_in_15_ dig_in_14_ 0.23029f
-C93 vdd_3v3 ibias0 4.08992f
-C94 dig_in_8_ dig_in_7_ 0.23029f
-C95 dig_out_11_ dig_out_10_ 0.23029f
-C96 clk vss_3v3 0.01706f
-C97 dig_out_4_ dig_out_3_ 0.23029f
-C98 analog_bus2 vss_3v3 0.15943f
-C99 vbias vss_3v3 0.15943f
-C100 vss_3v3 analog_bus0 0.15943f
-C101 core_p core_n 0.21126f
-C102 dig_in_0_ dig_in_1_ 3.75854f
-C103 iref_drv_30u vss_3v3 0.03635f
-C104 ibias1 vss_3v3 0.15943f
-C105 vss_3v3 s14_an_2_esd 0.01358f
-C106 vdd_1v2 vss_3v3 0.05645f
-C107 dig_in_23_ dig_in_22_ 0.23029f
-C108 dig_in_6_ dig_in_3_ 0.01052f
-C109 ibias0 dig_in_3_ 0.16321f
-C110 dig_in_16_ dig_in_15_ 0.23029f
-C111 dig_in_9_ dig_in_8_ 0.23029f
-C112 dig_out_5_ dig_out_4_ 0.23029f
-C113 ibias0 vss_3v3 0.01693f
-C114 iref_drv_30u vdd_3v3 0.60712f
-C115 vdd_1v2 vss_3v3 0.05764f
-C116 dig_in_2_ dig_in_1_ 6.58974f
-C117 vdd_3v3 dig_in_0_ 0.23525f
-C118 dig_in_17_ dig_in_16_ 0.23029f
-C119 dig_in_10_ dig_in_9_ 0.23029f
-C120 iref_drv_30u analog_bus1 0.54673f
-C121 s14_an_2_ dig_in_0_ 0.12873f
-C122 iref_drv_30u core_n 0.01561f
-C123 dig_out_6_ dig_out_5_ 0.23029f
-C124 dig_out_0_ vss_3v3 0.13023f
-C125 dig_out_1_ vss_3v3 0.04024f
-C126 dig_out_2_ vss_3v3 0.04024f
-C127 dig_out_3_ vss_3v3 0.04024f
-C128 dig_out_4_ vss_3v3 0.04024f
-C129 dig_out_5_ vss_3v3 0.03825f
-C130 dig_out_6_ vss_3v3 0.03626f
-C131 dig_out_7_ vss_3v3 0.03626f
-C132 dig_out_8_ vss_3v3 0.03626f
-C133 dig_out_9_ vss_3v3 0.03626f
-C134 dig_out_10_ vss_3v3 0.03626f
-C135 dig_out_11_ vss_3v3 0.04726f
-C136 s14_an_1_esd vss_3v3 0.15069f
-C137 dig_in_4_ vss_3v3 0.03013f
-C138 dig_in_5_ vss_3v3 0.03013f
-C139 dig_in_6_ vss_3v3 0.03013f
-C140 dig_in_7_ vss_3v3 0.03013f
-C141 dig_in_8_ vss_3v3 0.03626f
-C142 dig_in_9_ vss_3v3 0.03626f
-C143 dig_in_10_ vss_3v3 0.03626f
-C144 dig_in_11_ vss_3v3 0.03626f
-C145 dig_in_12_ vss_3v3 0.03626f
-C146 dig_in_13_ vss_3v3 0.03626f
-C147 dig_in_14_ vss_3v3 0.03626f
-C148 dig_in_15_ vss_3v3 0.03626f
-C149 dig_in_16_ vss_3v3 0.03626f
-C150 dig_in_17_ vss_3v3 0.03626f
-C151 dig_in_18_ vss_3v3 0.03626f
-C152 dig_in_19_ vss_3v3 0.03626f
-C153 dig_in_20_ vss_3v3 0.03626f
-C154 dig_in_21_ vss_3v3 0.03626f
-C155 dig_in_22_ vss_3v3 0.03626f
-C156 dig_in_23_ vss_3v3 0.03626f
-C157 reset vss_3v3 0.03646f
-C158 enable vss_3v3 0.03646f
-C159 clk vss_3v3 0.08678f
-C160 vbias vss_3v3 0.25962f
-C161 analog_bus3 vss_3v3 0.18025f
-C162 analog_bus2 vss_3v3 0.18303f
-C163 analog_bus0 vss_3v3 0.22596f
-C164 s14_an_0_esd vss_3v3 0.15079f
-C165 vss_3v3 vss_3v3 0.09418f ; **FLOATING
-C166 vss_3v3 vss_3v3 0.03587f ; **FLOATING
-C167 vss_3v3 vss_3v3 0.03077f ; **FLOATING
-C168 vss_3v3 vss_3v3 0.02939f ; **FLOATING
-C169 vss_3v3 vss_3v3 0.02872f ; **FLOATING
-C170 vss_3v3 vss_3v3 0.02972f ; **FLOATING
-C171 vss_3v3 vss_3v3 0.03194f ; **FLOATING
-C172 vss_3v3 vss_3v3 0.13667f ; **FLOATING
-C173 vdd_3v3 vss_3v3 51.08282f
-C174 vss_3v3 vss_3v3 -3.97114f
-C175 ibias1 vss_3v3 17.59322f
-C176 s14_an_2_ vss_3v3 10.0309f
-C177 vss_3v3 vss_3v3 -0.1917f
-C178 dig_in_0_ vss_3v3 39.40053f
-C179 vss_3v3 vss_3v3 -0.01342f
-C180 vss_3v3 vss_3v3 -3.43693f
-C181 vss_3v3 vss_3v3 -0.32481f
-C182 vss_3v3 vss_3v3 -0.28235f
-C183 vss_3v3 vss_3v3 -0.53447f
-C184 vss_3v3 vss_3v3 -0.41135f
-C185 dig_in_1_ vss_3v3 15.65477f
-C186 dig_in_3_ vss_3v3 18.97194f
-C187 s14_an_2_esd vss_3v3 20.72996f
-C188 vss_3v3 vss_3v3 -0.22754f
-C189 vss_3v3 vss_3v3 -0.18856f
-C190 vss_3v3 vss_3v3 -0.25105f
-C191 vss_3v3 vss_3v3 -0.27604f
-C192 vss_3v3 vss_3v3 -0.17097f
-C193 vss_3v3 vss_3v3 -3.03449f
-C194 vss_3v3 vss_3v3 -0.25343f
-C195 vdd_1v2 vss_3v3 40.97342f
-C196 vss_3v3 vss_3v3 -1.05457f
-C197 vss_3v3 vss_3v3 -0.98979f
-C198 vss_3v3 vss_3v3 -0.83418f
-C199 vss_3v3 vss_3v3 -0.46913f
-C200 vss_3v3 vss_3v3 -0.93516f
-C201 vss_3v3 vss_3v3 -0.91797f
-C202 vss_3v3 vss_3v3 -0.16205f
-C203 vss_3v3 vss_3v3 -0.42158f
-C204 vss_3v3 vss_3v3 -1.18931f
-C205 vss_3v3 vss_3v3 -0.57788f
-C206 vss_3v3 vss_3v3 -0.79049f
-C207 vss_3v3 vss_3v3 -3.97024f
-C208 ibias0 vss_3v3 24.04229f
-C209 s14_an_1_ vss_3v3 3.51693f
-C210 vss_3v3 vss_3v3 -1.40059f
-C211 vss_3v3 vss_3v3 -6.80153f
-C212 vss_3v3 vss_3v3 -6.6905f
-C213 s14_an_0_ vss_3v3 2.66173f
-C214 iref_drv_30u vss_3v3 -4.38726f
-C215 vss_3v3 vss_3v3 -0.85692f
-C216 vss_3v3 vss_3v3 -1.23915f
-C217 vss_3v3 vss_3v3 -1.15158f
-C218 vss_3v3 vss_3v3 -4.63527f
-C219 analog_bus1 vss_3v3 23.6753f
-C220 vss_3v3 vss_3v3 -1.09956f
-C221 core_p vss_3v3 -0.83436f
-C222 vss_3v3 vss_3v3 -1.89751f
-C223 vss_3v3 vss_3v3 -1.28987f
-C224 iref_pd_30u vss_3v3 -2.81707f
-C225 vss_3v3 vss_3v3 -1.09956f
-C226 core_n vss_3v3 -0.80858f
-C227 vss_3v3 vss_3v3 -1.92078f
-C228 vss_3v3 vss_3v3 -1.28987f
-C229 vss_3v3 vss_3v3 -2.74493f
-C230 vss_3v3 vss_3v3 -2.64305f
-C231 vss_3v3 vss_3v3 -1.00783f
-C232 vss_3v3 vss_3v3 -4.1965f
-C233 vss_3v3 vss_3v3 -4.98894f
-C234 vss_3v3 vss_3v3 -1.00783f
+X2 analog_bus0 ibias0 vss_3v3 rppd l=4u w=1u
+X3 analog_bus2 ibias1 vss_3v3 rppd l=4u w=1u
+C1 vdd_3v3 dig_in_1_ 1.14673f
+C3 vss_3v3 s14_an_2_esd 0.01358f
+C5 analog_bus1 analog_bus0 0.30648f
+C7 dig_in_0_ vss_3v3 0.05435f
+C10 vss_3v3 dig_in_0_ 0.14344f
+C12 dig_in_4_ dig_in_3_ 2.11134f
+C14 s14_an_2_esd vss_3v3 0.02187f
+C15 vdd_3v3 dig_in_2_ 1.03663f
+C16 s14_an_2_esd vss_3v3 0.02432f
+C18 dig_in_3_ vbias 0.20336f
+C19 vdd_1v2 vss_3v3 0.01201f
+C20 analog_bus1 vbias 0.34751f
+C24 vbias iref_drv_30u 0.54673f
+C25 vdd_1v2 ibias1 0.41576f
+C26 ibias1 ibias0 7.89217f
+C35 dig_in_4_ dig_in_0_ 0.04684f
+C39 s14_an_2_esd dig_in_2_ 0.22358f
+C41 vdd_1v2 dig_in_4_ 0.80268f
+C42 s14_an_2_ s14_an_2_esd 0.58946f
+C43 vdd_3v3 vss_3v3 -0.01154f
+C45 vdd_1v2 dig_in_3_ 0.07119f
+C46 dig_in_3_ ibias0 0.16321f
+C48 vdd_1v2 vbias 2.47032f
+C49 vbias ibias0 0.28554f
+C52 iref_pd_30u vbias 0.34352f
+C54 dig_in_1_ dig_in_2_ 6.6745f
+C60 vdd_3v3 ibias1 3.83551f
+C62 s14_an_2_esd s14_an_0_ 1.53325f
+C63 vdd_1v2 iref_drv_30u 0.05512f
+C64 iref_drv_30u ibias0 0.06001f
+C65 s14_an_2_esd s14_an_1_ 0.98123f
+C67 iref_pd_30u iref_drv_30u 0.28896f
+C70 vdd_1v2 dig_in_0_ 2.00353f
+C71 vdd_3v3 dig_in_4_ 0.75582f
+C74 analog_bus2 ibias1 0.06997f
+C75 vdd_3v3 dig_in_3_ 1.20477f
+C76 vdd_3v3 vbias 2.13188f
+C78 analog_bus2 analog_bus0 0.27339f
+C79 vbias core_n 0.01127f
+C81 vdd_1v2 ibias0 0.74604f
+C83 vss_3v3 iref_drv_30u 0.03635f
+C84 iref_pd_30u vss_3v3 0.04401f
+C85 vdd_3v3 iref_drv_30u 0.60712f
+C86 vss_3v3 iref_pd_30u 0.02239f
+C87 core_n iref_drv_30u 0.01561f
+C90 vss_3v3 ibias0 0.01693f
+C91 dig_in_1_ ibias1 0.16124f
+C92 iref_pd_30u core_p 0.15231f
+C94 analog_bus2 vbias 0.35328f
+C95 vdd_3v3 dig_in_0_ 0.23525f
+C98 s14_an_0_ s14_an_1_ 0.8358f
+C100 analog_bus1 analog_bus2 0.28864f
+C103 vss_3v3 dig_in_0_ 0.1083f
+C106 ibias1 dig_in_2_ 0.15872f
+C109 dig_in_4_ dig_in_1_ 0.21662f
+C111 vdd_1v2 vdd_3v3 4.45274f
+C112 vdd_3v3 ibias0 4.08992f
+C114 vdd_3v3 iref_pd_30u 0.65766f
+C115 dig_in_3_ dig_in_1_ 5.08747f
+C116 iref_pd_30u core_n 0.21208f
+C117 dig_in_1_ vbias 0.16634f
+C119 vdd_3v3 vss_3v3 0.79665f
+C120 dig_in_4_ dig_in_2_ 0.33703f
+C121 core_p core_n 0.21126f
+C123 dig_in_3_ dig_in_2_ 5.25393f
+C124 vbias dig_in_2_ 0.16383f
+C127 vss_3v3 dig_in_0_ 0.02879f
+C129 vdd_3v3 vss_3v3 0.79662f
+C130 dig_in_0_ dig_in_1_ 3.73415f
+C131 vdd_1v2 s14_an_2_esd 4.01128f
+C133 dig_in_1_ ibias0 0.16124f
+C137 analog_bus0 ibias1 0.01007f
+C140 dig_in_0_ s14_an_2_ 0.12873f
+C143 dig_in_2_ ibias0 0.15872f
+C145 vdd_3v3 s14_an_2_esd 0.03454f
+C147 vdd_1v2 s14_an_2_ 0.44158f
+C150 dig_in_3_ ibias1 0.16321f
+C151 ibias1 vbias 1.38426f
+C152 analog_bus0 vbias 0.65045f
+C191 analog_bus0 vss_3v3 2.04997f
+C192 analog_bus2 vss_3v3 1.58647f
+C193 analog_bus1 vss_3v3 0.99539f
+C202 vdd_3v3 vss_3v3 56.7025f
+C203 vss_3v3 vss_3v3 -3.97114f
+C204 ibias1 vss_3v3 21.97724f
+C205 s14_an_2_ vss_3v3 9.9867f
+C206 vss_3v3 vss_3v3 -0.1917f
+C207 dig_in_0_ vss_3v3 39.40453f
+C208 vss_3v3 vss_3v3 -0.01342f
+C214 dig_in_1_ vss_3v3 15.64491f
+C215 dig_in_3_ vss_3v3 18.80915f
+C216 s14_an_2_esd vss_3v3 17.43769f
+C222 vss_3v3 vss_3v3 -3.03449f
+C224 vdd_1v2 vss_3v3 43.65209f
+C236 vss_3v3 vss_3v3 -3.97024f
+C237 ibias0 vss_3v3 24.50528f
+C239 dig_in_4_ vss_3v3 33.42673f
+C240 s14_an_1_ vss_3v3 6.25083f
+C241 vss_3v3 vss_3v3 -1.40059f
+C244 s14_an_0_ vss_3v3 13.18399f
+C245 iref_drv_30u vss_3v3 -4.38726f
+C247 vss_3v3 vss_3v3 -1.23915f
+C248 vss_3v3 vss_3v3 -1.15158f
+C250 vbias vss_3v3 31.22524f
+C252 core_p vss_3v3 -0.83436f
+C255 iref_pd_30u vss_3v3 -2.81707f
+C256 vss_3v3 vss_3v3 -1.09956f
+C257 core_n vss_3v3 -0.80858f
+C258 vss_3v3 vss_3v3 -1.92078f
 .ends
 
 * the blocks, as xschem netlists schematic/xschem/slot_14.sch
@@ -538,6 +416,19 @@ XR1 PAD X VSS rppd w=40u l=6.65u m=1 b=0 mm_ok=1
 XDN VSS X dantenna l=1.26u w=20u
 XDP X VDDH dpantenna l=1.26u w=20u
 XMSW X ENH VSS VSS sg13_hv_nmos w=300u l=0.45u ng=30 m=1 mm_ok=1
+xls EN ENH VDD VDDH VSS ref_odt_lvlup
+XDEN VSS EN dantenna l=0.78u w=0.78u
+.ends
+
+
+* expanding   symbol:  lvds_bt.sym # of pins=6
+** sym_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_bt/schematic/xschem/lvds_bt.sym
+** sch_path: /foss/designs/chipalooza_lvds_pll/macros/lvds_bt/schematic/xschem/lvds_bt.sch
+.subckt lvds_bt EN OUTP OUTN VDD VDDH VSS
+*.PININFO OUTP:B OUTN:B EN:I VDD:B VDDH:B VSS:B
+XR1 OUTP A VSS rppd w=10u l=3.3u m=1 b=0 mm_ok=1
+XMSW A ENH B VSS sg13_hv_nmos w=300u l=0.45u ng=30 m=1 mm_ok=1
+XR2 B OUTN VSS rppd w=10u l=3.3u m=1 b=0 mm_ok=1
 xls EN ENH VDD VDDH VSS ref_odt_lvlup
 XDEN VSS EN dantenna l=0.78u w=0.78u
 .ends

@@ -146,34 +146,20 @@ sim-prepare: ## Netlist every top-level bench, so the xschem Simulate arrow work
 	@$(SCRIPTS_DIR)/prepare_benches.sh $(abspath .)
 .PHONY: sim-prepare
 
-extract-lvds: ## Extract lvds_tx and lvds_pattern with coupling C into netlist/pex/, for the post-layout LVDS bench
-	bash $(SCRIPTS_DIR)/sim/extract_lvds.sh
-.PHONY: extract-lvds
-
-sim-lvds-postlayout: extract-lvds ## Post-layout LVDS bench in batch mode: extracted lvds_pattern + lvds_tx, PRBS-7 at 500 Mb/s, no PLL
-	mkdir -p $(XSCHEM_TB_DIR)/simulations
-	-cd $(XSCHEM_TB_DIR) && xschem -r -x -q --rcfile xschemrc --command ' \
-		xschem set netlist_type spice; \
-		set netlist_dir $(abspath $(XSCHEM_TB_DIR)/simulations); \
-		xschem netlist \
-	' $(TOP)_tb_lvds_postlayout.sch
-	cd $(XSCHEM_TB_DIR)/simulations && ngspice -b $(TOP)_tb_lvds_postlayout.spice
-.PHONY: sim-lvds-postlayout
-
 extract-top: ## Extract the whole slot (hierarchical, coupling C) into netlist/pex/slot_14_pex.spice and slot_14_wires.spice, for the pad and PEX benches
 	bash $(SCRIPTS_DIR)/sim/extract_top.sh
 .PHONY: extract-top
 
-sim-lvds: ## Bench 1, schematic: the whole slot from its schematics, ideal sources, no pads; PRBS-7 at 500 Mb/s into 100 ohm
+sim-lvds: ## Bench 1, schematic: the whole slot from its schematics, pad 2's IO cell only; PRBS-7 at 500 Mb/s into 100 ohm, ODT switched on in the run
 	$(MAKE) sim-xschem TB=$(TOP)_tb_lvds
 .PHONY: sim-lvds
 
-sim-lvds-pads: extract-top ## Bench 2, pads + wiring: IHP pads, bond wire, package, line, receiver; the top-level wiring as laid out, the blocks as schematics; ODT off and on
+sim-lvds-pads: extract-top ## Bench 2, pads + wiring: IHP pads, bond wire, package, line, receiver; the top-level wiring as laid out, the blocks as schematics; ODT switched on in the run
 	python3 $(SCRIPTS_DIR)/sim/gen_tb_lvds_pads.py
 	$(MAKE) sim-xschem TB=$(TOP)_tb_lvds_pads
 .PHONY: sim-lvds-pads
 
-sim-lvds-pex: extract-top ## Bench 3, PEX: the same surroundings as bench 2, the whole slot as laid out (every block extracted); ODT off
+sim-lvds-pex: extract-top ## Bench 3, PEX: the same surroundings as bench 2, the whole slot as laid out (every block extracted)
 	python3 $(SCRIPTS_DIR)/sim/gen_tb_lvds_pads.py
 	$(MAKE) sim-xschem TB=$(TOP)_tb_lvds_pex
 .PHONY: sim-lvds-pex
