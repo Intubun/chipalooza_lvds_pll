@@ -1,7 +1,7 @@
 magic
 tech ihp-sg13cmos5l
 magscale 1 2
-timestamp 1790970481
+timestamp 1791066065
 << nmos >>
 rect -166 -60 -140 60
 rect -64 -60 -38 60

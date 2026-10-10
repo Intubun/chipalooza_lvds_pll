@@ -3,7 +3,7 @@
 
 MAKEFILE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-RUN_TAG = $(shell ls -1 $(LIBRELANE_DIR)/runs 2>/dev/null | tail -n 1)
+RUN_TAG = $(shell find $(LIBRELANE_DIR)/runs -maxdepth 1 -type d -name 'RUN_*' 2>/dev/null | sort | tail -n 1 | xargs basename)
 
 # Variables
 TOP = pll_digital
@@ -57,7 +57,7 @@ NET_SPICE_DIR 	:= netlist/spice
 XSPICE_DIR  	:= netlist/xspice
 NET_PEX_DIR   	:= netlist/pex
 LIBRELANE_DIR 	:= flow/librelane
-FLOW_FINAL_DIR 	:= flow/final
+FLOW_FINAL_DIR 	:= $(LIBRELANE_DIR)/final
 FINAL_DIR      	:= final
 LAY_DIR        	:= final/gds
 

@@ -69,16 +69,16 @@ def gate_to_bus(xc, halfwidth, device_y, gate_x, bus_y):
 
 YP, YN = 1600, 0
 PX = [700, 2500, 4300, 6100]
-NX = [0, 1200, 2400, 3600, 4800, 6000]
+NX = [0, 1200, 2400, 3800, 5000, 6200]
 uses = [
     ("dev_p_w0p6_l0p13_ng2_noguard_m1", "M1", PX[0], YP),
     ("dev_p_w0p6_l0p13_ng2_noguard_m1", "M4", PX[1], YP),
-    ("dev_p_w0p6_l0p13_ng2_noguard_m1", "M6", PX[2], YP),
+    ("dev_p_w0p6_l0p13_ng4_noguard_m1", "M6", PX[2], YP),
     ("dev_p_w0p6_l0p13_ng1_noguard_m1", "XRB", PX[3], YP),
     ("dev_n_w0p6_l0p13_ng2_noguard_m1", "M3", NX[0], YN),
     ("dev_n_w0p6_l0p13_ng2_noguard_m1", "M2", NX[1], YN),
     ("dev_n_w0p6_l0p13_ng6_noguard_m1", "M5", NX[2], YN),
-    ("dev_n_w0p6_l0p13_ng4_noguard_m1", "M7", NX[3], YN),
+    ("dev_n_w0p6_l0p13_ng8_noguard_m1", "M7", NX[3], YN),
     ("dev_n_w0p6_l0p13_ng1_noguard_m1", "XRA", NX[4], YN),
     ("dev_n_w0p6_l0p13_ng1_noguard_m1", "XRQ", NX[5], YN),
 ]
@@ -87,14 +87,29 @@ BUS = {
     "VSS": -900, "N1": -700, "A": -500, "B": -300, "Q": -100,
     "VDD": 300, "D": 500, "CLK": 700, "RST": 900, "RESET_B": 1100,
 }
-for y in BUS.values():
-    rect("metal4", -700, y - 29, 7600, y + 29)
+BUS_EXTENT = {
+    "VSS": (-700, 7800), "N1": (250, 950), "A": (-550, 4750),
+    "B": (1850, 5550), "Q": (-700, 5950), "VDD": (-700, 7800),
+    "D": (-700, 1750), "CLK": (-700, 4900), "RST": (-700, 6750),
+    "RESET_B": (-700, 7050),
+}
+for net, y in BUS.items():
+    x0, x1 = BUS_EXTENT[net]
+    rect("metal4", x0, y - 29, x1, y + 29)
 
 
 def pmos2(x, drain, gate, source, drops):
     diffusion_rail([x - 102, x + 102], YP, 80, drops[0], BUS[drain])
     diffusion_rail([x], YP, -90, drops[1], BUS[source])
     gate_to_bus(x, 102, YP, drops[2], BUS[gate])
+
+
+def pmos4(x, drain, gate, source, drops):
+    diffusion_rail([x - 204, x, x + 204], YP, 80,
+                   drops[0], BUS[drain])
+    diffusion_rail([x - 102, x + 102], YP, -90,
+                   drops[1], BUS[source])
+    gate_to_bus(x, 204, YP, drops[2], BUS[gate])
 
 
 def pmos1(x, drain, gate, source, drops):
@@ -120,30 +135,30 @@ def nmos(x, fingers, drain, gate, source, drops):
 
 pmos2(PX[0], "A", "D", "VDD", (100, 1050, 1250))
 pmos2(PX[1], "B", "A", "VDD", (2050, 2750, 3400))
-pmos2(PX[2], "Q", "CLK", "VDD", (3850, 4650, 4850))
+pmos4(PX[2], "Q", "CLK", "VDD", (3850, 4650, 4850))
 pmos1(PX[3], "B", "RESET_B", "VDD", (5500, 6800, 7000))
 nmos(NX[0], 2, "A", "CLK", "N1", (-500, 300, 500))
 nmos(NX[1], 2, "N1", "D", "VSS", (900, 1500, 1700))
 nmos(NX[2], 6, "B", "CLK", "VSS", (1900, 2900, 3100))
-nmos(NX[3], 4, "Q", "B", "VSS", (3250, 4000, 4200))
-nmos(NX[4], 1, "A", "RST", "VSS", (4500, 5100, 5300))
-nmos(NX[5], 1, "Q", "RST", "VSS", (5700, 6300, 6500))
+nmos(NX[3], 8, "Q", "B", "VSS", (3250, 4350, 4550))
+nmos(NX[4], 1, "A", "RST", "VSS", (4700, 5100, 5300))
+nmos(NX[5], 1, "Q", "RST", "VSS", (5900, 6500, 6700))
 
 # Body ties and wide tap rails.
-rect("nwell", -600, 1300, 7700, 2700)
-rect("nsubdiff", -500, 2550, 7600, 2610)
-rect("psubdiff", -600, -1210, 7700, -1150)
+rect("nwell", -600, 1300, 7900, 2700)
+rect("nsubdiff", -500, 2550, 7800, 2610)
+rect("psubdiff", -600, -1210, 7900, -1150)
 for layer, y0 in (("nsubdiffcont", 2564), ("psubdiffcont", -1196)):
-    for x in range(-456, 7560, 72):
+    for x in range(-456, 7760, 72):
         rect(layer, x, y0, x + 32, y0 + 32)
-rect("metal1", -600, 2550, 7700, 2610)
-rect("metal1", -600, -1210, 7700, -1150)
+rect("metal1", -600, 2550, 7900, 2610)
+rect("metal1", -600, -1210, 7900, -1150)
 for tap_y, bus_y in ((2580, BUS["VDD"]), (-1180, BUS["VSS"])):
-    via12(7500, tap_y)
-    via23(7500, tap_y)
-    rect("metal3", 7471, min(tap_y, bus_y) - 29,
-         7529, max(tap_y, bus_y) + 29)
-    via34(7500, bus_y)
+    via12(7700, tap_y)
+    via23(7700, tap_y)
+    rect("metal3", 7671, min(tap_y, bus_y) - 29,
+         7729, max(tap_y, bus_y) + 29)
+    via34(7700, bus_y)
 
 labels = [
     ("D", 0), ("CLK", 1), ("Q", 2), ("RST", 3),

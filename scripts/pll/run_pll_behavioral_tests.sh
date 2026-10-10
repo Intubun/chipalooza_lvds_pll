@@ -21,6 +21,12 @@ sources=(
   "$TB_DIR/tb_pll_behavioral.v"
 )
 
+"$IVERILOG" -g2012 -s tb_fractional_divider \
+  -o "$WORK/tb_fractional_divider" \
+  "$RTL_DIR/fractional_divider.v" \
+  "$TB_DIR/tb_fractional_divider.v"
+"$VVP" "$WORK/tb_fractional_divider"
+
 run_case() {
   local name=$1 ratio=$2 ref_period_ns=$3
   local output="$WORK/$name"

@@ -18,3 +18,27 @@ module ihp_async_toggle_ff_map (
         .RESET_B(reset_b)
     );
 endmodule
+
+(* techmap_celltype = "high_speed_div2" *)
+module ihp_high_speed_div2_map (
+    input  wire clk,
+    input  wire reset_b,
+    output wire q
+);
+    pll_tspc_div2 _TECHMAP_REPLACE_ (
+        .CLK(clk),
+        .RESET_B(reset_b),
+        .Q(q)
+    );
+endmodule
+
+(* techmap_celltype = "half_rate_clock_buffer" *)
+module ihp_half_rate_clock_buffer_map (
+    input  wire a,
+    output wire y
+);
+    sg13cmos5l_buf_16 _TECHMAP_REPLACE_ (
+        .A(a),
+        .X(y)
+    );
+endmodule

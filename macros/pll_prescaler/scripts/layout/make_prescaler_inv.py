@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Generate layout/mag/prescaler_inv.mag from PDK gencells + routing.
 
-prescaler_inv: XP PMOS w1.2 ng2 + XN NMOS w0.6 ng1.
-  XP Y A VDD VDD  -> dev_p_w0p6_ng2 (0.6x2=1.2u)
-  XN Y A VSS VSS  -> dev_n_w0p6_ng1 (0.6x1)
+prescaler_inv: XP PMOS w2.4 ng4 + XN NMOS w1.2 ng2.
+  XP Y A VDD VDD  -> dev_p_w0p6_ng4 (0.6x4=2.4u)
+  XN Y A VSS VSS  -> dev_n_w0p6_ng2 (0.6x2=1.2u)
 
 Pattern follows macros/pll_analog/scripts/layout/make_inverter.py:
 M2 buses on D/S stripes with offset via1s (M2.b safe), gate() landings,
@@ -70,20 +70,20 @@ def m3wire(a, b, c, d):
 # Placement: PMOS top, NMOS bottom (like inverter M2/M3).
 YP, YN = 600, 0
 uses = [
-    ("dev_p_w0p6_l0p13_ng2_noguard_m1", "XP", 0, YP),
-    ("dev_n_w0p6_l0p13_ng1_noguard_m1", "XN", 0, YN),
+    ("dev_p_w0p6_l0p13_ng4_noguard_m1", "XP", 0, YP),
+    ("dev_n_w0p6_l0p13_ng2_noguard_m1", "XN", 0, YN),
 ]
 
 # D/S stripes (M1 coords, from gencell measurement):
-#  ng2: diffusions -102,0,+102 -> outers strapped, middle alone.
-#  ng1: D -51, S +51.
-# PMOS: outers=VDD (2 stripes to supply), middle=Y.
-# NMOS: D=Y at -51, S=VSS at +51.
+#  ng4: diffusions -204,-102,0,+102,+204.
+#  ng2: diffusions -102,0,+102.
+# PMOS: -204,0,+204=VDD; -102,+102=Y.
+# NMOS: -102,+102=Y; 0=VSS.
 # Supply buses at +/-80 (vs +/-70 signal) for M2.b/M3.b clearance.
-rail([-102, 102], YP, 80)   # VDD (PMOS sources)
-rail([0], YP, -70)          # Y (PMOS drain, middle)
-rail([-51], YN, 70)         # Y (NMOS drain)
-rail([51], YN, -80)         # VSS (NMOS source)
+rail([-204, 0, 204], YP, 80)  # VDD (PMOS sources)
+rail([-102, 102], YP, -110)   # Y (PMOS drains)
+rail([-102, 102], YN, 110)    # Y (NMOS drains)
+rail([0], YN, -80)            # VSS (NMOS source)
 
 # NOTE: no min-area widening rects on the PMOS bottom gate rail (its 3-pad
 # row passes M1.d alone). The NMOS single-finger bottom rail needs one;
@@ -92,19 +92,19 @@ rect("metal1", -60, YN - 150, 60, YN - 118)
 
 # Gates to A on M4 (like inverter VIN/VBP/VBN): M2 landing -> M3 -> M4,
 # so the horizontal A bus never shares M3 with the Y wire.
-GATE_X = 300
-gate(YP + 134, 102, GATE_X)   # PMOS gate rail (poly ends +/-134)
-gate(YN + 134, 51, -250)      # NMOS gate rail
-for p in [(GATE_X, YP + 134), (-250, YN + 134)]:
+GATE_X = -330
+gate(YP + 134, 204, GATE_X)   # PMOS gate rail
+gate(YN + 134, 102, -300)     # NMOS gate rail
+for p in [(GATE_X, YP + 134), (-300, YN + 134)]:
     via23(*p, landing=True)
     from pathlib import Path as _P  # noqa
 rect("via3", GATE_X - 20, YP + 134 - 20, GATE_X + 20, YP + 134 + 20)
 pad("metal3", GATE_X, YP + 134)
 rect("metal4", GATE_X - 29, YP + 134 - 29, GATE_X + 29, YP + 134 + 29)
-rect("via3", -250 - 20, YN + 134 - 20, -250 + 20, YN + 134 + 20)
-pad("metal3", -250, YN + 134)
-rect("metal4", -250 - 29, YN + 134 - 29, -250 + 29, YN + 134 + 29)
-rect("metal4", -279, YN + 134 - 29, GATE_X + 29, YN + 134 + 29)
+rect("via3", -320, YN + 114, -280, YN + 154)
+pad("metal3", -300, YN + 134)
+rect("metal4", -329, YN + 105, -271, YN + 163)
+rect("metal4", -329, YN + 105, GATE_X + 29, YN + 163)
 # PMOS gate M4 riser down to the A bus (joins area, like inverter m4wire).
 rect("metal4", GATE_X - 29, YN + 134, GATE_X + 29, YP + 134 + 29)
 # A port on M4 left edge.
@@ -112,18 +112,18 @@ rect("metal4", -450, YN + 134 - 29, -279, YN + 134 + 29)
 
 # Output Y: PMOS middle drain to NMOS drain. Use landing pads so the
 # M3 meets the 0.144um^2 minimum area.
-for p in [(0, YP - 70), (-51, YN + 70)]:
+for p in [(0, YP - 110), (0, YN + 110)]:
     via23(*p, landing=True)
-m3wire(-80, YN + 70, 80, YP - 70)
-pad("metal3", 0, YP - 70)
-pad("metal3", -51, YN + 70)
+m3wire(-80, YN + 110, 80, YP - 110)
+pad("metal3", 0, YP - 110)
+pad("metal3", 0, YN + 110)
 
 # Supplies to tap rails (right-edge trunk like inverter), with landings.
 # VDD via on outer stripe (102) to clear the Y stub at x=0 (M2.b).
 # Trunk x 170..228 clears the PMOS gate M3 pad (271..329) by 43 (M3.b):
 # an earlier trunk at 226..284 overlapped it and shorted VDD to A.
-TX0, TX1, TXC = 170, 228, 199
-for p in [(102, YP + 80), (51, YN - 80)]:
+TX0, TX1, TXC = -228, -170, -199
+for p in [(-204, YP + 80), (0, YN - 80)]:
     via23(*p, landing=True)
 via23(TXC, 1280 - 21, landing=True)
 via23(TXC, -680 + 21, landing=True)
@@ -134,8 +134,8 @@ m3wire(TX0, YP + 80, TX1, 1280)
 m3wire(TX0, YN - 80, TX1, -680)
 # Trunk jogs to the stripe vias. VDD jog covers the pad fully upward so no
 # M3.b sliver remains alongside the trunk.
-m3wire(73, YP + 51, TX1, YP + 130)
-m3wire(22, YN - 109, TX1, YN - 51)
+m3wire(-233, YP + 51, TX1, YP + 130)
+m3wire(TX0, YN - 109, 29, YN - 51)
 
 # Wells/taps.
 rect("nwell", -350, YP - 200, 350, YP + 758)
@@ -148,20 +148,14 @@ rect("metal1", -450, YP + 650, 450, YP + 710)
 rect("metal1", -450, YN - 710, 450, YN - 650)
 
 # Ports.
-m3wire(-22, YN + 41, 450, 99)              # Y out (M3 right edge)
+m3wire(-22, YN + 81, 450, 139)             # Y out (M3 right edge)
 # A in on metal4 left, Y out metal3 right, supplies on metal1 taps.
 labels = [
     ("metal1", -450, YP + 650, -410, YP + 710, "VDD", 2),
     ("metal1", -450, YN - 710, -410, YN - 650, "VSS", 3),
     ("metal4", -450, 105, -410, 163, "A", 0),
-    ("metal3", 410, 41, 450, 99, "Y", 1),
+    ("metal3", 410, 81, 450, 139, "Y", 1),
 ]
-# A riser: M3 A bus to M4.
-rect("via3", -270, YN + 114, -230, YN + 154)
-pad("metal3", -250, YN + 134)
-rect("metal4", -279, YN + 105, -221, YN + 163)
-rect("metal4", -450, YN + 105, -221, YN + 163)
-
 lines = ["magic", "tech ihp-sg13cmos5l", "magscale 1 2", "timestamp 0"]
 for cell, name, x, y in uses:
     lines += [f"use {cell}  {name}", "timestamp 0",

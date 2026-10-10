@@ -15,8 +15,11 @@ module pll_digital (
     output wire        up,
     output wire        down
 );
+    // Share the characterized full-rate /2 stage with the output path. The
+    // feedback divider preserves the external Q7.3 ratio using Q6.4 arithmetic
+    // in this half-rate clock domain.
     fractional_divider feedback_divider_i (
-        .vco_clk(vco_clk),
+        .half_clk(pll_clk),
         .reset_n(reset_n),
         .enable(enable),
         .integer_div(div_ratio[9:3]),

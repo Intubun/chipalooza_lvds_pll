@@ -1,156 +1,98 @@
 `timescale 1ns/1ps
 
-// Portable behavioral model of the high-speed dual-modulus prescaler. The
-// technology mapping replaces this module with the IHP TSPC macro; keeping the
-// circuit boundary generic leaves the divider RTL portable to other PDKs.
+// Programmable feedback divider behind a fixed full-rate divide-by-two stage.
 //
-// modulus_request is prepared one prescaler cycle early. It is sampled on the
-// rising edge of q2 so that the selected modulus takes effect immediately
-// after that interval boundary without placing a standard-cell clock-to-Q path
-// between q2 and the next VCO edge.
-module dual_modulus_prescaler (
-    input  wire vco_clk,
-    input  wire reset_b,
-    input  wire modulus_request,
-    output reg  q2
-);
-    reg q1;
-    reg modulus_2;
-
-    always @(posedge vco_clk or negedge reset_b) begin
-        if (!reset_b) begin
-            q1 <= 1'b0;
-            q2 <= 1'b0;
-        end else begin
-            q1 <= q2;
-            q2 <= ~(q2 | (q1 & ~modulus_2));
-        end
-    end
-
-    always @(posedge q2 or negedge reset_b) begin
-        if (!reset_b)
-            modulus_2 <= 1'b1;
-        else
-            modulus_2 <= modulus_request;
-    end
-endmodule
-
-// Programmable N/N+1 feedback divider with a dual-modulus /2-/3 prescaler.
+// The external divide word remains Q7.3. At the half-rate clock it is exactly
+// represented as Q6.4:
 //
-// Only the two prescaler state bits run at the full VCO rate. The program
-// counter and fractional accumulator are clocked by the prescaler output, at
-// no more than half the VCO frequency. For a requested integer modulus M:
+//     base_half = floor(integer_div / 2)
+//     half_fraction = {integer_div[0], fractional_num}
 //
-//     M = 2 * floor(M / 2) + (M mod 2)
-//
-// The prescaler therefore runs in /3 mode for its first cycle when M is odd,
-// then in /2 mode for the remaining program-counter cycles. The fractional
-// accumulator chooses M or M+1 for each complete division interval, giving:
+// The accumulator chooses base_half or base_half+1 half-rate periods per
+// interval. Since each half-rate period is two VCO periods, the requested
+// average VCO divide ratio is unchanged:
 //
 //     integer_div + fractional_num / 2^FRAC_WIDTH
 //
-// Set fractional_num to zero for integer-N operation. integer_div must be >= 4
-// for the PLL operating range.
+// Odd integer ratios alternate between adjacent even VCO-cycle intervals.
+// integer_div must remain >= 4, making the minimum half-rate count two.
 module fractional_divider #(
     parameter integer DIV_WIDTH = 7,
     parameter integer FRAC_WIDTH = 3
 ) (
-    input  wire                  vco_clk,
+    input  wire                  half_clk,
     input  wire                  reset_n,
     input  wire                  enable,
     input  wire [DIV_WIDTH-1:0]  integer_div,
     input  wire [FRAC_WIDTH-1:0] fractional_num,
     output reg                   feedback_clk
 );
-    localparam integer PROGRAM_WIDTH = DIV_WIDTH - 1;
-    localparam integer GROUP_WIDTH = PROGRAM_WIDTH - 2;
+    localparam integer HALF_WIDTH = DIV_WIDTH;
+    localparam integer HALF_FRAC_WIDTH = FRAC_WIDTH + 1;
+    localparam integer MAX_HALF_DIVISOR = 1 << (HALF_WIDTH - 1);
 
-    wire prescaler_q2;
-    reg modulus_request;
-    reg modulus_armed;
     reg interval_active;
-    reg terminal_pending;
-    reg [3:0] pulse_phase;
-    reg [1:0] pulse_remainder;
-    reg [GROUP_WIDTH-1:0] group_counter;
-    reg [FRAC_WIDTH-1:0] accumulator;
+    reg reload_base_pending;
+    reg reload_plus_pending;
+    reg [MAX_HALF_DIVISOR-1:0] countdown;
+    reg [HALF_FRAC_WIDTH-1:0] accumulator;
 
     wire reset_b = reset_n && enable;
-    wire [FRAC_WIDTH:0] accumulator_sum =
-        {1'b0, accumulator} + {1'b0, fractional_num};
-    wire [DIV_WIDTH-1:0] next_divisor =
-        integer_div + {{(DIV_WIDTH-1){1'b0}},
-                       accumulator_sum[FRAC_WIDTH]};
-    wire group_nonzero = |group_counter;
-    wire group_is_one = group_counter == {{(GROUP_WIDTH-1){1'b0}}, 1'b1};
-    // Assert one prescaler edge before terminal count. This keeps the terminal
-    // edge itself to a registered select plus small reload muxes rather than a
-    // wide decode feeding every interval register.
-    wire one_pulse_after_current =
-        (group_is_one &&
-         ((pulse_remainder == 2'b00 && pulse_phase[2]) ||
-          (pulse_remainder == 2'b01 && pulse_phase[3]))) ||
-        (!group_nonzero &&
-         ((pulse_remainder == 2'b10 && pulse_phase[0]) ||
-          (pulse_remainder == 2'b11 && pulse_phase[1])));
+    wire [HALF_WIDTH-1:0] base_half_divisor =
+        {1'b0, integer_div[DIV_WIDTH-1:1]};
+    wire [HALF_FRAC_WIDTH-1:0] half_fraction =
+        {integer_div[0], fractional_num};
+    wire [HALF_FRAC_WIDTH:0] accumulator_sum =
+        {1'b0, accumulator} + {1'b0, half_fraction};
+    wire [HALF_WIDTH-1:0] base_minus_one = base_half_divisor - 1'b1;
 
-    dual_modulus_prescaler prescaler_i (
-        .vco_clk(vco_clk),
-        .reset_b(reset_b),
-        .modulus_request(modulus_request),
-        .q2(prescaler_q2)
-    );
+    wire [MAX_HALF_DIVISOR-1:0] base_countdown =
+        {{(MAX_HALF_DIVISOR-1){1'b0}}, 1'b1} << base_minus_one;
+    wire [MAX_HALF_DIVISOR-1:0] plus_one_countdown =
+        {base_countdown[MAX_HALF_DIVISOR-2:0], 1'b0};
+    wire use_plus_one = accumulator_sum[HALF_FRAC_WIDTH];
+    wire load_base = !interval_active || reload_base_pending;
+    wire load_plus_one = reload_plus_pending;
 
-    always @(posedge prescaler_q2 or negedge reset_b) begin
+    // At terminal count the token is bit zero, so shifting it produces zero.
+    // Reload can therefore be ORed into the unconditional shift without a
+    // terminal-select mux. Both masks are decoded from static configuration.
+    always @(posedge half_clk or negedge reset_b) begin
+        if (!reset_b)
+            countdown <= {MAX_HALF_DIVISOR{1'b0}};
+        else
+            countdown <= {1'b0, countdown[MAX_HALF_DIVISOR-1:1]} |
+                ({MAX_HALF_DIVISOR{load_base}} & base_countdown) |
+                ({MAX_HALF_DIVISOR{load_plus_one}} & plus_one_countdown);
+    end
+
+    always @(posedge half_clk or negedge reset_b) begin
+        if (!reset_b)
+            accumulator <= {HALF_FRAC_WIDTH{1'b0}};
+        else if (countdown[0])
+            accumulator <= accumulator_sum[HALF_FRAC_WIDTH-1:0];
+    end
+
+    // Prepare both reload selects on the lookahead edge. The actual reload
+    // then has only a registered select and static ratio mask, not a live
+    // terminal-to-fractional-carry-to-bank cascade.
+    always @(posedge half_clk or negedge reset_b) begin
         if (!reset_b) begin
-            pulse_phase      <= 4'b0000;
-            pulse_remainder  <= 2'b00;
-            group_counter    <= {GROUP_WIDTH{1'b0}};
-            accumulator     <= {FRAC_WIDTH{1'b0}};
-            modulus_request <= 1'b1;
-            modulus_armed   <= 1'b0;
-            interval_active <= 1'b0;
-            terminal_pending <= 1'b0;
-            feedback_clk    <= 1'b0;
-        end else if (!modulus_armed) begin
-            // The custom prescaler samples this request at the next q2 edge.
-            // No externally visible interval starts until that has happened.
-            modulus_request <= ~integer_div[0];
-            modulus_armed   <= 1'b1;
-            interval_active <= 1'b0;
-            terminal_pending <= 1'b0;
-            feedback_clk    <= 1'b0;
-        end else if (!interval_active) begin
-            // The requested first modulus is now active. Load configuration
-            // and begin the first externally visible division interval.
-            pulse_phase      <= 4'b0001;
-            pulse_remainder  <= integer_div[2:1];
-            group_counter    <= integer_div[DIV_WIDTH-1:3];
-            modulus_request <= 1'b1;
-            modulus_armed   <= 1'b1;
-            interval_active <= 1'b1;
-            terminal_pending <= 1'b0;
-            feedback_clk    <= 1'b0;
-        end else if (terminal_pending) begin
-            pulse_phase      <= 4'b0001;
-            pulse_remainder  <= next_divisor[2:1];
-            group_counter    <= next_divisor[DIV_WIDTH-1:3];
-            accumulator     <= accumulator_sum[FRAC_WIDTH-1:0];
-            modulus_request <= 1'b1;
-            modulus_armed   <= 1'b1;
-            interval_active <= 1'b1;
-            terminal_pending <= 1'b0;
-            feedback_clk    <= 1'b1;
+            reload_base_pending <= 1'b0;
+            reload_plus_pending <= 1'b0;
         end else begin
-            pulse_phase <= {pulse_phase[2:0], pulse_phase[3]};
-            if (group_nonzero && pulse_phase[3])
-                group_counter <= group_counter - 1'b1;
-            modulus_request <= one_pulse_after_current ?
-                               ~next_divisor[0] : 1'b1;
-            modulus_armed   <= 1'b1;
+            reload_base_pending <= countdown[1] && !use_plus_one;
+            reload_plus_pending <= countdown[1] && use_plus_one;
+        end
+    end
+
+    always @(posedge half_clk or negedge reset_b) begin
+        if (!reset_b) begin
+            interval_active <= 1'b0;
+            feedback_clk <= 1'b0;
+        end else begin
             interval_active <= 1'b1;
-            terminal_pending <= one_pulse_after_current;
-            feedback_clk    <= 1'b0;
+            feedback_clk <= countdown[0];
         end
     end
 endmodule

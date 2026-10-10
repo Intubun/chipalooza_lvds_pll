@@ -15,6 +15,10 @@ PEX = MACRO_ROOT / (
     "verification/signoff/pll_tspc_div23/"
     "pll_tspc_div23_magic_pex_3.spice"
 )
+DIV2_PEX = MACRO_ROOT / (
+    "verification/signoff/pll_tspc_div2_drive2/"
+    "pll_tspc_div2_magic_pex_3.spice"
+)
 MODEL = Path("/foss/pdks/ihp-sg13cmos5l/libs.tech/ngspice/models/cornerMOSlv.lib")
 DIODE_MODEL = Path("/foss/pdks/ihp-sg13cmos5l/libs.tech/ngspice/models/diodes.lib")
 
@@ -29,13 +33,20 @@ CASES = (
 )
 
 
-def deck(netlist, subcircuit, corner, vdd, temp_c, frequency_hz, modulus):
+def deck(netlist, subcircuit, corner, vdd, temp_c, frequency_hz, modulus,
+         fixed_div2=False):
     period_ns = 1e9 / frequency_hz
     edge_ns = max(0.005, period_ns * 0.04)
     high_ns = period_ns / 2 - edge_ns
     start_ns = 3 * period_ns
     stop_ns = 45 * period_ns
     request = vdd if modulus == 2 else 0
+    request_source = "" if fixed_div2 else f"VREQUEST MODULUS_REQUEST 0 {request}\n"
+    instance = (
+        f"XPRE CLK RESET_B Q2 VDD 0 {subcircuit}"
+        if fixed_div2 else
+        f"XPRE CLK RESET_B MODULUS_REQUEST Q2 VDD 0 {subcircuit}"
+    )
     return f"""\
 .lib {MODEL} {corner}
 .include {DIODE_MODEL}
@@ -44,8 +55,7 @@ def deck(netlist, subcircuit, corner, vdd, temp_c, frequency_hz, modulus):
 VDD VDD 0 {vdd}
 VRESET RESET_B 0 pulse(0 {vdd} {start_ns - period_ns}n {edge_ns}n {edge_ns}n 100n 200n)
 VCLK CLK 0 pulse(0 {vdd} {start_ns}n {edge_ns}n {edge_ns}n {high_ns}n {period_ns}n)
-VREQUEST MODULUS_REQUEST 0 {request}
-XPRE CLK RESET_B MODULUS_REQUEST Q2 VDD 0 {subcircuit}
+{request_source}{instance}
 CQ2 Q2 0 3f
 .control
 set noaskquit
@@ -62,12 +72,13 @@ quit
 """
 
 
-def simulate(case, modulus, directory, netlist, subcircuit):
+def simulate(case, modulus, directory, netlist, subcircuit, fixed_div2=False):
     name, corner, vdd, temp_c, frequency_hz = case
     source = directory / f"{name}_div{modulus}.spice"
     log = source.with_suffix(".log")
     source.write_text(deck(
-        netlist, subcircuit, corner, vdd, temp_c, frequency_hz, modulus
+        netlist, subcircuit, corner, vdd, temp_c, frequency_hz, modulus,
+        fixed_div2,
     ))
     subprocess.run(
         ["ngspice", "-b", "-o", str(log), str(source)],
@@ -83,7 +94,7 @@ def simulate(case, modulus, directory, netlist, subcircuit):
         )
     }
     if len(values) != 3:
-        raise RuntimeError(f"Missing measurements in {log}")
+        raise RuntimeError(f"Missing measurements in {log}:\n{text[-4000:]}")
 
     expected_s = modulus / frequency_hz
     period_error = values["output_period"] / expected_s - 1
@@ -112,20 +123,45 @@ def main():
         "--pex", action="store_true",
         help="characterize the signed-off full-RC extracted netlist",
     )
-    args = parser.parse_args()
-    netlist = PEX if args.pex else SCHEMATIC
-    subcircuit = "pll_tspc_div23_pex" if args.pex else "pll_tspc_div23"
-    results = MACRO_ROOT / "info" / (
-        "pll_tspc_div23_pex_pvt.csv" if args.pex
-        else "pll_tspc_div23_pvt.csv"
+    parser.add_argument(
+        "--fixed-div2", action="store_true",
+        help="characterize the dedicated fixed /2 full-RC extracted netlist",
     )
+    args = parser.parse_args()
+    if args.fixed_div2:
+        netlist = DIV2_PEX
+        subcircuit = "pll_tspc_div2_pex"
+        results = MACRO_ROOT / "info/pll_tspc_div2_pex_pvt.csv"
+        moduli = (2,)
+    else:
+        netlist = PEX if args.pex else SCHEMATIC
+        subcircuit = "pll_tspc_div23_pex" if args.pex else "pll_tspc_div23"
+        results = MACRO_ROOT / "info" / (
+            "pll_tspc_div23_pex_pvt.csv" if args.pex
+            else "pll_tspc_div23_pvt.csv"
+        )
+        moduli = (2, 3)
 
     rows = []
     with tempfile.TemporaryDirectory(prefix="pll-prescaler-") as temporary:
         directory = Path(temporary)
+        # The PDK antenna-diode models are characterized only in reverse bias
+        # and fail ngspice convergence when TSPC edge undershoot briefly
+        # forward-biases them. Preserve every other schematic or extracted
+        # device, but omit the signoff-only diode instances from dynamic
+        # characterization. CQ2 adds a 3 fF load at the observed output.
+        filtered = directory / "no_antenna_diodes.spice"
+        filtered.write_text("\n".join(
+            line for line in netlist.read_text().splitlines()
+            if " dantenna " not in line and " dpantenna " not in line
+        ) + "\n")
+        netlist = filtered
         for case in CASES:
-            for modulus in (2, 3):
-                row = simulate(case, modulus, directory, netlist, subcircuit)
+            for modulus in moduli:
+                row = simulate(
+                    case, modulus, directory, netlist, subcircuit,
+                    args.fixed_div2,
+                )
                 rows.append(row)
                 print(
                     f"{row['result']} {row['corner']} "

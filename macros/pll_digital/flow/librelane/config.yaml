@@ -25,6 +25,21 @@ VERILOG_FILES:
   - dir::../../rtl/clock_output_divider.v
   - dir::../../rtl/pll_digital.v
 
+# Signed-off fixed full-rate TSPC /2. The portable RTL boundary is replaced
+# through ihp_toggle_ff_map.v; no foundry cells appear in RTL.
+EXTRA_VERILOG_MODELS:
+  - dir::../../../pll_prescaler/models/pll_tspc_div23.v
+MACROS:
+  pll_tspc_div2:
+    lef:
+      - dir::../../../pll_prescaler/layout/pll_tspc_div2.lef
+    gds:
+      - dir::../../../pll_prescaler/layout/pll_tspc_div2.gds
+    instances:
+      "output_divider_i.div2_ff":
+        location: [140, 25]
+        orientation: N
+
 # Enable plugin for better SystemVerilog support
 # USE_SLANG: True
 
@@ -32,8 +47,8 @@ VERILOG_FILES:
 # PRIMARY_GDSII_STREAMOUT_TOOL: klayout
 
 # Layout / Floorplan Rules
-DIE_AREA: [0, 0, 120, 100]
-PL_TARGET_DENSITY_PCT: 40
+DIE_AREA: [0, 0, 240, 210]
+PL_TARGET_DENSITY_PCT: 35
 GRT_ALLOW_CONGESTION: true
 RUN_MAGIC_DRC: true
 RUN_CTS: false
@@ -47,14 +62,22 @@ ERROR_ON_SYNTH_CHECKS: false
 # DELAY 4 = fastest, but largest area
 # AREA 3 = slowest, but smallest area
 SYNTH_STRATEGY: DELAY 4
-# The prescaler instance carries (* keep *) so Yosys does not flatten it.
-# The SDC builds prescaler_clk from feedback_divider_i.prescaler_q2.
+# Keep the fixed /2 macro boundary hierarchical for physical implementation.
 SYNTH_HIERARCHY_MODE: deferred_flatten
 SYNTH_EXTRA_MAPPING_FILE: dir::ihp_toggle_ff_map.v
 # MAX_FANOUT_CONSTRAINT: 6
-# RT_MAX_LAYER: Metal4
+# The hard-macro signal pins are vertical TopMetal1 rails. Keep signal routes
+# below them so a horizontal TopMetal1 segment cannot short several rails.
+RT_MAX_LAYER: Metal4
 FP_PIN_ORDER_CFG: dir::pin_order.cfg
-FP_PDN_MULTILAYER: false
+# Keep TopMetal1 free because the prescaler uses full-height signal rails on
+# that layer. Its compact LEF exposes legal M4/TopMetal1 supply-via landings,
+# allowing the single-layer M4 grid to connect the hard macros directly.
+PDN_MULTILAYER: false
+# The macro supply access is already on the M4 grid layer; do not ask pdngen
+# to synthesize a second internal M4-to-TopMetal1 macro connection.
+PDN_CONNECT_MACROS_TO_GRID: false
+PDN_CFG: dir::pdn_cfg.tcl
 FP_SIZING: absolute
 
 # SDC files
@@ -103,13 +126,12 @@ STA_CORNERS:
   - nom_typ_1p20V_25C
   - nom_typ_1p50V_25C
 
-DEFAULT_CORNER: nom_typ_1p20V_25C
+DEFAULT_CORNER: nom_slow_1p08V_125C
 
-# Preserve enough default-corner margin for the 1.08 V/125 C signoff corner.
-# The high-speed prescaler/program-divider paths otherwise meet the 1.2 V
-# implementation corner before the resizer has reason to strengthen them.
-PL_RESIZER_SETUP_SLACK_MARGIN: 0.45
-GRT_RESIZER_SETUP_SLACK_MARGIN: 0.45
+# Implement at the limiting voltage/temperature instead of meeting typical
+# timing and leaving the slow-corner failures as nonfatal flow warnings.
+PL_RESIZER_SETUP_SLACK_MARGIN: 0.05
+GRT_RESIZER_SETUP_SLACK_MARGIN: 0.05
 
 # Fix hold violations
 GRT_RESIZER_HOLD_SLACK_MARGIN: 0.05
