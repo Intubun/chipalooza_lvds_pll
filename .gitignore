@@ -47,6 +47,20 @@ sim_build/
 /macros/iref_x15/testbenches/xschem/simulations
 /macros/pll_digital/flow/final
 /macros/pll_digital/flow/librelane/runs
+# Generated digital build/export snapshots, not accepted integration releases.
+/macros/pll_digital/flow/librelane/final/
+/macros/pll_digital/final/
+/macros/pll_digital/netlist/
+/macros/pll_digital/render/img/pll_digital_librelane.png
+# Ignore generated reports, not future verification scripts or test inputs.
+/macros/pll_digital/verification/*.rpt
+/macros/pll_digital/verification/drc.klayout.json
+# Prescaler scratch cells and misplaced intermediate LEF exports. Canonical
+# layout/*.lef, layout/*.gds and editable MAG cells remain tracked.
+/macros/pll_prescaler/layout/mag/mkdev_scratch.mag
+/macros/pll_prescaler/layout/mag/.amp/in/
+/macros/pll_prescaler/pll_tspc_div23.lef
+/macros/pll_prescaler/scripts/pll_tspc_div23.lef
 /macros/counter/flow/final
 /macros/counter/fpga/*/build/
 tmp_pics/
